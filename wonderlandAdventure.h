@@ -689,7 +689,7 @@ class Door : public Thing {
         void openThing();
     
         // effects of openThing()
-        virtual std::ostream& render(const std::ostream&);
+        std::ostream& render(const std::ostream&);
 };
 
 // derived class of Thing
@@ -709,6 +709,6 @@ class Chest : public Thing {
         void openThing();
     
         // effects of openThing()
-        virtual std::ostream& render(const std::ostream&);
+        std::ostream& render(const std::ostream&);
 };
 
