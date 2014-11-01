@@ -21,19 +21,37 @@ class List {
     public:
         List();                 // constructor
         ~List();                // destructor
-        void push(const T);     // appends element to end of array
+        void push(const T value);     // appends element to end of array
         T pop();                // removes and returns element from the front of array
         bool empty() const;     // returns true if array is empty
         int size() const;       // returns the number of elements in array
+        bool contains(const T value) const; //lets us know if a value is in a list I figure we do not need to pull everything out in order
 };
-
+/*
+ ----------------------------------
+ Person Class: Base class for Alice, Helper, and Badguy
+ ----------------------------------
+ */
+ class Person {
+     private:
+        Person(const Person& other);            //copy constructor
+        void operator = (const Person& other);  //assignment operator
+    protected:
+        static int health;                      //health level of the person
+        //do you think each person should have a stuff list, that way if they are holding onto something, like say the white rabbit may have a watch, he might then be able to give it to Alice
+        
+    public:
+        void Move(Place from, place to)         //allows each person to move from place to place
+ }
+ 
+ 
 /*
  ----------------------------------
  Alice Class: Base
  ----------------------------------
  */
 
-class Alice {
+class Alice: public Person {
     
     private:
     
@@ -42,11 +60,11 @@ class Alice {
         void operator = (const Alice& other);   // assignment operator (copy)
     
     protected:
-
+        //Oh for our lists, since list is templatized, don't we need to say what type of list is each list* pointing to? maybe not since it is just a pointer... although since we have them as lists, do we need it to be a list pointer? I would think no.
         static List* stuffList;      // list of stuff Alice has
         static List* helperList;     // list of helpers with Alice
         static List* badGuyList;     // list of bad guys Alice will still encounter
-        static List* placesList;     // list of places Alice has been
+        static List* placesList;     // list of places Alice has been //I think this should not be here, but just keep track of who is where in the place. I feel like it is less improtant to remember where each person has been in the past.
     
         static int bodySize;    // size of Alice (small(1), normal(2), big(3))
         static int health;      // health level of Alice
@@ -55,6 +73,16 @@ class Alice {
     
         Alice();                // constructor
         virtual~Alice();        // destructor
+        
+        void TaggingAlong (Person Tagger);  //adds a person to the list of helpers
+        void Ditched (Person Ditcher);      //removes a person from the list of helpers
+        
+        void Pickup (Stuff item);           //Alice picks something up, adds it to the list of stuff
+        void Drop (Stuff item);             //Alice drops an item
+        void Use (Stuff item);              //Alice uses an item on herself
+        void Use (Stuff item, Place where); //Alice uses an item in a place
+        void Use (Stuff item, Thing what);  //Alice uses an item on a thing
+        void Use (Stuff item, Person who);  //Alice uses an item on a person
     
         // output what she has, where she's been, who she's met, body size, and health
         virtual std::ostream& render(std::ostream&)=0;
@@ -64,10 +92,11 @@ class Alice {
  ----------------------------------
  Places Class: Derived from Alice
                Base for other Places
+               I really don't like the idea of deriving things from alice. they are not an alice
  ----------------------------------
  */
 
-class Places : public Alice {
+class Places : {
     
     public:
     
@@ -76,6 +105,17 @@ class Places : public Alice {
     
         void setPlaceName();            // add place name to Alice's list of places
         Places getPlaceName() const;    // get place from Alice's list of places
+        //consider this instead
+        //List<Person> PeopleHere               //should be protected variable to contain everybody here
+        //void PersonEnters(Person enterer);    //somebody comes into the place
+        //List<Person> WhoHere();               //returns a list of everybody here
+        //void PersonLeaves(Person leaver);     //removes somebody from a place
+        
+        //consider this for additions
+        //List<Stuff> StuffHere;             //list of things in a place should be protected
+        //List<Stuff> WhatsHere() const;    //returns the list of stuff here
+        //void Dropped(Stuff drop);         //someone dropped an item here, so it is now laying around
+        //void Picked(Stuff pick);          //somebody picked up an item here
     
         // pure virtual function, derived classes will have unique output
         virtual std::ostream& narrate(std::ostream&) const=0;
@@ -114,6 +154,8 @@ class Garden : public Places {
     
         std::string* description;   // unique description of Garden (array)
         std::string name;           // name of place
+        
+        //my additions to place would take out these
         WhiteRabbit whtRbbt;        // (Helper) helps Alice, gives advice and intros to Mad Hatter
         Bandersnatch bndrsntch;     // (BadGuy) tries to capture Alice
         BandersnatchEye eye;        // (Stuff) Dormouse takes and gives to Alice
@@ -246,10 +288,11 @@ class Home : public Places {
 ----------------------------------
 Helper Class: Derived from Alice
               Base for other Helpers
+              Needs to be derived from person, each helper is not an Alice, but a person.
 ----------------------------------
  */
 
-class Helper : public Alice {
+class Helper : public Person {
     
     public:
         
@@ -258,6 +301,7 @@ class Helper : public Alice {
         
         void setHelperName();           // add Helper name to Alice's helper list
         Helper getHelperName() const;   // get Helper from Alice's helper list
+        //consider as I what I have done in the Alice class instead
         
         // pure virtual function, derived classes will have unique output
         virtual std::ostream& narrate(std::ostream&) const=0;
@@ -358,10 +402,11 @@ class MadHatter : public Helper {
  ----------------------------------
  BadGuy Class: Derived from Alice
                Base for other BadGuys
+               I think a badguy is a person
  ----------------------------------
  */
 
-class BadGuy {
+class BadGuy: public Person {
     
     public:
         
