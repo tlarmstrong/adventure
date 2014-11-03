@@ -24,11 +24,11 @@ class List {
         List();                 // constructor
         ~List();                // destructor
     
-        void push(const T);             // appends element to end of array
-        T pop();                        // removes and returns element from the front of array
+        void push(const T value);             // appends element to end of array
+        T pop(T value);                 // removes and returns element from the front of array //I figured, since our list has no ordering, we need to tell it what value we want, it will return the same 
         bool empty() const;             // returns true if array is empty
         int size() const;               // returns the number of elements in array
-        bool contains(const T) const;   // lets us know if a value is in a list
+        bool contains(const T value) const;   // lets us know if a value is in a list
 };
 
 /*
@@ -57,7 +57,10 @@ class List {
         Person(const int health, const List<Stuff> list);
         virtual ~Person();                       // destructor
      
-        void Move(Place from, place to)          //allows each person to move from place to place
+        void Move(Place from, Place to);          //allows each person to move from place to place
+        void Give(Stuff item, Person other);      //gives an item to someone else
+        void Recieve(Stuff item);                 //recieves an item
+        void Hurt(int damage);					 //person takes damage
  }
  
  
@@ -72,7 +75,7 @@ class Alice: public Person {
     private:
 
         List<Helper> helperList;    // list of helpers with Alice
-        List<BadGuy> badGuyList;    // list of bad guys Alice has encounter
+        List<BadGuy> badGuyList;    // list of bad guys Alice has encountered //is this needed?
     
         int bodySize;               // size of Alice (small(1), normal(2), big(3))
     
@@ -92,7 +95,7 @@ class Alice: public Person {
         void Use (const Stuff item, const Thing what);      //Alice uses an item on a thing
         void Use (const Stuff item, const Person who);      //Alice uses an item on a person
     
-        // output what she has, where she's been, who she's met, body size, and health
+        // output what she has, who she's met, body size, and health
         std::ostream& render(std::ostream&) const;
 };
 
@@ -102,7 +105,7 @@ class Alice: public Person {
  ----------------------------------
  
 generic class will instantiate individual helpers dynamically (on demand)
-Helpers will be WhiteRabbit, MadHatter, CheshireCat
+Helpers will be WhiteRabbit, MadHatter, CheshireCat...
  
 Example:
 
@@ -133,8 +136,8 @@ class Helper : public Person {
         // output description of Helper
         virtual std::ostream& narrate(std::ostream&) const;
         
-        // Alice can talk to Helpers in helperList
-        virtual void talkTo();
+        //Helpers in Alice's helperList can talk to alice
+        virtual void talkTo();			//how is this different from give advice
         
         // each Helper can give advice to Alice
         virtual std::string giveAdvice() const;
@@ -171,7 +174,7 @@ class BadGuy: public Person {
         // threats BGs pose to Alice
         std::string makeThreat() const;
         
-        // Alice and BG can fight
+        // Alice and BG can fight //what does this do? 
         void fight();
 };
 
@@ -194,7 +197,7 @@ class BadGuy: public Person {
  
  */
 
-class Places : {
+class Places {
     
     protected:
         
@@ -203,15 +206,17 @@ class Places : {
         std::string name;                // name of Place
         List<Person> PeopleHere;         // everybody in Place
         List<Stuff> StuffHere;           // list of things in a Place
+        List<Thing> ThingHere;			// list of things here
+        List<Place> Placeto				// list of places Alice can go from here
     
     public:
     
         // constructor
-        Places(const std::string name, const std::string descript, const std::string actions, const List<Person> who, const List<stuff> what);
+        Places(const std::string name, const std::string descript, const std::string actions, const List<Person> who, const List<Stuff> what, const List<Thing> obj, const List<Place> where);
         ~Places();                                  // destructor
     
-        void PersonEnters(const Person enterer);    //somebody comes into the place
         List<Person> WhoHere() const;               //returns a list of everybody here
+        void PersonEnters(const Person enterer);    //somebody comes into the place
         void PersonLeaves(const Person leaver);     //removes somebody from a place
     
         List<Stuff> WhatsHere() const;              //returns the list of stuff here
@@ -242,13 +247,15 @@ class Stuff {
         bool status;                // if used, status = 0; if not, status = 1
         std::string name;           // name of stuff object
         std::string description;    // description of Bandersnatch Eye
-        int result;                 // decrease to BGs health / increase to Alice's health
+        int result;                 // decrease to BGs health / increase to Alice's health //what about increasing alices size or doing something else?
     
     public:
     
         // constructor
         Stuff(const bool status, const std::string name, const std::string description, const int result);
         virtual ~Stuff();       // destructor
+    
+    	//we should make sure we don't need another function to activate on such as a function that uses the item on a badguy or on alice or...
     
         // output description of Stuff
         std::ostream& narrate(std::ostream&) const;
@@ -280,7 +287,7 @@ class Door : public Thing {
     
     private:
     
-        bool status;        // status of door: 1 = open, 0 = closed
+        bool status;        // status of door: 1 = open, 0 = closed //could this be put into the thing class?
     
     public:
         
@@ -289,7 +296,10 @@ class Door : public Thing {
     
         // open Door to find Chest
         // must be small (bodySize = 1) and must have key
+        //should this take other input, how does open and close thing know alice's size? Should take person?
+        //could this be in thing class
         void openThing();
+        void closeThing();
     
         // effects of openThing()
         std::ostream& render(const std::ostream&);
@@ -301,10 +311,11 @@ class Chest : public Thing {
     private:
         
         bool status;            // status of chest: 1 = open, 0 = closed
+        List<Stuff> inside;		//list of stuff inside the chest
         
     public:
         
-        Chest(const bool status);                // constructor
+        Chest(const bool status, const List<Stuff> contains);                // constructor
         ~Chest();               // destructor
     
         // open Chest to find Sword
