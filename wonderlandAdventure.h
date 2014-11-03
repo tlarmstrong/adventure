@@ -102,6 +102,8 @@ class Places : {
     
         Places();               // constructor
         virtual ~Places();      // destructor
+        std::string* description;        // unique description of Tree
+        std::string name;               // name of place
     
         void setPlaceName();            // add place name to Alice's list of places
         Places getPlaceName() const;    // get place from Alice's list of places
@@ -146,6 +148,31 @@ class Tree : public Places {
         // what Alice can do (input = follow white rabbit) / returns result of action
         std::string action(const std::string);
 };
+/*
+list<people> tree(rabbit, eorye, piglet)
+list<people> bridge(cristopher, pooh, owl)
+
+Place tree(tree, people, stuff, things, action)
+Place garden(bridge, people, stuff, things, action)
+tree.narrate
+tree.whoshere
+*/
+
+
+/*
+
+place::changedescription(string)
+
+tree.changedescription(string description2)
+
+tree.desciption
+
+describe1 tree
+pooh will eat honey from tree. *change description* pooh will play stick game at bridge with christopher. christopher goes to tree. tree description2
+
+describe1 tree
+pooh circles thinking about how to get honey. pooh goes to bridge and asks christopher how to get honey. christopher and pooh return to tree. describe1 tree
+
 
 // derived class of Places
 class Garden : public Places {
