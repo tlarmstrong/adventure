@@ -24,11 +24,14 @@ class List {
         List();                 // constructor
         ~List();                // destructor
     
-        void push(const T value);             // appends element to end of array
-        T pop(T value);                 // removes and returns element from the front of array //I figured, since our list has no ordering, we need to tell it what value we want, it will return the same 
-        bool empty() const;             // returns true if array is empty
-        int size() const;               // returns the number of elements in array
-        bool contains(const T value) const;   // lets us know if a value is in a list
+        void push(const T value);           // appends element to end of array
+    
+        //I figured, since our list has no ordering, we need to tell it what value we want -- Good Call!
+        T pop(T value);                     // removes and returns element from array
+    
+        bool empty() const;                 // returns true if array is empty
+        int size() const;                   // returns the number of elements in array
+        bool contains(const T value) const; // lets us know if a value is in a list
 };
 
 /*
@@ -60,7 +63,7 @@ class List {
         void Move(Place from, Place to);          //allows each person to move from place to place
         void Give(Stuff item, Person other);      //gives an item to someone else
         void Recieve(Stuff item);                 //recieves an item
-        void Hurt(int damage);					 //person takes damage
+        void Hurt(int damage);					  //person takes damage -- ooh, this is good -- I think this takes place of the fight() I had in Bad Guys earlier. Makes more sense here.
  }
  
  
@@ -75,7 +78,6 @@ class Alice: public Person {
     private:
 
         List<Helper> helperList;    // list of helpers with Alice
-        List<BadGuy> badGuyList;    // list of bad guys Alice has encountered //is this needed?
     
         int bodySize;               // size of Alice (small(1), normal(2), big(3))
     
@@ -85,8 +87,8 @@ class Alice: public Person {
         Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
         virtual~Alice();        // destructor
         
-        void TaggingAlong (const Person Tagger);  //adds a person to the list of Helpers / BadGuys
-        void Ditched (const Person Ditcher);      //removes a person from the list of Helpers / BadGuys
+        void TaggingAlong (const Person Tagger);  //adds a person to the list of Helpers
+        void Ditched (const Person Ditcher);      //removes a person from the list of Helpers
         
         void Pickup (const Stuff item);                     //Alice adds item to the list of stuff
         void Drop (const Stuff item);                       //Alice drops an item
@@ -124,7 +126,7 @@ class Helper : public Person {
     private:
         
         std::string description;        // unique description of Helper
-        std::string name;               // name of helper
+        std::string name;               // name of Helper
         std::string advice;             // Helper's advice for Alice
         
     public:
@@ -134,13 +136,12 @@ class Helper : public Person {
         ~Helper();                      // destructor
         
         // output description of Helper
-        virtual std::ostream& narrate(std::ostream&) const;
-        
-        //Helpers in Alice's helperList can talk to alice
-        virtual void talkTo();			//how is this different from give advice
+        std::ostream& narrate(std::ostream&) const;
         
         // each Helper can give advice to Alice
-        virtual std::string giveAdvice() const;
+        std::string giveAdvice() const;
+    
+        void talkTo();	//how is this different from give advice // input vs. output...could do both in giveAdvice() and get rid of this one?
 };
 
 /*
@@ -149,7 +150,7 @@ class Helper : public Person {
  ----------------------------------
  
  generic class will instantiate individual bad guys dynamically (on demand)
- Bad guys will be Bandersnatch, Jabberwocky, RedQueen
+ Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
  
  */
 
@@ -173,9 +174,6 @@ class BadGuy: public Person {
         
         // threats BGs pose to Alice
         std::string makeThreat() const;
-        
-        // Alice and BG can fight //what does this do? 
-        void fight();
 };
 
 /*
@@ -206,8 +204,8 @@ class Places {
         std::string name;                // name of Place
         List<Person> PeopleHere;         // everybody in Place
         List<Stuff> StuffHere;           // list of things in a Place
-        List<Thing> ThingHere;			// list of things here
-        List<Place> Placeto				// list of places Alice can go from here
+        List<Thing> ThingHere;			 // list of things here
+        List<Place> Placeto;			 // list of places Alice can go from here
     
     public:
     
@@ -236,7 +234,7 @@ class Places {
  ----------------------------------
  
  generic class will instantiate individual stuff dynamically (on demand)
- Stuff will be BandersnatchEye, Key, WhiteRose, CupCake, RoadTea, Sword, JabberBlood
+ Stuff will be BandersnatchEye, Key, WhiteRose, CupCake, RoadTea, Sword, JabberBlood...
  
  */
 
@@ -247,7 +245,7 @@ class Stuff {
         bool status;                // if used, status = 0; if not, status = 1
         std::string name;           // name of stuff object
         std::string description;    // description of Bandersnatch Eye
-        int result;                 // decrease to BGs health / increase to Alice's health //what about increasing alices size or doing something else?
+        int result;                 // decrease to BGs health / change Alice's health, size, or to be defined :) -- are you thinking about the Absolem the Caterpillar's smoke? Would that affect her health, or do we need another variable?
     
     public:
     
@@ -255,7 +253,7 @@ class Stuff {
         Stuff(const bool status, const std::string name, const std::string description, const int result);
         virtual ~Stuff();       // destructor
     
-    	//we should make sure we don't need another function to activate on such as a function that uses the item on a badguy or on alice or...
+    	//we should make sure we don't need another function to activate on such as a function that uses the item on a badguy or on alice or...// good question, I'm not sure. Since we have polymorphic use() in Alice, would that take care of it?
     
         // output description of Stuff
         std::ostream& narrate(std::ostream&) const;
@@ -269,6 +267,9 @@ class Stuff {
 
 class Thing {
 
+    protected:
+        bool status;        // status of door: 1 = open, 0 = closed
+    
     public:
         
         Thing();            // constructor
@@ -285,10 +286,6 @@ class Thing {
 // derived class of Thing
 class Door : public Thing {
     
-    private:
-    
-        bool status;        // status of door: 1 = open, 0 = closed //could this be put into the thing class?
-    
     public:
         
         Door(const bool status);             // constructor
@@ -296,10 +293,12 @@ class Door : public Thing {
     
         // open Door to find Chest
         // must be small (bodySize = 1) and must have key
-        //should this take other input, how does open and close thing know alice's size? Should take person?
+        //should this take other input, how does open and close thing know alice's size? Should take person? -- yes, more specifically, should it just be an Alice?
+    
         //could this be in thing class
-        void openThing();
-        void closeThing();
+        // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
+        void openThing(const Alice alice);
+        void closeThing();      // automatic close, or should this also take a Person?
     
         // effects of openThing()
         std::ostream& render(const std::ostream&);
