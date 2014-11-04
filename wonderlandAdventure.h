@@ -268,6 +268,7 @@ class Stuff {
 class Thing {
 
     protected:
+    
         bool status;        // status of door: 1 = open, 0 = closed
     
     public:
@@ -293,6 +294,7 @@ class Door : public Thing {
     
         // open Door to find Chest
         // must be small (bodySize = 1) and must have key
+    
         //should this take other input, how does open and close thing know alice's size? Should take person? -- yes, more specifically, should it just be an Alice?
     
         //could this be in thing class
@@ -308,13 +310,12 @@ class Door : public Thing {
 class Chest : public Thing {
     
     private:
-        
-        bool status;            // status of chest: 1 = open, 0 = closed
+    
         List<Stuff> inside;		//list of stuff inside the chest
         
     public:
         
-        Chest(const bool status, const List<Stuff> contains);                // constructor
+        Chest(const bool status, const List<Stuff> contains);  // constructor
         ~Chest();               // destructor
     
         // open Chest to find Sword
