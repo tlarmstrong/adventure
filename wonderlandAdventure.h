@@ -141,7 +141,7 @@ class Helper : public Person {
         // each Helper can give advice to Alice
         std::string giveAdvice() const;
     
-        void talkTo();	//how is this different from give advice // input vs. output...could do both in giveAdvice() and get rid of this one?
+        void talkTo(std::string talk);	//how is this different from give advice // input vs. output...could do both in giveAdvice() and get rid of this one? // So if we have an input vs output we need two functions, but one needs to take a string of advice
 };
 
 /*
@@ -245,7 +245,7 @@ class Stuff {
         bool status;                // if used, status = 0; if not, status = 1
         std::string name;           // name of stuff object
         std::string description;    // description of Bandersnatch Eye
-        int result;                 // decrease to BGs health / change Alice's health, size, or to be defined :) -- are you thinking about the Absolem the Caterpillar's smoke? Would that affect her health, or do we need another variable?
+        int result;                 // decrease to BGs health / change Alice's health, size, or to be defined :) -- are you thinking about the Absolem the Caterpillar's smoke? Would that affect her health, or do we need another variable? // um not quite. it is a I don't know how we control what each different stuff changes. It may be that we need to create different classes for each type of object so each type of object can change the proper thing. Not sure, takes more thinking
     
     public:
     
@@ -295,12 +295,12 @@ class Door : public Thing {
         // open Door to find Chest
         // must be small (bodySize = 1) and must have key
     
-        //should this take other input, how does open and close thing know alice's size? Should take person? -- yes, more specifically, should it just be an Alice?
+        //should this take other input, how does open and close thing know alice's size? Should take person? -- yes, more specifically, should it just be an Alice? I suppose it could just be an alice, although then rabbit cannot open the door, but we might not care about that... I guess it needs to be an alice if it involves her size.
     
         //could this be in thing class
         // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
         void openThing(const Alice alice);
-        void closeThing();      // automatic close, or should this also take a Person?
+        void closeThing(const Alice alice);      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
     
         // effects of openThing()
         std::ostream& render(const std::ostream&);
