@@ -39,7 +39,7 @@ class List {
  Person Class: Base class for Alice, Helper, and Badguy
  ----------------------------------
  */
-
+//make a factory derived from person
  class Person {
      
      private:
@@ -66,6 +66,29 @@ class List {
         void Hurt(int damage);					  //person takes damage -- ooh, this is good -- I think this takes place of the fight() I had in Bad Guys earlier. Makes more sense here.
  }
  
+
+/*
+ ----------------------------------
+ Factory Class: Derived from Person to make people
+ ----------------------------------
+ */
+class Factory: public Person {
+	public:
+		Factory();		//makes a factory
+		~Factory();		//destroys a factory
+		static Person* makePerson (string who);		//make a test tube baby
+}
+ /*
+ Factory::makePerson
+ {
+ 	person* testtube
+ 	if (who==Bandersnatch){
+ 		testtube=new badguy(description, ffiwoafj, dfjiwofe, afijefiojwsf)
+ 	}
+ 	if (who==)
+ }
+ */
+ 
  
 /*
  ----------------------------------
@@ -73,6 +96,7 @@ class List {
  ----------------------------------
  */
 
+// make Alice a singleton
 class Alice: public Person {
     
     private:
@@ -80,12 +104,16 @@ class Alice: public Person {
         List<Helper> helperList;    // list of helpers with Alice
     
         int bodySize;               // size of Alice (small(1), normal(2), big(3))
+        
+         // constructor
+        Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
     
     public:
-    
-        // constructor
-        Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
+       
         virtual~Alice();        // destructor
+        
+        //ask about singleton
+        static Alice& makeAlice();
         
         void TaggingAlong (const Person Tagger);  //adds a person to the list of Helpers
         void Ditched (const Person Ditcher);      //removes a person from the list of Helpers
@@ -120,7 +148,7 @@ Example:
     WhiteRabbit.talkTo();
     WhiteRabbit.giveAdvice();
 */
-
+/*
 class Helper : public Person {
     
     private:
@@ -143,7 +171,7 @@ class Helper : public Person {
     
         void talkTo(std::string talk);	//how is this different from give advice // input vs. output...could do both in giveAdvice() and get rid of this one? // So if we have an input vs output we need two functions, but one needs to take a string of advice
 };
-
+*/
 /*
  ----------------------------------
  BadGuy Class: Derived from Person
@@ -154,20 +182,20 @@ class Helper : public Person {
  
  */
 
-class BadGuy: public Person {
+class NPC: public Person {
     
     private:
         
         std::string description;        // unique description of BadGuy
         std::string name;               // name of bad guy
-        std::string threat;             // BG threat for Alice
+        std::string says;             // Say to Alice
         bool friendly;                  // 1 = friend, 0 = not friend
         
     public:
         
         // constructor
-        BadGuy(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly);
-        ~BadGuy();               // destructor
+        NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly);
+        ~NPC();               // destructor
         
         // description of BadGuy
         std::ostream& narrate(std::ostream&) const;
