@@ -72,11 +72,11 @@ class List {
  Factory Class: Derived from Person to make people
  ----------------------------------
  */
-class Factory: public Person {
+class personFactory: public Person {
 	public:
-		Factory();		//makes a factory
-		~Factory();		//destroys a factory
-		static Person* makePerson (string who);		//make a test tube baby
+		personFactory();		//makes a factory
+		~personFactory();		//destroys a factory
+		static Person* makePerson (string who);		//make a test tube baby //from here for npc's we will call their constructor but for alice we will call getalice
 }
  /*
  Factory::makePerson
@@ -87,6 +87,8 @@ class Factory: public Person {
  	}
  	if (who==)
  }
+ 
+ I think this will all work. I think we should be good :)
  */
  
  
@@ -110,10 +112,18 @@ class Alice: public Person {
     
     public:
        
-        virtual~Alice();        // destructor
+        virtual ~Alice();        // destructor
         
         //ask about singleton
-        static Alice& makeAlice();
+        static Alice& makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
+        /*
+        {
+        	static Alice alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
+        	return &alice;
+        }
+        
+        when I looked it up, I saw many different ways of implimentation, I think they all worked. This one seemed the simplest and I think it should work. It might be a good idea to still double check with prather
+        */
         
         void TaggingAlong (const Person Tagger);  //adds a person to the list of Helpers
         void Ditched (const Person Ditcher);      //removes a person from the list of Helpers
