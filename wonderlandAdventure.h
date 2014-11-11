@@ -22,7 +22,7 @@ protected:
     List<Stuff> stuffList;          // list of stuff each person has
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
     
-    Place whereAmI;                 // person's current location
+    Place* whereAmI;                 // person's current location //a place is not a part of a person. If you want to do something like this, it should be a place pointer. Personally, I am pro keeping track of where a person is in just one place. Pros of one place: We don't have to remember to change it in both places, Cons we will have to iterate through something.
     
     // helper function to copy from one list to another
     copyList(List<T> from, List<T> to);
@@ -40,6 +40,39 @@ public:
 }
 
 
+/*
+ ----------------------------------
+ Options for where people are:
+ ----------------------------------
+ 
+storing in person:
+class person
+{
+place* whereAmI;
+void move(const place& to) {whereAmI=&to;} //to move a person to somewhere else
+place* whereAreYou() {return whereAmI;} //to get where someone is
+}
+class place
+{
+ person[] whoshere() {for (person* iterator=something...; iterate through everybody) if(thatpersonisthere) then include in array to be returned}		//this will be the hard part of storing in person. I think that we will just keep our people in an array so we can iterate through them. Also it should be noted you cannot actually return an array, but there are ways we can do pretty much that. 
+}
+
+
+storing in place:
+class person
+{
+void move(place& from, place& to) {from.personleaves(this); to.personenters(this)} //to move a person to somewhere else
+place* whereAreYou() {for(places* iterator=something...; iterate through all the places) if(personisthere)return iterator} //This will be the difficult part of storing in places. like the people we will probably have an array of places (I think that whichever we do we should keep all our places and people in an list anyway.) )
+}
+class place
+{
+list<person> peoplehere;
+ person[] whoshere() {return peoplehere}	//since we keep it in a list instead of an array, it will be slightly more complicated than this, but this is really how it will work.
+}
+
+
+//I think we are far more likely to ask who is at a place, which would say we should store that information in place. However, I really like the idea of storing it in person. I don't know I have been going back and forth on where we should store it every minute. Really both options are good.
+*/
 /*
  ----------------------------------
  Factory Class: Derived from Person to make people
