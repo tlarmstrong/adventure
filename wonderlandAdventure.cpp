@@ -8,7 +8,7 @@ using namespace std;
  -----------------------------------------------------------
  */
 
-// constructor -- all derived use (initialization list)
+// constructor -- all derived use (initialization list)			//it is fine if you want to keep where a person is in two locations (places keep people, then people keep where they are) but if we keep it in both places we need to be careful to always change it in both places and keep it consistent.
 Person::Person(const int hlevel, const List<Stuff> slist, const Place location) : health(hLevel), whereAmI(location)
 {
     // copy list of stuff into Person's stuff list
@@ -19,18 +19,18 @@ Person::Person(const int hlevel, const List<Stuff> slist, const Place location) 
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::Move(const Place to)
+void Person::Move(const Place& to)
 {
-    whereAmI = to;
+    whereAmI = &to;
 }
 
 //gives an item to someone else
-void Person::Give(const Stuff item, const Person other)
+void Person::Give(const Stuff item, Person other) //we are not keeping the person constant, we are changing what is in their inventory
 {
     if(stuffList.contains(item))
     {
-        Stuff gotIt = stuffList.pop(item);
-        other.stuffList.push(gotIt);
+        Stuff gotIt = stuffList.pop(item);  //this is good. If you want we can make this 1 line, but I am not a picky person and am fine with 2 lines :)
+        other.Recieve(gotIt);       //we cannot touch someone else's private parts. We need to use the recieve function
     }
 }
 
@@ -47,7 +47,7 @@ void Person::Hurt(const int damage)
 }
 
 template<class T>
-void Person::copyList(const List<T> from, const List<T> to)
+void Person::copyList(const List<T> from, const List<T> to)		//what is the purpose of a person copying a list? shouldn't this be part of our list, not person?
 {
     for(int i = 0; i < from.getSize()-1; i++)
         to.push(from[i]);
@@ -75,7 +75,7 @@ Alice::~Alice() {}
 // Alice is a Singleton
 Alice& Alice::makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel)
 {
-     static Alice alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel);
+     static Alice alice(sList, hList, bList, bodySize, hLevel);
         
      return &alice;
 }
@@ -92,7 +92,7 @@ void Alice::ditched(const Person ditcher)
     helperList.pop(ditcher);
 }
 
-//Alice adds item to the list of stuff
+//Alice adds item to the list of stuff	//could we perhaps just use recieve maybe. it is is the same function. Also, we need to think about how we remove the item from place...
 void Alice::pickup(const Stuff item)
 {
     stuffList.push(item);
@@ -103,6 +103,8 @@ void Alice::drop(const Stuff item)
 {
     stuffList.pop(item);
 }
+
+//to define the ones after this, I think it will be easier if we first define stuffs. I think we will need to create subclasses for stuff. 
 
 //Alice uses an item on herself
 void Alice::use(const Stuff item)
