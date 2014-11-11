@@ -1,97 +1,75 @@
 // wonderlandAdventure.h
+#include "linkedList.h"
 #include <iostream>
 
 /*
- ----------------------------------
- List Class: Base
- ----------------------------------
- 
- List object to handle lists of places, helpers, bad guys, and stuff for Alice
- 
+ ------------------------------------------------------------
+ Person Class: Base class for Alice, NPC, and personFactory
+ ------------------------------------------------------------
  */
 
-template <class T>
-class List {
+class Person {
     
-    private:
-        T*  elements;           // array of values
-        int sz;                 // size of array
-        int head;               // index of head value
-        int tail;               // 1 + index of tail value
-        void checkSpace();      // check number of spaces available in array
-        
-    public:
-        List();                 // constructor
-        ~List();                // destructor
+private:
     
-        void push(const T value);           // appends element to end of array
+    // prevent value semantics
+    Person(const Person& other);            //copy constructor
+    void operator = (const Person& other);  //assignment operator
     
-        //I figured, since our list has no ordering, we need to tell it what value we want -- Good Call!
-        T pop(T value);                     // removes and returns element from array
+protected:
     
-        bool empty() const;                 // returns true if array is empty
-        int size() const;                   // returns the number of elements in array
-        bool contains(const T value) const; // lets us know if a value is in a list
-};
+    int health;                     //health level of the person
+    List<Stuff> stuffList;          // list of stuff each person has
+    // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
+    
+    Place whereAmI;                 // person's current location
+    
+    // helper function to copy from one list to another
+    copyList(List<T> from, List<T> to);
+    
+public:
+    
+    // constructor -- all derived use (initialization list)
+    Person(const int hLevel, const List<Stuff> list, Place location);
+    virtual ~Person();                       // destructor
+    
+    void Move(const Place to);                       // Person can move from place to place
+    void Give(const Stuff item, const Person other); // gives an item to someone else
+    void Recieve(const Stuff item);                  // recieves an item
+    void Hurt(const int damage);					 // person takes damage
+}
 
-/*
- ----------------------------------
- Person Class: Base class for Alice, Helper, and Badguy
- ----------------------------------
- */
-//make a factory derived from person
- class Person {
-     
-     private:
-     
-        // prevent value semantics
-        Person(const Person& other);            //copy constructor
-        void operator = (const Person& other);  //assignment operator
-     
-    protected:
-     
-        int health;                     //health level of the person
-        List<Stuff> stuffList;          // list of stuff each person has
-        // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
-        
-    public:
-     
-        // constructor -- all derived use (initialization list)
-        Person(const int health, const List<Stuff> list);
-        virtual ~Person();                       // destructor
-     
-        void Move(Place from, Place to);          //allows each person to move from place to place
-        void Give(Stuff item, Person other);      //gives an item to someone else
-        void Recieve(Stuff item);                 //recieves an item
-        void Hurt(int damage);					  //person takes damage -- ooh, this is good -- I think this takes place of the fight() I had in Bad Guys earlier. Makes more sense here.
- }
- 
 
 /*
  ----------------------------------
  Factory Class: Derived from Person to make people
  ----------------------------------
  */
-class personFactory: public Person {
-	public:
-		personFactory();		//makes a factory
-		~personFactory();		//destroys a factory
-		static Person* makePerson (string who);		//make a test tube baby //from here for npc's we will call their constructor but for alice we will call getalice
+
+class personFactory: public Person
+{
+    public:
+        personFactory();		//makes a factory
+        ~personFactory();		//destroys a factory
+    
+        static Person* makePerson (string who);		//make a test tube baby
+    
+        //from here for npc's we will call their constructor but for alice we will call getalice
 }
- /*
+/*
  Factory::makePerson
  {
- 	person* testtube
- 	if (who==Bandersnatch){
- 		testtube=new badguy(description, ffiwoafj, dfjiwofe, afijefiojwsf)
- 	}
- 	if (who==)
+ person* testtube
+ if (who==Bandersnatch){
+ testtube=new badguy(description, ffiwoafj, dfjiwofe, afijefiojwsf)
+ }
+ if (who==)
  }
  
  I think this will all work. I think we should be good :)
  */
- 
- 
+
+
 /*
  ----------------------------------
  Alice Class: Derived from Person
@@ -101,117 +79,75 @@ class personFactory: public Person {
 // make Alice a singleton
 class Alice: public Person {
     
-    private:
-
-        List<Helper> helperList;    // list of helpers with Alice
+private:
     
-        int bodySize;               // size of Alice (small(1), normal(2), big(3))
-        
-         // constructor
-        Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
+    List<NPC> helperList;    // list of helpers with Alice
+    List<NPC> badguyList;    // list of badguys with Alice
+    int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
     
-    public:
-       
-        virtual ~Alice();        // destructor
-        
-        //ask about singleton
-        static Alice& makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
-        /*
-        {
-        	static Alice alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
-        	return &alice;
-        }
-        
-        when I looked it up, I saw many different ways of implimentation, I think they all worked. This one seemed the simplest and I think it should work. It might be a good idea to still double check with prather
-        */
-        
-        void TaggingAlong (const Person Tagger);  //adds a person to the list of Helpers
-        void Ditched (const Person Ditcher);      //removes a person from the list of Helpers
-        
-        void Pickup (const Stuff item);                     //Alice adds item to the list of stuff
-        void Drop (const Stuff item);                       //Alice drops an item
-        void Use (const Stuff item);                        //Alice uses an item on herself
-        void Use (const Stuff item, const Place where);     //Alice uses an item in a place
-        void Use (const Stuff item, const Thing what);      //Alice uses an item on a thing
-        void Use (const Stuff item, const Person who);      //Alice uses an item on a person
+    // constructor
+    Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health, const Place location);
     
-        // output what she has, who she's met, body size, and health
-        std::ostream& render(std::ostream&) const;
+public:
+    
+    virtual ~Alice();        // destructor
+    
+    //ask about singleton
+    static Alice& makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel);
+    /*
+     {
+     static Alice alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel);
+     return &alice;
+     }
+     
+     when I looked it up, I saw many different ways of implimentation, I think they all worked. This one seemed the simplest and I think it should work. It might be a good idea to still double check with prather
+     */
+    
+    void taggingAlong(const Person Tagger);  //adds a person to the list of Helpers
+    void ditched(const Person Ditcher);      //removes a person from the list of Helpers
+    
+    void pickup(const Stuff item);                     //Alice adds item to the list of stuff
+    void drop(const Stuff item);                       //Alice drops an item
+    void use(const Stuff item);                        //Alice uses an item on herself
+    void use(const Stuff item, const Place where);     //Alice uses an item in a place
+    void use(const Stuff item, const Thing what);      //Alice uses an item on a thing
+    void use(const Stuff item, const Person who);      //Alice uses an item on a person
+    
+    // output what she has, who she's met, body getSize, and health
+    std::ostream& render(std::ostream&) const;
 };
 
 /*
  ----------------------------------
- Helper Class: Derived from Person
+ NPC: Derived from Person
  ----------------------------------
  
-generic class will instantiate individual helpers dynamically (on demand)
-Helpers will be WhiteRabbit, MadHatter, CheshireCat...
- 
-Example:
-
-    List<Stuff> whatHave(Stuff watch);
- 
-    Helper WhiteRabbit(name, description, advice, whatHave, health);
-
-    Then possible to use base functions:
-    WhiteRabbit.narrate();
-    WhiteRabbit.talkTo();
-    WhiteRabbit.giveAdvice();
-*/
-/*
-class Helper : public Person {
-    
-    private:
-        
-        std::string description;        // unique description of Helper
-        std::string name;               // name of Helper
-        std::string advice;             // Helper's advice for Alice
-        
-    public:
-    
-        // constructor
-        Helper(const std::string nm, const std::string dscrpt, const std::string advice, const List<Stuff> list, const int hlth);
-        ~Helper();                      // destructor
-        
-        // output description of Helper
-        std::ostream& narrate(std::ostream&) const;
-        
-        // each Helper can give advice to Alice
-        std::string giveAdvice() const;
-    
-        void talkTo(std::string talk);	//how is this different from give advice // input vs. output...could do both in giveAdvice() and get rid of this one? // So if we have an input vs output we need two functions, but one needs to take a string of advice
-};
-*/
-/*
- ----------------------------------
- BadGuy Class: Derived from Person
- ----------------------------------
- 
- generic class will instantiate individual bad guys dynamically (on demand)
+ generic class will instantiate individual bad guys/helpers dynamically (on demand)
  Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
+ Helpers will be WhiteRabbit, MadHatter, CheshireCat...
  
  */
 
 class NPC: public Person {
     
-    private:
-        
-        std::string description;        // unique description of BadGuy
-        std::string name;               // name of bad guy
-        std::string says;             // Say to Alice
-        bool friendly;                  // 1 = friend, 0 = not friend
-        
-    public:
-        
-        // constructor
-        NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly);
-        ~NPC();               // destructor
-        
-        // description of BadGuy
-        std::ostream& narrate(std::ostream&) const;
-        
-        // threats BGs pose to Alice
-        std::string makeThreat() const;
+private:
+    
+    std::string description;      // unique description of helper / badguy
+    std::string name;             // name of helper / badguy
+    std::string says;             // what helper / badguy says to Alice
+    bool friendly;                // 1 = friend, 0 = not friend
+    
+public:
+    
+    // constructor
+    NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly, const Place location);
+    ~NPC();               // destructor
+    
+    // description of BadGuy
+    std::ostream& narrate(std::ostream&) const;
+    
+    // threats BGs pose to Alice
+    std::string makeThreat() const;
 };
 
 /*
@@ -227,7 +163,7 @@ class NPC: public Person {
  List<Stuff> TeaPartyStuff(Cupcake, roadTea)
  
  Place TeaParty(name, description, actions, TeaPartyPeople*, TeaPartyStuff*)
-
+ 
  TeaParty.narrate();
  TeaParty.WhoHere();
  
@@ -235,35 +171,35 @@ class NPC: public Person {
 
 class Places {
     
-    protected:
-        
-        std::string description;         // unique description of Place
-        std::string actions;             // what Alice can do here
-        std::string name;                // name of Place
-        List<Person> PeopleHere;         // everybody in Place
-        List<Stuff> StuffHere;           // list of things in a Place
-        List<Thing> ThingHere;			 // list of things here
-        List<Place> Placeto;			 // list of places Alice can go from here
+protected:
     
-    public:
+    std::string description;         // unique description of Place
+    std::string actions;             // what Alice can do here
+    std::string name;                // name of Place
+    List<Person> PeopleHere;         // everybody in Place
+    List<Stuff> StuffHere;           // list of things in a Place
+    List<Thing> ThingHere;			 // list of things here
+    List<Place> Placeto;			 // list of places Alice can go from here
     
-        // constructor
-        Places(const std::string name, const std::string descript, const std::string actions, const List<Person> who, const List<Stuff> what, const List<Thing> obj, const List<Place> where);
-        ~Places();                                  // destructor
+public:
     
-        List<Person> WhoHere() const;               //returns a list of everybody here
-        void PersonEnters(const Person enterer);    //somebody comes into the place
-        void PersonLeaves(const Person leaver);     //removes somebody from a place
+    // constructor
+    Places(const std::string name, const std::string descript, const std::string actions, const List<Person> who, const List<Stuff> what, const List<Thing> obj, const List<Place> where);
+    ~Places();                                  // destructor
     
-        List<Stuff> WhatsHere() const;              //returns the list of stuff here
-        void Dropped(const Stuff drop);             //someone dropped an item here, so it is now laying around
-        void Picked(const Stuff pick);              //somebody picked up an item here
+    List<Person> WhoHere() const;               //returns a list of everybody here
+    void PersonEnters(const Person enterer);    //somebody comes into the place
+    void PersonLeaves(const Person leaver);     //removes somebody from a place
     
-        // output description of Place
-        std::ostream& narrate(std::ostream&) const;
-
-        // what Alice can do in particular place
-        std::string action(const std::string);
+    List<Stuff> WhatsHere() const;              //returns the list of stuff here
+    void Dropped(const Stuff drop);             //someone dropped an item here, so it is now laying around
+    void Picked(const Stuff pick);              //somebody picked up an item here
+    
+    // output description of Place
+    std::ostream& narrate(std::ostream&) const;
+    
+    // what Alice can do in particular place
+    std::string action(const std::string);
 };
 
 /*
@@ -278,23 +214,23 @@ class Places {
 
 class Stuff {
     
-    protected:
+protected:
     
-        bool status;                // if used, status = 0; if not, status = 1
-        std::string name;           // name of stuff object
-        std::string description;    // description of Bandersnatch Eye
-        int result;                 // decrease to BGs health / change Alice's health, size, or to be defined :) -- are you thinking about the Absolem the Caterpillar's smoke? Would that affect her health, or do we need another variable? // um not quite. it is a I don't know how we control what each different stuff changes. It may be that we need to create different classes for each type of object so each type of object can change the proper thing. Not sure, takes more thinking
+    bool status;                // if used, status = 0; if not, status = 1
+    std::string name;           // name of stuff object
+    std::string description;    // description of Bandersnatch Eye
+    int result;                 // decrease to BGs health / change Alice's health, getSize, or to be defined :) -- are you thinking about the Absolem the Caterpillar's smoke? Would that affect her health, or do we need another variable? // um not quite. it is a I don't know how we control what each different stuff changes. It may be that we need to create different classes for each type of object so each type of object can change the proper thing. Not sure, takes more thinking
     
-    public:
+public:
     
-        // constructor
-        Stuff(const bool status, const std::string name, const std::string description, const int result);
-        virtual ~Stuff();       // destructor
+    // constructor
+    Stuff(const bool status, const std::string name, const std::string description, const int result);
+    virtual ~Stuff();       // destructor
     
-    	//we should make sure we don't need another function to activate on such as a function that uses the item on a badguy or on alice or...// good question, I'm not sure. Since we have polymorphic use() in Alice, would that take care of it?
+    //we should make sure we don't need another function to activate on such as a function that uses the item on a badguy or on alice or...// good question, I'm not sure. Since we have polymorphic use() in Alice, would that take care of it?
     
-        // output description of Stuff
-        std::ostream& narrate(std::ostream&) const;
+    // output description of Stuff
+    std::ostream& narrate(std::ostream&) const;
 };
 
 /*
@@ -304,63 +240,64 @@ class Stuff {
  */
 
 class Thing {
-
-    protected:
     
-        bool status;        // status of door: 1 = open, 0 = closed
+protected:
     
-    public:
-        
-        Thing();            // constructor
-        virtual ~Thing();   // destructor
+    bool status;        // status of door: 1 = open, 0 = closed
     
-        // open thing, depend on Place & Alice's bodySize
-        // pure virtual function, each derived will have own
-        virtual void openThing()=0;
+public:
     
-        // output of what Alice has opened (will pass to derived)
-        virtual std::ostream& render(const std::ostream&)=0;
+    Thing();            // constructor
+    virtual ~Thing();   // destructor
+    
+    // open thing, depend on Place & Alice's bodySize
+    // pure virtual function, each derived will have own
+    virtual void openThing()=0;
+    
+    // output of what Alice has opened (will pass to derived)
+    virtual std::ostream& render(const std::ostream&)=0;
 };
 
 // derived class of Thing
 class Door : public Thing {
     
-    public:
-        
-        Door(const bool status);             // constructor
-        ~Door();            // destructor
+public:
     
-        // open Door to find Chest
-        // must be small (bodySize = 1) and must have key
+    Door(const bool status);             // constructor
+    ~Door();            // destructor
     
-        //should this take other input, how does open and close thing know alice's size? Should take person? -- yes, more specifically, should it just be an Alice? I suppose it could just be an alice, although then rabbit cannot open the door, but we might not care about that... I guess it needs to be an alice if it involves her size.
+    // open Door to find Chest
+    // must be small (bodySize = 1) and must have key
     
-        //could this be in thing class
-        // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
-        void openThing(const Alice alice);
-        void closeThing(const Alice alice);      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
+    //should this take other input, how does open and close thing know alice's getSize? Should take person? -- yes, more specifically, should it just be an Alice? I suppose it could just be an alice, although then rabbit cannot open the door, but we might not care about that... I guess it needs to be an alice if it involves her getSize.
     
-        // effects of openThing()
-        std::ostream& render(const std::ostream&);
+    //could this be in thing class
+    // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
+    void openThing(const Alice alice);
+    void closeThing(const Alice alice);      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
+    
+    // effects of openThing()
+    std::ostream& render(const std::ostream&);
 };
 
 // derived class of Thing
 class Chest : public Thing {
     
-    private:
+private:
     
-        List<Stuff> inside;		//list of stuff inside the chest
-        
-    public:
-        
-        Chest(const bool status, const List<Stuff> contains);  // constructor
-        ~Chest();               // destructor
+    List<Stuff> inside;		//list of stuff inside the chest
     
-        // open Chest to find Sword
-        // must be tall (bodySize = 3)
-        void openThing();
+public:
     
-        // effects of openThing()
-        std::ostream& render(const std::ostream&);
+    Chest(const bool status, const List<Stuff> contains);  // constructor
+    ~Chest();               // destructor
+    
+    // open Chest to find Sword
+    // must be tall (bodySize = 3)
+    void openThing();
+    
+    // effects of openThing()
+    std::ostream& render(const std::ostream&);
 };
+
 
