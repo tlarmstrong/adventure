@@ -73,7 +73,7 @@ Alice::Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGu
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice::Alice& makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel)
+Alice& Alice::makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel)
 {
      static Alice alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel);
         
