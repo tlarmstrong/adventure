@@ -19,18 +19,18 @@ Person::Person(const int hlevel, const List<Stuff> slist, const Place location) 
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::Move(const Place to)
+void Person::Move(const Place& to)
 {
-    whereAmI = to;
+    whereAmI = &to;
 }
 
 //gives an item to someone else
-void Person::Give(const Stuff item, const Person other)
+void Person::Give(const Stuff item, Person other) //we are not keeping the person constant, we are changing what is in their inventory
 {
     if(stuffList.contains(item))
     {
-        Stuff gotIt = stuffList.pop(item);
-        other.stuffList.push(gotIt);
+        Stuff gotIt = stuffList.pop(item);  //this is good. If you want we can make this 1 line, but I am not a picky person and am fine with 2 lines :)
+        other.Recieve(gotIt);       //we cannot touch someone else's private parts. We need to use the recieve function
     }
 }
 
@@ -41,7 +41,7 @@ void Person::Recieve(const Stuff item)
 }
 
 //person takes damage
-void Person::Hurt(const int damage)
+void Person::Hurt(const int damage)     //Austin is here in looking through
 {
     health -= damage;
 }
