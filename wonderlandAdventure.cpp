@@ -41,13 +41,13 @@ void Person::Recieve(const Stuff item)
 }
 
 //person takes damage
-void Person::Hurt(const int damage)     //Austin is here in looking through
+void Person::Hurt(const int damage)
 {
     health -= damage;
 }
 
 template<class T>
-void Person::copyList(const List<T> from, const List<T> to)
+void Person::copyList(const List<T> from, const List<T> to)		//what is the purpose of a person copying a list? shouldn't this be part of our list, not person?
 {
     for(int i = 0; i < from.getSize()-1; i++)
         to.push(from[i]);
@@ -73,9 +73,9 @@ Alice::Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGu
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice::Alice& makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel)
+Alice& Alice::makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel)
 {
-     static Alice alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel);
+     static Alice alice(sList, hList, bList, bodySize, hLevel);
         
      return &alice;
 }
@@ -92,7 +92,7 @@ void Alice::ditched(const Person ditcher)
     helperList.pop(ditcher);
 }
 
-//Alice adds item to the list of stuff
+//Alice adds item to the list of stuff	//could we perhaps just use recieve maybe. it is is the same function. Also, we need to think about how we remove the item from place...
 void Alice::pickup(const Stuff item)
 {
     stuffList.push(item);
@@ -103,6 +103,8 @@ void Alice::drop(const Stuff item)
 {
     stuffList.pop(item);
 }
+
+//to define the ones after this, I think it will be easier if we first define stuffs. I think we will need to create subclasses for stuff. 
 
 //Alice uses an item on herself
 void Alice::use(const Stuff item)
