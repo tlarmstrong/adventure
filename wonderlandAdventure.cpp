@@ -8,49 +8,63 @@ using namespace std;
  -----------------------------------------------------------
  */
 
-// constructor -- all derived use (initialization list)			//it is fine if you want to keep where a person is in two locations (places keep people, then people keep where they are) but if we keep it in both places we need to be careful to always change it in both places and keep it consistent.
-Person::Person(const int hlevel, const List<Stuff> slist, const Place location) : health(hLevel), whereAmI(location)
+// constructor -- all derived use (initialization list)
+Person::Person(const int hlevel, const List<Stuff>& slist) : health(hLevel)
 {
     // copy list of stuff into Person's stuff list
-    copyList(slist, stuffList);
+    stuffList.copyList(slist);
 }
 
 // destructor
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::Move(const Place& to)
+void Person::move(Place& from, Place& to)
 {
-    whereAmI = &to;
+    from.personLeaves(*this);        // remove person from current location
+    to.personEnters(*this);          // move a person to another place
+}
+
+//for(Places* iterator=something...; iterate through all the places) if(personisthere)return iterator} //This will be the difficult part of storing in places. like the people we will probably have an array of places (I think that whichever we do we should keep all our places and people in an list anyway.) )
+
+// do we need Place to store a static list of all Places?
+
+// get name of Place where Person is
+std::ostream& Person::whereAreYou(std::ostream& cout) const
+{
+    std::string youAreHere;
+
+    int x = Place::getPlaceList().getSize()-1;
+    
+    for(int i = 0; i < x; i++)
+    {
+        Place* here = Place::getPlaceList.peek();
+        
+        // whoHere() will return a list of people at place; if people at place == this person, then assign string to the name of place.
+        if((here->whoHere().contains(this))
+               youAreHere = Place::getPlaceName();
+    }
+
+    return cout << youAreHere << endl;
 }
 
 //gives an item to someone else
-void Person::Give(const Stuff item, Person other) //we are not keeping the person constant, we are changing what is in their inventory
+void Person::give(const Stuff item, Person other) 
 {
     if(stuffList.contains(item))
-    {
-        Stuff gotIt = stuffList.pop(item);  //this is good. If you want we can make this 1 line, but I am not a picky person and am fine with 2 lines :)
-        other.Recieve(gotIt);       //we cannot touch someone else's private parts. We need to use the recieve function
-    }
+        other.recieve(stuffList.pop(item));
 }
 
 //recieves an item
-void Person::Recieve(const Stuff item)
+void Person::recieve(const Stuff item)
 {
     stuffList.push(item);
 }
 
 //person takes damage
-void Person::Hurt(const int damage)
+void Person::hurt(const int damage)
 {
     health -= damage;
-}
-
-template<class T>
-void Person::copyList(const List<T> from, const List<T> to)		//what is the purpose of a person copying a list? shouldn't this be part of our list, not person?
-{
-    for(int i = 0; i < from.getSize()-1; i++)
-        to.push(from[i]);
 }
 
 /*
@@ -60,10 +74,10 @@ void Person::copyList(const List<T> from, const List<T> to)		//what is the purpo
  */
 
 // constructor (private)
-Alice::Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hlevel, const Place location) : health(hLevel), whereAmI(location), stuffList(sList)
+Alice::Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hlevel) : health(hLevel), stuffList(sList)
 {
-    copyList(hList, helperList);    // list of helpers with Alice
-    copyList(bList, badguyList);    // list of badguys with Alice
+    helperList.copyList(hList);    // list of helpers with Alice
+    badguyList.copyList(bList);    // list of badguys with Alice
 
     // size of Alice (small(1), normal(2), big(3))
     bodySize = 2;
@@ -95,7 +109,7 @@ void Alice::ditched(const Person ditcher)
 //Alice adds item to the list of stuff	//could we perhaps just use recieve maybe. it is is the same function. Also, we need to think about how we remove the item from place...
 void Alice::pickup(const Stuff item)
 {
-    stuffList.push(item);
+    recieve(item);
 }
 
 //Alice drops an item
@@ -142,29 +156,30 @@ std::string Alice::getBodySize(int size)
 }
 
 // output what she has, who she's met, bodySize, and health
-std::ostream& Alice::render(std::ostream&) const
+std::ostream& Alice::render(std::ostream& cout) const
 {
     cout << "Alice is " << getBodySize(bodySize) << endl;
     cout << "Her health level is " << health << endl;
     
     cout << "She has these items: ";
     
-    cout << stuffList[0];
+    // peek() will return a Stuff object (.name will return the actual name of the obj)
+    cout << (stuffList.peek()).name;
     
     for(int i = 1; i < stuffList.getSize()-1; i++)
-        cout << " ," << stuffList.peek();
+        cout << " ," << (stuffList.peek()).name;
     
     cout << "/nHer friends are: ";
-    cout << helperList[0];
+    cout << (helperList.peek()).name;
     
     for(int i = 1; i < helperList.getSize()-1; i++)
-        cout << " ," << helperList.peek();
+        cout << " ," << (helperList.peek()).name;
     
     cout << "/nHer enemies are: ";
-    cout << badguyList[0];
+    cout << (badguyList.peek()).name;
     
     for(int i = 1; i < badguyList.getSize()-1; i++)
-        cout << " ," << badguyList.peek();
+        cout << " ," << (badguyList.peek()).name;
     
     cout << endl;
     return cout;
@@ -183,90 +198,121 @@ std::ostream& Alice::render(std::ostream&) const
  */
 
 // constructor
-NPC::NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> slist, const int hLevel, const bool frndly, const Place location) : health(hLevel), whereAmI(location), stuffList(sList)
+NPC::NPC(const std::string nm, const std::string dscrpt, const std::string sayThings, const List<Stuff> sList, const int hLevel, const bool frndly) : health(hLevel),stuffList(sList)
 {
-    std::string description;        // unique description of badguy / helper
-    std::string name;               // name of badguy
-    std::string says;               // what helper / badguy says to Alice
-    bool friendly;                  // 1 = friend, 0 = not friend
+    std::string description = dscrpt;    // unique description of badguy / helper
+    std::string name = nm;               // name of badguy
+    std::string says = sayThings;        // what helper / badguy says to Alice
+    bool friendly = frndly;              // 1 = friend, 0 = not friend
 }
 
 // destructor
 NPC::~NPC() {}
     
-// description of BadGuy
-std::ostream& narrate(std::ostream&) const
+// description of helper/badguy
+std::ostream& NPC::narrate(std::ostream& cout) const
 {
-    
+    return cout << description << endl;
 }
     
-// threats BGs pose to Alice
-std::string makeThreat() const
+// helpers/badguys talk to Alice
+std::ostream& NPC::talk(std::ostream& cout) const
 {
-    
+    return cout << says << endl;
 }
 
 /*
  --------------------------------------------------
  Factory Class: Derived from Person to make people
  --------------------------------------------------
+ 
+ Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
+ Helpers will be WhiteRabbit, MadHatter, CheshireCat...
+ 
  */
 
-Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
-Helpers will be WhiteRabbit, MadHatter, CheshireCat...
-
 // constructor makes a factory
-personFactory::personFactory()
-{
-    
-}
+PersonFactory::PersonFactory() {}
 
 // destructor destroys a factory
-personFactory::~personFactory()
-{
-    
-}
+PersonFactory::~PersonFactory() {}
 
-void personFactory::Person* makePerson (string who)
+// dynamically create characters based on input
+Person* PersonFactory::makePerson(std::string who)
 {
-    Person* testtube;
+    // Person* testtube; // Do we need this variable, or can we just return new NPC (below)?
     
-    if (who == Bandersnatch)
+    if (who == "Bandersnatch")
     {
-        std::string nm;
-        std::string dscrpt;
-        std::string threat;
-        List<Stuff> slist;
-        int hLevel;
-        bool frndly;
-        Place location;
+        std::string nm = "Bandersnatch";
+        std::string dscrpt = "I'm a bad guy";
+        std::string sayThings = "I'm gonna get you";
+        sList = [eyeBall];  // inherits stuffList and health variables from Person?
+        hLevel = 10;
+        bool frndly = 0;
         
-        testtube = new NPC(nm, dscrpt, threat, slist, hLevel, frndly, location);
+        // testtube = new NPC(nm, dscrpt, threat, sList, hLevel, frndly); // instead of this
+        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?
     }
     
-    else if (who == Jabberwocky)
+    else if (who == "Jabberwocky")
     {
+        std::string nm = "Jabberwocky";
+        std::string dscrpt = "I'm a really bad guy";
+        std::string sayThings = "I'm really gonna get you";
+        sList = [sword];
+        hLevel = 10;
+        bool frndly = 0;
         
+        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
     }
     
-    else if (who == RedQueen)
+    else if (who == "RedQueen")
     {
+        std::string nm = "RedQueen";
+        std::string dscrpt = "I'm an evil queen";
+        std::string sayThings = "I'm gonna get you, my pretty";
+        sList = [potion];
+        hLevel = 10;
+        bool frndly = 0;
         
+        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
     }
     
-    else if (who == WhiteRabbit)
+    else if (who == "WhiteRabbit")
     {
+        std::string nm = "WhiteRabbit";
+        std::string dscrpt = "I'm a white rabbit";
+        std::string sayThings = "I'm a friend";
+        sList = [watch];
+        hLevel = 10;
+        bool frndly = 1;
         
+        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
     }
     
-    else if (who == MadHatter)
+    else if (who == "MadHatter")
     {
+        std::string nm = "MadHatter";
+        std::string dscrpt = "I like tea parties";
+        std::string sayThings = "Would you like to come to my party?";
+        sList = [cupcake, tea];
+        hLevel = 10;
+        bool frndly = 1;
         
+        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
     }
     
-    else if (who == CheshireCat)
+    else if (who == "CheshireCat")
     {
+        std::string nm = "CheshireCat";
+        std::string dscrpt = "I like to smile";
+        std::string sayThings = "I'm a mysterious friend";
+        sList = [key];
+        hLevel = 10;
+        bool frndly = 1;
         
+        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
     }
 }
 

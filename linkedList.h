@@ -28,10 +28,13 @@ public:
     T pop(const T value);                   // removes and returns element from array
     T pop();                                // removes first element
     std::string peek();                     // returns element
+    
+    // copy elements from one list to another
+    void copyList(const List<T>& from);
+    
     bool isEmpty() const;                   // returns true if array is empty
     int getSize() const;                    // returns the number of elements in array
     bool contains(const T value) const;     // lets us know if a value is in a list
-    
 };
 
 template <class T>
@@ -161,6 +164,7 @@ T List<T>::pop()
     return popped;
 }
 
+// look at element in list without removing node
 template <class T>
 std::string List<T>::peek()
 {
@@ -168,6 +172,14 @@ std::string List<T>::peek()
     push(nodeReturn);           // add node onto back of list
     
     return nodeReturn->element;          // return the node
+}
+
+// copy elements from one list to another
+template<class T>
+void List<T>::copyList(const List<T>& from)
+{
+    for(int i = 0; i < from.getSize()-1; i++)
+        push(from[i]);
 }
 
 template <class T>

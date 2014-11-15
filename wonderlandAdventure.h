@@ -22,21 +22,17 @@ protected:
     List<Stuff> stuffList;          // list of stuff each person has
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
     
-    Place* whereAmI;                 // person's current location //a place is not a part of a person. If you want to do something like this, it should be a place pointer. Personally, I am pro keeping track of where a person is in just one place. Pros of one place: We don't have to remember to change it in both places, Cons we will have to iterate through something.
-    
-    // helper function to copy from one list to another
-    copyList(List<T> from, List<T> to);
-    
 public:
     
     // constructor -- all derived use (initialization list)
     Person(const int hLevel, const List<Stuff> list, Place location);
     virtual ~Person();                       // destructor
     
-    void Move(const Place to);                       // Person can move from place to place
-    void Give(const Stuff item, const Person other); // gives an item to someone else
-    void Recieve(const Stuff item);                  // recieves an item
-    void Hurt(const int damage);					 // person takes damage
+    void move(Place& from, Place& to);               // Person can move from place to place
+    std::ostream& whereAreYou(std::ostream& cout) const; // get name of place
+    void give(const Stuff& item, Person& other);     // gives an item to someone else
+    void recieve(const Stuff item);                  // recieves an item
+    void hurt(const int damage);					 // person takes damage
 }
 
 
@@ -45,6 +41,7 @@ public:
  Options for where people are:
  ----------------------------------
  
+
 storing in person:
 class person
 {
@@ -79,10 +76,14 @@ list<person> peoplehere;
  ----------------------------------
  */
 
-class personFactory: public Person
+class PersonFactory: public Person
 {
+    private:    
+    
+        personFactory();		//makes a factory // constructor should be private?
+    
     public:
-        personFactory();		//makes a factory
+    
         ~personFactory();		//destroys a factory
     
         static Person* makePerson (string who);		//make a test tube baby
@@ -136,8 +137,8 @@ public:
      when I looked it up, I saw many different ways of implimentation, I think they all worked. This one seemed the simplest and I think it should work. It might be a good idea to still double check with prather
      */
     
-    void taggingAlong(const Person Tagger);  //adds a person to the list of Helpers
-    void ditched(const Person Ditcher);      //removes a person from the list of Helpers
+    void taggingAlong(const Person tagger);  //adds a person to the list of Helpers
+    void ditched(const Person ditcher);      //removes a person from the list of Helpers
     
     void pickup(const Stuff item);                     //Alice adds item to the list of stuff
     void drop(const Stuff item);                       //Alice drops an item
@@ -147,7 +148,7 @@ public:
     void use(const Stuff item, const Person who);      //Alice uses an item on a person
     
     // output what she has, who she's met, body getSize, and health
-    std::ostream& render(std::ostream&) const;
+    std::ostream& render(std::ostream& cout) const;
 };
 
 /*
@@ -173,14 +174,14 @@ private:
 public:
     
     // constructor
-    NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly, const Place location);
+    NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly);
     ~NPC();               // destructor
     
     // description of BadGuy
-    std::ostream& narrate(std::ostream&) const;
+    std::ostream& narrate(std::ostream& cout) const;
     
     // threats BGs pose to Alice
-    std::string makeThreat() const;
+    std::ostream& talk(std::ostream& cout) const;
 };
 
 /*
@@ -209,10 +210,12 @@ protected:
     std::string description;         // unique description of Place
     std::string actions;             // what Alice can do here
     std::string name;                // name of Place
-    List<Person> PeopleHere;         // everybody in Place
-    List<Stuff> StuffHere;           // list of things in a Place
-    List<Thing> ThingHere;			 // list of things here
-    List<Place> Placeto;			 // list of places Alice can go from here
+    List<Person> peopleHere;         // everybody in Place
+    List<Stuff> stuffHere;           // list of things in a Place
+    List<Thing> thingHere;			 // list of things here
+    List<Place> placeTo;			 // list of places Alice can go from here
+    
+    static List<Place> placeList;    // list of places in game
     
 public:
     
@@ -220,16 +223,21 @@ public:
     Places(const std::string name, const std::string descript, const std::string actions, const List<Person> who, const List<Stuff> what, const List<Thing> obj, const List<Place> where);
     ~Places();                                  // destructor
     
-    List<Person> WhoHere() const;               //returns a list of everybody here
-    void PersonEnters(const Person enterer);    //somebody comes into the place
-    void PersonLeaves(const Person leaver);     //removes somebody from a place
+    List<Person> whoHere() const;               //returns a list of everybody here
     
-    List<Stuff> WhatsHere() const;              //returns the list of stuff here
-    void Dropped(const Stuff drop);             //someone dropped an item here, so it is now laying around
-    void Picked(const Stuff pick);              //somebody picked up an item here
+    std::string getPlaceName() const;           // returns name of Place
+    List<Place> getPlaceList() const;           // returns list of Places
+    // thought we may need these to get the name of Place (private) and list of places (private) by calling a public function?
+    
+    void personEnters(const &Person enterer);   //somebody comes into the place
+    void personLeaves(const &Person leaver);    //removes somebody from a place
+    
+    List<Stuff> whatsHere() const;              //returns the list of stuff here
+    void dropped(const Stuff drop);             //someone dropped an item here, so it is now laying around
+    void picked(const Stuff pick);              //somebody picked up an item here
     
     // output description of Place
-    std::ostream& narrate(std::ostream&) const;
+    std::ostream& narrate(std::ostream& cout) const;
     
     // what Alice can do in particular place
     std::string action(const std::string);
