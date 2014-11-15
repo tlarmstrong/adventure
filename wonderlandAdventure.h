@@ -22,17 +22,30 @@ protected:
     List<Stuff> stuffList;          // list of stuff each person has
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
     
+<<<<<<< .merge_file_RFrRuq
+=======
+    // helper function to copy from one list to another
+    // copyList(List<T> from, List<T> to);		//should be a part of list
+    
+>>>>>>> .merge_file_PbkUo5
 public:
     
     // constructor -- all derived use (initialization list)
-    Person(const int hLevel, const List<Stuff> list, Place location);
+    Person(const int& hLevel, const List<Stuff>& list);
     virtual ~Person();                       // destructor
     
+<<<<<<< .merge_file_RFrRuq
     void move(Place& from, Place& to);               // Person can move from place to place
     std::ostream& whereAreYou(std::ostream& cout) const; // get name of place
     void give(const Stuff& item, Person& other);     // gives an item to someone else
     void recieve(const Stuff item);                  // recieves an item
     void hurt(const int damage);					 // person takes damage
+=======
+    void Move(Place& from, Place& to);                       // Person can move from place to place //we need to change place
+    void Give(const Stuff& item, Person& other); // gives an item to someone else
+    void Recieve(const Stuff& item);                  // recieves an item
+    void Hurt(const int& damage);					 // person takes damage
+>>>>>>> .merge_file_PbkUo5
 }
 
 

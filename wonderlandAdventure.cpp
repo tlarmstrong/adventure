@@ -8,8 +8,13 @@ using namespace std;
  -----------------------------------------------------------
  */
 
+<<<<<<< .merge_file_psXTEY
 // constructor -- all derived use (initialization list)
 Person::Person(const int hlevel, const List<Stuff>& slist) : health(hLevel)
+=======
+// constructor -- all derived use (initialization list)			//it is fine if you want to keep where a person is in two locations (places keep people, then people keep where they are) but if we keep it in both places we need to be careful to always change it in both places and keep it consistent.
+Person::Person(const int& hlevel, const List<Stuff>& slist) : health(hLevel)
+>>>>>>> .merge_file_dr0FuU
 {
     // copy list of stuff into Person's stuff list
     stuffList.copyList(slist);
@@ -19,6 +24,7 @@ Person::Person(const int hlevel, const List<Stuff>& slist) : health(hLevel)
 Person::~Person() {}
 
 //allows each person to move from place to place
+<<<<<<< .merge_file_psXTEY
 void Person::move(Place& from, Place& to)
 {
     from.personLeaves(*this);        // remove person from current location
@@ -31,6 +37,16 @@ void Person::move(Place& from, Place& to)
 
 // get name of Place where Person is
 std::ostream& Person::whereAreYou(std::ostream& cout) const
+=======
+void Person::Move(Place& from, Place& to)
+{
+    from.PersonLeaves(*this);
+    to.PersonEnters(*this);
+}
+
+//gives an item to someone else
+void Person::Give(const Stuff& item, Person& other) //we are not keeping the person constant, we are changing what is in their inventory
+>>>>>>> .merge_file_dr0FuU
 {
     std::string youAreHere;
 
@@ -38,11 +54,18 @@ std::ostream& Person::whereAreYou(std::ostream& cout) const
     
     for(int i = 0; i < x; i++)
     {
+<<<<<<< .merge_file_psXTEY
         Place* here = Place::getPlaceList.peek();
         
         // whoHere() will return a list of people at place; if people at place == this person, then assign string to the name of place.
         if((here->whoHere().contains(this))
                youAreHere = Place::getPlaceName();
+=======
+        other.Recieve(stuffList.pop(item));       //we cannot touch someone else's private parts. We need to use the recieve function
+    }
+    else {
+      	cout << "You do not have that item";	//it would be good if we could output the name of the person and object. Shouldn't be too difficult.
+>>>>>>> .merge_file_dr0FuU
     }
 
     return cout << youAreHere << endl;
@@ -56,17 +79,37 @@ void Person::give(const Stuff item, Person other)
 }
 
 //recieves an item
+<<<<<<< .merge_file_psXTEY
 void Person::recieve(const Stuff item)
+=======
+void Person::Recieve(const Stuff& item)
+>>>>>>> .merge_file_dr0FuU
 {
     stuffList.push(item);
 }
 
 //person takes damage
+<<<<<<< .merge_file_psXTEY
 void Person::hurt(const int damage)
+=======
+void Person::Hurt(const int& damage)
+>>>>>>> .merge_file_dr0FuU
 {
     health -= damage;
 }
 
+<<<<<<< .merge_file_psXTEY
+=======
+/*
+template<class T>
+void Person::copyList(const List<T> from, const List<T> to)		//what is the purpose of a person copying a list? shouldn't this be part of our list, not person?
+{
+    for(int i = 0; i < from.getSize()-1; i++)
+        to.push(from[i]);
+}
+*/
+
+>>>>>>> .merge_file_dr0FuU
 /*
  ----------------------------------
  Alice Class: Derived from Person
