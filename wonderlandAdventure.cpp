@@ -19,39 +19,44 @@ Person::Person(const int& hlevel, const List<Stuff>& slist) : health(hLevel)
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::Move(const Place& from, const Place& to)
+void Person::Move(Place& from, Place& to)
 {
-    
+    from.PersonLeaves(*this);
+    to.PersonEnters(*this);
 }
 
 //gives an item to someone else
-void Person::Give(const Stuff item, Person other) //we are not keeping the person constant, we are changing what is in their inventory
+void Person::Give(const Stuff& item, Person& other) //we are not keeping the person constant, we are changing what is in their inventory
 {
     if(stuffList.contains(item))
     {
-        Stuff gotIt = stuffList.pop(item);  //this is good. If you want we can make this 1 line, but I am not a picky person and am fine with 2 lines :)
-        other.Recieve(gotIt);       //we cannot touch someone else's private parts. We need to use the recieve function
+        other.Recieve(stuffList.pop(item));       //we cannot touch someone else's private parts. We need to use the recieve function
+    }
+    else {
+      	cout << "You do not have that item";	//it would be good if we could output the name of the person and object. Shouldn't be too difficult.
     }
 }
 
 //recieves an item
-void Person::Recieve(const Stuff item)
+void Person::Recieve(const Stuff& item)
 {
     stuffList.push(item);
 }
 
 //person takes damage
-void Person::Hurt(const int damage)
+void Person::Hurt(const int& damage)
 {
     health -= damage;
 }
 
+/*
 template<class T>
 void Person::copyList(const List<T> from, const List<T> to)		//what is the purpose of a person copying a list? shouldn't this be part of our list, not person?
 {
     for(int i = 0; i < from.getSize()-1; i++)
         to.push(from[i]);
 }
+*/
 
 /*
  ----------------------------------
