@@ -31,8 +31,8 @@ public:
     Person(const int& hLevel, const List<Stuff>& list);
     virtual ~Person();                       // destructor
     
-    void Move(const Place& from, const Place& to);                       // Person can move from place to place
-    void Give(const Stuff& item, const Person& other); // gives an item to someone else
+    void Move(Place& from, Place& to);                       // Person can move from place to place //we need to change place
+    void Give(const Stuff& item, Person& other); // gives an item to someone else
     void Recieve(const Stuff& item);                  // recieves an item
     void Hurt(const int& damage);					 // person takes damage
 }
