@@ -22,21 +22,19 @@ protected:
     List<Stuff> stuffList;          // list of stuff each person has
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
     
-    Place* whereAmI;                 // person's current location //a place is not a part of a person. If you want to do something like this, it should be a place pointer. Personally, I am pro keeping track of where a person is in just one place. Pros of one place: We don't have to remember to change it in both places, Cons we will have to iterate through something.
-    
     // helper function to copy from one list to another
-    copyList(List<T> from, List<T> to);
+    // copyList(List<T> from, List<T> to);		//should be a part of list
     
 public:
     
     // constructor -- all derived use (initialization list)
-    Person(const int hLevel, const List<Stuff> list, Place location);
+    Person(const int& hLevel, const List<Stuff>& list);
     virtual ~Person();                       // destructor
     
-    void Move(const Place to);                       // Person can move from place to place
-    void Give(const Stuff item, const Person other); // gives an item to someone else
-    void Recieve(const Stuff item);                  // recieves an item
-    void Hurt(const int damage);					 // person takes damage
+    void Move(const Place& from, const Place& to);                       // Person can move from place to place
+    void Give(const Stuff& item, const Person& other); // gives an item to someone else
+    void Recieve(const Stuff& item);                  // recieves an item
+    void Hurt(const int& damage);					 // person takes damage
 }
 
 
