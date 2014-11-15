@@ -9,7 +9,7 @@ using namespace std;
  */
 
 // constructor -- all derived use (initialization list)			//it is fine if you want to keep where a person is in two locations (places keep people, then people keep where they are) but if we keep it in both places we need to be careful to always change it in both places and keep it consistent.
-Person::Person(const int hlevel, const List<Stuff> slist, const Place location) : health(hLevel), whereAmI(location)
+Person::Person(const int& hlevel, const List<Stuff>& slist) : health(hLevel)
 {
     // copy list of stuff into Person's stuff list
     copyList(slist, stuffList);
@@ -19,9 +19,9 @@ Person::Person(const int hlevel, const List<Stuff> slist, const Place location) 
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::Move(const Place& to)
+void Person::Move(const Place& from, const Place& to)
 {
-    whereAmI = &to;
+    
 }
 
 //gives an item to someone else
