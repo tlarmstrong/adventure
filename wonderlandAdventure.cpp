@@ -245,7 +245,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Bandersnatch";
         std::string dscrpt = "I'm a bad guy";
         std::string sayThings = "I'm gonna get you";
-        sList = [eyeBall];  // inherits stuffList and health variables from Person?
+        sList[] = {eyeBall};  // inherits stuffList and health variables from Person?
         hLevel = 10;
         bool frndly = 0;
         
@@ -258,7 +258,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Jabberwocky";
         std::string dscrpt = "I'm a really bad guy";
         std::string sayThings = "I'm really gonna get you";
-        sList = [sword];
+        sList[] = {sword};
         hLevel = 10;
         bool frndly = 0;
         
@@ -270,7 +270,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "RedQueen";
         std::string dscrpt = "I'm an evil queen";
         std::string sayThings = "I'm gonna get you, my pretty";
-        sList = [potion];
+        sList[] = {potion};
         hLevel = 10;
         bool frndly = 0;
         
@@ -282,7 +282,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "WhiteRabbit";
         std::string dscrpt = "I'm a white rabbit";
         std::string sayThings = "I'm a friend";
-        sList = [watch];
+        sList[] = {watch};
         hLevel = 10;
         bool frndly = 1;
         
@@ -294,7 +294,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "MadHatter";
         std::string dscrpt = "I like tea parties";
         std::string sayThings = "Would you like to come to my party?";
-        sList = [cupcake, tea];
+        sList[] = {cupcake, tea};
         hLevel = 10;
         bool frndly = 1;
         
@@ -306,7 +306,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "CheshireCat";
         std::string dscrpt = "I like to smile";
         std::string sayThings = "I'm a mysterious friend";
-        sList = [key];
+        sList[] = {key};
         hLevel = 10;
         bool frndly = 1;
         
