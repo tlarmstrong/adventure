@@ -8,108 +8,67 @@ using namespace std;
  -----------------------------------------------------------
  */
 
-<<<<<<< .merge_file_psXTEY
-// constructor -- all derived use (initialization list)
-Person::Person(const int hlevel, const List<Stuff>& slist) : health(hLevel)
-=======
-// constructor -- all derived use (initialization list)			//it is fine if you want to keep where a person is in two locations (places keep people, then people keep where they are) but if we keep it in both places we need to be careful to always change it in both places and keep it consistent.
-Person::Person(const int& hlevel, const List<Stuff>& slist) : health(hLevel)
->>>>>>> .merge_file_dr0FuU
+
+Person::Person(const int& hlevel, const List<Stuff>& sList) : health(hLevel)
 {
     // copy list of stuff into Person's stuff list
-    stuffList.copyList(slist);
+    stuffList = sList;
 }
 
 // destructor
 Person::~Person() {}
 
 //allows each person to move from place to place
-<<<<<<< .merge_file_psXTEY
 void Person::move(Place& from, Place& to)
 {
     from.personLeaves(*this);        // remove person from current location
     to.personEnters(*this);          // move a person to another place
 }
 
-//for(Places* iterator=something...; iterate through all the places) if(personisthere)return iterator} //This will be the difficult part of storing in places. like the people we will probably have an array of places (I think that whichever we do we should keep all our places and people in an list anyway.) )
+//for(Place* iterator=something...; iterate through all the Place) if(personisthere)return iterator} //This will be the difficult part of storing in Place. like the people we will probably have an array of Place (I think that whichever we do we should keep all our Place and people in an list anyway.) )
 
-// do we need Place to store a static list of all Places?
+// Does this mean we need Place to store a static list of all Place(s)? -- I added this to Place, but not sure if it was what you intended.
 
 // get name of Place where Person is
 std::ostream& Person::whereAreYou(std::ostream& cout) const
-=======
-void Person::Move(Place& from, Place& to)
 {
-    from.PersonLeaves(*this);
-    to.PersonEnters(*this);
-}
-
-//gives an item to someone else
-void Person::Give(const Stuff& item, Person& other) //we are not keeping the person constant, we are changing what is in their inventory
->>>>>>> .merge_file_dr0FuU
-{
-    std::string youAreHere;
-
     int x = Place::getPlaceList().getSize()-1;
     
     for(int i = 0; i < x; i++)
     {
-<<<<<<< .merge_file_psXTEY
         Place* here = Place::getPlaceList.peek();
         
-        // whoHere() will return a list of people at place; if people at place == this person, then assign string to the name of place.
-        if((here->whoHere().contains(this))
-               youAreHere = Place::getPlaceName();
-=======
-        other.Recieve(stuffList.pop(item));       //we cannot touch someone else's private parts. We need to use the recieve function
-    }
-    else {
-      	cout << "You do not have that item";	//it would be good if we could output the name of the person and object. Shouldn't be too difficult.
->>>>>>> .merge_file_dr0FuU
+        // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
+        if((here->whoHere()).contains(this))
+           cout << name << " is in the " << Place::getPlaceName() << endl;
     }
 
-    return cout << youAreHere << endl;
+    return cout;
 }
 
 //gives an item to someone else
-void Person::give(const Stuff item, Person other) 
+void Person::give(const Stuff& item, Person& other)
 {
     if(stuffList.contains(item))
         other.recieve(stuffList.pop(item));
+    
+    else
+        cout << name << " does not have " << item.name << endl;
+    //it would be good if we could output the name of the person and object. Shouldn't be too difficult.
 }
 
 //recieves an item
-<<<<<<< .merge_file_psXTEY
-void Person::recieve(const Stuff item)
-=======
-void Person::Recieve(const Stuff& item)
->>>>>>> .merge_file_dr0FuU
+void Person::recieve(const Stuff& item)
 {
     stuffList.push(item);
 }
 
 //person takes damage
-<<<<<<< .merge_file_psXTEY
-void Person::hurt(const int damage)
-=======
-void Person::Hurt(const int& damage)
->>>>>>> .merge_file_dr0FuU
+void Person::hurt(const int& damage)
 {
     health -= damage;
 }
 
-<<<<<<< .merge_file_psXTEY
-=======
-/*
-template<class T>
-void Person::copyList(const List<T> from, const List<T> to)		//what is the purpose of a person copying a list? shouldn't this be part of our list, not person?
-{
-    for(int i = 0; i < from.getSize()-1; i++)
-        to.push(from[i]);
-}
-*/
-
->>>>>>> .merge_file_dr0FuU
 /*
  ----------------------------------
  Alice Class: Derived from Person
@@ -268,10 +227,6 @@ std::ostream& NPC::talk(std::ostream& cout) const
  --------------------------------------------------
  Factory Class: Derived from Person to make people
  --------------------------------------------------
- 
- Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
- Helpers will be WhiteRabbit, MadHatter, CheshireCat...
- 
  */
 
 // constructor makes a factory
@@ -359,3 +314,179 @@ Person* PersonFactory::makePerson(std::string who)
     }
 }
 
+/*
+ ----------------------------------
+ Place Class: Base
+ ----------------------------------
+ 
+ generic class will instantiate individual Place dynamically (on demand)
+ Place will be Tree, Garden, Woods, TeaParty, Castle, Battlefield, Home
+ 
+ */
+
+// should we also make a factory for Place? (see below for PlaceFactory class)
+
+// constructor
+Place::Place(const std::string nm, const std::string dscpt, const std::string act, const List<Stuff> what, const List<People> who, const List<Thing> obj,)
+{
+    name = nm;                      // name of Place
+    description = dscrpt;           // unique description of Place
+    action = act;                   // what Alice can do here
+    peopleHere = who;               // everybody in Place
+    stuffHere = what;               // list of things in a Place
+    thingHere = obj;                // list of things here
+    placeList.push(this*);          // add to Place list
+}
+
+Place::~Place() {}                         // destructor
+
+List<Person> Place::whoHere() const     //returns a list of everybody here
+{
+    return peopleHere;
+}
+
+// thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
+std::string Place::getPlaceName() const  // returns name of Place
+{
+    return name;
+}
+
+List<Place> Place::getPlaceList() const   // returns list of Place
+{
+    return placeList;
+}
+
+void Place::personEnters(const &Person enterer)  // somebody comes into the place
+{
+    peopleHere.push(enterer);
+}
+
+void Place::personLeaves(const &Person leaver)   // removes somebody from a place
+{
+    peopleHere.pop(leaver);
+}
+
+List<Stuff> Place::whatsHere() const              // returns the list of stuff here
+{
+    return stuffHere;
+}
+
+void Place::dropped(const Stuff drop)    // someone dropped an item, so now it is laying around
+{
+    stuffHere.push(drop);
+}
+
+void Place::pickedUp(const Stuff leftBehind)      //somebody picked up an item here
+{
+    Person::recieve(leftBehind);
+}
+
+// output description of Place
+std::ostream& Place::narrate(std::ostream& cout) const
+{
+    return cout << description << endl;
+}
+
+// what Alice can do in particular place
+std::string Place::canDo(const std::string)
+{
+    return cout << action << endl;
+}
+
+/*
+ ----------------------------------
+ PlaceFactory Class: Derived from Place to make places
+ ----------------------------------
+ */
+
+PlaceFactory::PlaceFactory() {}
+
+PlaceFactory::~PlaceFactory() {}
+
+// Dynamically create new Place in factory
+Place* PlaceFactory::makePlace(const std::string where)
+{
+    if(where == "Tree")
+    {
+        name = "Tree";
+        description = "Alice woke up under a big oak tree. She saw a white rabbit run by.";
+        action = "Should she follow the white rabbit?";
+        peopleHere[] = {WhiteRabbit};
+        stuffHere[] = {};
+        thingHere[] = {};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+    }
+    
+    else if(where == "Garden")
+    {
+        name = "Garden";
+        description = "Alice is in a beautiful garden.";
+        action = "Should she look around?";
+        peopleHere[] = {MadHatter, DoorMouse, Bandersnatch};
+        stuffHere[] = {WhiteRose};
+        thingHere[] = {};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+    }
+    
+    else if(where == "Woods")
+    {
+        name = "Woods";
+        description = "Alice is in the Woods. She sees a cat in a tree.";
+        action = "Should she talk to the cat?";
+        peopleHere[] = {CheshireCat};
+        stuffHere[] = {Key};
+        thingHere[] = {};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingHere);
+    }
+    
+    else if(where == "TeaParty")
+    {
+        name = "TeaParty";
+        description = "Alice goes to a Tea Party.";
+        action = "Should she have some tea and cake?";
+        peopleHere[] = {MadHatter};
+        stuffHere[] = {Cake, Tea};
+        thingHere[] = {};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+    }
+    
+    else if(where == "Castle")
+    {
+        name = "Castle";
+        description = "Alice is taken to the Red Queen's Castle";
+        action = "She sees a door. Should she go in?";
+        peopleHere[] = {RedQueen, Jabberwocky, Bandersnatch};
+        stuffHere[] = {Sword};
+        thingHere[] = {Door, Chest};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+    }
+    
+    else if(where == "Battlefield")
+    {
+        name = "Battlefield";
+        description = "Alice is all suited up and ready to fight.";
+        action = "Do you think she will win?";
+        peopleHere[] = {WhiteQueen};
+        stuffHere[] = {JabberBlood};
+        thingHere[] = {};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+    }
+    
+    else if(where == "Home")
+    {
+        name = "Home";
+        description = "Alice wakes up and remembers a wonderful dream...";
+        action = "Was the dream real?";
+        peopleHere[] = {};
+        stuffHere[] = {};
+        thingHere[] = {};
+        
+        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+    }
+}

@@ -32,6 +32,9 @@ public:
     // copy elements from one list to another
     void copyList(const List<T>& from);
     
+    // copy constructor for assignment operator
+    List<T>& operator = (const List<T>& other) const;
+    
     bool isEmpty() const;                   // returns true if array is empty
     int getSize() const;                    // returns the number of elements in array
     bool contains(const T value) const;     // lets us know if a value is in a list
@@ -53,7 +56,7 @@ List<T>::~List()
     head->prev->next = NULL;
     Node <T>* walker = head;
     
-    // "walk" through the list and distroy each node
+    // "walk" through the list and destroy each node
     while(walker != NULL)
     {
         Node <T>* remove = walker;
@@ -176,10 +179,20 @@ std::string List<T>::peek()
 
 // copy elements from one list to another
 template<class T>
-void List<T>::copyList(const List<T>& from)
+// copy constructor for assignment operator
+List<T>& List<T>::operator = (const List<T>& other) const
 {
-    for(int i = 0; i < from.getSize()-1; i++)
-        push(from[i]);
+    // check if assigning List to self
+    if(this == &other)
+        return *this;
+    
+    // make deep copy from other list to new list
+    for(int i = 0; i < other.getSize(); i++)
+    {
+        push(other.peek());
+    }
+    
+    return *this;
 }
 
 template <class T>
