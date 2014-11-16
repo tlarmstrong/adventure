@@ -39,28 +39,6 @@ public:
 
 /*
  ----------------------------------
- PersonFactory Class: Derived from Person to make people
- ----------------------------------
- */
-
-class PersonFactory: public Person
-{
-    private:    
-    
-        PersonFactory();		//makes a factory // constructor should be private (I moved it)?
-    
-    public:
-    
-        ~PersonFactory();		//destroys a factory
-    
-        //make a test tube baby
-        static Person* makePerson (const std::string who);
-    
-        //from here for npc's we will call their constructor but for alice we will call getalice
-};
-
-/*
- ----------------------------------
  Alice Class: Derived from Person
  ----------------------------------
  */
@@ -94,6 +72,8 @@ public:
     void use(const Stuff item, const Thing what);      //Alice uses an item on a thing
     void use(const Stuff item, const Person who);      //Alice uses an item on a person
     
+    std::string getBodySize() const;                   // Get size of Alice
+    
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& cout) const;
 };
@@ -124,11 +104,36 @@ public:
     NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly);
     ~NPC();               // destructor
     
+    // set friendly status
+    void setFriendly(int x);
+    
     // description of NPC
     std::ostream& narrate(std::ostream& cout) const;
     
     // What NPCs say to Alice
     std::ostream& talk(std::ostream& cout) const;
+};
+
+/*
+ ----------------------------------
+ PersonFactory Class: Derived from Person to make people
+ ----------------------------------
+ */
+
+class PersonFactory: public Person
+{
+private:
+    
+    PersonFactory();		//makes a factory // constructor should be private (I moved it)?
+    
+public:
+    
+    ~PersonFactory();		//destroys a factory
+    
+    //make a test tube baby
+    static Person* makePerson (const std::string who);
+    
+    //from here for npc's we will call their constructor but for alice we will call getalice
 };
 
 /*
@@ -197,7 +202,7 @@ class PlaceFactory: public Place
         ~PlaceFactory();		// destructor destroys a factory
     
         //make a specific Place
-        static Place* makePerson (std::string where);
+        static Place* makePlace (std::string where);
 };
 
 /*
@@ -206,9 +211,9 @@ class PlaceFactory: public Place
  ----------------------------------
  
  generic class will instantiate individual stuff dynamically (on demand)
- Stuff will be BandersnatchEye, Key, WhiteRose, CupCake, RoadTea, Sword, JabberBlood...
+ uses Chain of Responsibility
  
- */
+*/
 
 class Stuff {
     
@@ -216,8 +221,10 @@ protected:
     
     bool status;                // if used, status = 0; if not, status = 1
     std::string name;           // name of stuff object
-    std::string description;    // description of Bandersnatch Eye
-    int result;                 // decrease to BGs health / change Alice's health, getSize, or to be defined :) -- are you thinking about the Absolem the Caterpillar's smoke? Would that affect her health, or do we need another variable? // um not quite. it is a I don't know how we control what each different stuff changes. It may be that we need to create different classes for each type of object so each type of object can change the proper thing. Not sure, takes more thinking
+    std::string description;    // description of Stuff
+    int result;                 // decrease to BGs health / change Alice's health, getSize
+    
+    Stuff* next;                // Base pointer for Chain of Responsibility
     
 public:
     
@@ -225,10 +232,85 @@ public:
     Stuff(const bool status, const std::string name, const std::string description, const int result);
     virtual ~Stuff();       // destructor
     
-    //we should make sure we don't need another function to activate on such as a function that uses the item on a badguy or on alice or...// good question, I'm not sure. Since we have polymorphic use() in Alice, would that take care of it?
+    // functions for Chain of Responsibility
+    void setNext(Stuff* n);
+    void add(Stuff* n);
+    virtual void handle(std::string sName);
     
     // output description of Stuff
     std::ostream& narrate(std::ostream&) const;
+};
+
+/*
+ ----------------------------------
+ Handler Classes: Derived from Stuff
+ ----------------------------------
+ 
+ handlers will be BandersnatchEye, Key, WhiteRose, Cake, Tea, Sword, JabberBlood...
+ 
+ */
+
+class BandersnatchEye : public Stuff {
+    
+    public:
+        BandersnatchEye();              // constructor
+        ~BandersnatchEye();             // destructor
+        void handle(std::string sName); // handler id
+    
+};
+
+class Key : public Stuff {
+    
+    public:
+        Key();
+        ~Key();
+        void handle(std::string sName);
+    
+};
+
+class WhiteRose : public Stuff {
+    
+    public:
+        WhiteRose();
+        ~WhiteRose();
+        void handle(std::string sName);
+    
+};
+
+class Cake : public Stuff {
+    
+    public:
+        Cake();
+        ~Cake();
+        void handle(std::string sName);
+    
+};
+
+class Tea : public Stuff {
+    
+    public:
+        Tea();
+        ~Tea();
+        void handle(std::string sName);
+    
+};
+
+class Sword : public Stuff {
+    
+    public:
+        Sword();
+        ~Sword();
+        void handle(std::string sName);
+    
+};
+
+class JabberBlood : public Stuff {
+    
+    public:
+        JabberBlood();
+        ~JabberBlood();
+        void handle(std::string sName);
+    
 };
 
 /*

@@ -92,6 +92,7 @@ void List<T>::push(const T value)
     }
 }
 
+// pop specific value
 template<class T>
 T List<T>::pop(const T value)
 {
@@ -136,6 +137,7 @@ T List<T>::pop(const T value)
     return popped;
 }
 
+// pop without arguments
 template<class T>
 T List<T>::pop()
 {

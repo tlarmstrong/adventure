@@ -39,8 +39,8 @@ std::ostream& Person::whereAreYou(std::ostream& cout) const
         Place* here = Place::getPlaceList.peek();
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
-        if((here->whoHere()).contains(this))
-           cout << name << " is in the " << Place::getPlaceName() << endl;
+        if((here->whoHere()).contains(*this))
+           cout << name << " is in the " << Place::here->getPlaceName() << endl;
     }
 
     return cout;
@@ -146,12 +146,12 @@ void Alice::use(const Stuff item, const Person who)
     
 }
 
-std::string Alice::getBodySize(int size)
+std::string Alice::getBodySize() const
 {
-    if(size == 1)
+    if(bodySize == 1)
         return "small";
     
-    else if(size == 3)
+    else if(bodySize == 3)
         return "big";
     
     return "normal";
@@ -160,7 +160,7 @@ std::string Alice::getBodySize(int size)
 // output what she has, who she's met, bodySize, and health
 std::ostream& Alice::render(std::ostream& cout) const
 {
-    cout << "Alice is " << getBodySize(bodySize) << endl;
+    cout << "Alice is " << getBodySize() << endl;
     cout << "Her health level is " << health << endl;
     
     cout << "She has these items: ";
@@ -194,22 +194,26 @@ std::ostream& Alice::render(std::ostream& cout) const
  ----------------------------------
  
  generic class will instantiate individual bad guys/helpers dynamically (on demand)
- Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
- Helpers will be WhiteRabbit, MadHatter, CheshireCat...
  
  */
 
 // constructor
 NPC::NPC(const std::string nm, const std::string dscrpt, const std::string sayThings, const List<Stuff> sList, const int hLevel, const bool frndly) : health(hLevel),stuffList(sList)
 {
-    std::string description = dscrpt;    // unique description of badguy / helper
-    std::string name = nm;               // name of badguy
-    std::string says = sayThings;        // what helper / badguy says to Alice
-    bool friendly = frndly;              // 1 = friend, 0 = not friend
+    description = dscrpt;       // unique description of badguy / helper
+    sname = nm;                 // name of badguy
+    says = sayThings;           // what helper / badguy says to Alice
+    friendly = frndly;          // 1 = friend, 0 = not friend
 }
 
 // destructor
 NPC::~NPC() {}
+
+// public function to set friendly status of NPC
+void NPC::setFriendly(int x)
+{
+    friendly = x;
+}
     
 // description of helper/badguy
 std::ostream& NPC::narrate(std::ostream& cout) const
@@ -227,6 +231,10 @@ std::ostream& NPC::talk(std::ostream& cout) const
  --------------------------------------------------
  Factory Class: Derived from Person to make people
  --------------------------------------------------
+ 
+ Bad guys will be Bandersnatch, Jabberwocky, RedQueen...
+ Helpers will be WhiteRabbit, MadHatter, CheshireCat...
+ 
  */
 
 // constructor makes a factory
@@ -245,8 +253,8 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Bandersnatch";
         std::string dscrpt = "I'm a bad guy";
         std::string sayThings = "I'm gonna get you";
-        sList[] = {eyeBall};  // inherits stuffList and health variables from Person?
-        hLevel = 10;
+        sList[] = {eyeBall};    // inherits stuffList and health
+        hLevel = 10;            // variables from Person?
         bool frndly = 0;
         
         // testtube = new NPC(nm, dscrpt, threat, sList, hLevel, frndly); // instead of this
@@ -335,7 +343,7 @@ Place::Place(const std::string nm, const std::string dscpt, const std::string ac
     peopleHere = who;               // everybody in Place
     stuffHere = what;               // list of things in a Place
     thingHere = obj;                // list of things here
-    placeList.push(this*);          // add to Place list
+    placeList.push(this*);          // add to master Place list
 }
 
 Place::~Place() {}                         // destructor
@@ -411,9 +419,9 @@ Place* PlaceFactory::makePlace(const std::string where)
         name = "Tree";
         description = "Alice woke up under a big oak tree. She saw a white rabbit run by.";
         action = "Should she follow the white rabbit?";
-        peopleHere[] = {WhiteRabbit};
-        stuffHere[] = {};
-        thingHere[] = {};
+        peopleHere[] = {WhiteRabbit};       // to make these lists of People, Stuff, and Thing
+        stuffHere[] = {};                   // objects, do we need to instatiate them and then
+        thingHere[] = {};                   // add them to the list?
         
         return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
     }
@@ -423,7 +431,7 @@ Place* PlaceFactory::makePlace(const std::string where)
         name = "Garden";
         description = "Alice is in a beautiful garden.";
         action = "Should she look around?";
-        peopleHere[] = {MadHatter, DoorMouse, Bandersnatch};
+        peopleHere[] = {MadHatter, Bandersnatch};
         stuffHere[] = {WhiteRose};
         thingHere[] = {};
         
@@ -490,3 +498,238 @@ Place* PlaceFactory::makePlace(const std::string where)
         return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
     }
 }
+
+/*
+ ----------------------------------
+ Stuff Class: Base
+ ----------------------------------
+ 
+ generic class will instantiate individual stuff dynamically (on demand)
+ uses Chain of Responsibility
+ 
+ */
+
+// constructor
+Stuff::Stuff(const bool stat, const std::string nm, const std::string dscrptn, const int rslt)
+{
+    status = stat;                // if used, status = 0; if not, status = 1
+    name = nm;                    // name of stuff object
+    description = dscrptn;        // description of Stuff
+    result = rslt;                // decrease to BGs health / change Alice's health, getSize
+    
+    next = 0;                     // Base pointer for chain
+}
+
+Stuff::~Stuff() {}                // destructor
+
+void Stuff::setNext(Stuff* n)
+{
+    next = n;
+}
+
+void add(Stuff* n)
+{
+    if (next)
+        next->add(n);
+    else
+        next = n;
+}
+
+// delegate to the next obj
+void Stuff::handle(std::string sName)       // virtual function
+{
+    next->handle(sName);
+}
+
+// output description of Stuff
+std::ostream& Stuff::narrate(std::ostream&) const
+{
+    return cout << description << endl;
+}
+
+/*
+ ----------------------------------
+ Handler Classes: Derived from Stuff
+ ----------------------------------
+ 
+ handlers will be BandersnatchEye, Key, WhiteRose, Cake, Tea, Sword, JabberBlood...
+ 
+ */
+
+BandersnatchEye::BandersnatchEye()
+{
+    name = "BandersnatchEye";
+    description = "If Alice gives Bandersnatch his missing eye, he will become her friend";
+    result = 1;      // friend = 1
+    status = 1;      // not used
+}
+
+BandersnatchEye::~BandersnatchEye() {}
+
+void BandersnatchEye::handle(std::string sName)
+{
+    // if string does not equal "Bandersnatch", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        Bandersnatch.setFriendly(result);
+        // not sure this will work since Bandersnatch is an NPC and not a Bandersnatch object...help!
+        status = 0;
+    }
+}
+
+Key::Key()
+{
+    name = "Key";
+    description = "Key can be used to open the door, but Alice needs to be small to get through!";
+    result = 1;      // not sure of result here
+    status = 1;      // not used
+}
+
+Key::~Key () {}
+
+void Key::handle(std::string sName)
+{
+    // if string does not equal "Key", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        if(Alice::getBodySize == 1)
+        {
+            // open door, but not sure how
+            status = 0;
+        }
+        else
+        {
+            // send back to handler (change sName to "Tea")?
+            Stuff::handle("Tea");
+        }
+    }
+}
+
+WhiteRose::WhiteRose()
+{
+    name = "WhiteRose";
+    description = "The Red Queen hates white roses";
+    result = 3;      // affect on heath of RQ
+    status = 1;      // not used
+}
+
+WhiteRose::~WhiteRose() {}
+
+void WhiteRose::handle(std::string sName)
+{
+    // if string does not equal "WhiteRose", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        RedQueen::hurt(result);     // again, since RQ is not RQ object, not sure how to do this
+        status = 0;
+    }
+}
+
+Cake::Cake()
+{
+    name = "Cake";
+    description = "The cake will make Alice big!";
+    result = 3;      // make Alice big
+    status = 1;      // not used
+}
+
+Cake::~Cake () {}
+
+void Cake::handle(std::string sName)
+{
+    // if string does not equal "Cake", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        Alice::setBodySize(result);
+        status = 0;
+    }
+}
+
+Tea::Tea()
+{
+    name = "Tea";
+    description = "Drinking the tea will make Alice small.";
+    result = 1;      // make Alice small
+    status = 1;      // not used
+}
+
+Tea::~Tea() {}
+
+void Tea::handle(std::string sName)
+{
+    // if string does not equal "Tea", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        Alice::setBodySize(result);
+        status = 0;
+    }
+}
+
+Sword::Sword()
+{
+    name = "Sword";
+    description = "Sword can be used to fight the Jabberwocky";
+    result = 4;      // hurt done to Jabberwocky
+    status = 3;      // Alice can hit him 3 times
+}
+
+Sword::~Sword() {}
+
+void Sword::handle(std::string sName)
+{
+    // if string does not equal "Sword", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        // Alice can hit Jabberwocky 3 times
+        if(status != 0)
+        {
+            Jabberwocky.hurt(result); // not sure how this will work since JW is part of NPC class
+            status--;
+        }
+    }
+}
+
+JabberBlood::JabberBlood()
+{
+    name = "JabberBlood";
+    description = "Drinking the Jabberwocky's purple blood will take Alice home";
+    result = 0;      // don't actually need for this -- take Alice home instead
+    status = 1;      // not used
+}
+
+JabberBlood::~JabberBlood() {}
+
+void JabberBlood::handle(std::string sName)
+{
+    // if string does not equal "JabberBlood", pass variable back to Stuff (base)
+    if (sName != name)
+        Stuff::handle(sName);
+    
+    else
+    {
+        // Alice goes home
+        Alice::move(Castle, Home);  // not sure this works...
+    }
+}
+
+// Wow! I really struggled with Stuff, not sure I can make it through Thing...can you help?
+
+
