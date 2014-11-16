@@ -21,20 +21,21 @@ Person::~Person() {}
 //allows each person to move from place to place
 void Person::move(Place& from, Place& to)
 {
-    from.personLeaves(*this);        // remove person from current location
-    to.personEnters(*this);          // move a person to another place
+    from.personLeaves(this);        // remove person from current location
+    to.personEnters(this);          // move a person to another place
 }
 
 //for(Place* iterator=something...; iterate through all the Place) if(personisthere)return iterator} //This will be the difficult part of storing in Place. like the people we will probably have an array of Place (I think that whichever we do we should keep all our Place and people in an list anyway.) )
 
-// Does this mean we need Place to store a static list of all Place(s)? -- I added this to Place, but not sure if it was what you intended.
+// Does this mean we need Place to store a static list of all Place(s)? -- I added this to Place, but not sure if it was what you intended. //good instinct. If we do that, it would be in our main though. So our options are to just pass the list when we need it, or make the list of places static.
 
 // get name of Place where Person is
-std::ostream& Person::whereAreYou(std::ostream& cout) const
+Place* Person::whereAreYou(const List<Place>& places) const
 {
-    int x = Place::getPlaceList().getSize()-1;
+    //good instinct on places being a static list. The list though should not be a part of each place. Instead if we do the static option, it would need to be in main. Our other option is to pass our list of places (also in main) around. For now I will assume we pass our list of places around.
+//    int x = Place::getPlaceList().getSize()-1;
     
-    for(int i = 0; i < x; i++)
+    for(int i = 0; i < places.getSize(); i++)
     {
         Place* here = Place::getPlaceList.peek();
         
