@@ -231,35 +231,88 @@ std::ostream& Alice::render(std::ostream& out) const
  generic class will instantiate individual bad guys/helpers dynamically (on demand)
  
  */
+/*
+private:
+    
+    std::string description;      // unique description of helper / badguy
+//    std::string name;             // name of helper / badguy		//I moved this to person
+    std::string says;             // what helper / badguy says to Alice
+    bool friendly;                // true = friend, false = not friend
+    
+public:
+    
+    // constructor
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const List<Stuff*>& list, const int& hlth, const bool& frndly);
+    ~NPC();               // destructor
+    
+    // set friendly status
+    void setFriendly(const bool& x);
+    
+    // set NPC's narration					//adding these two for character progression
+    void setnarrate(const std::string& nar);
+    
+    // set what NPC says to Alice
+    void settalk(const std::string& nar);
+    
+    // description of NPC
+    std::ostream& narrate(std::ostream& cout) const;
+    
+    // What NPCs say to Alice
+    std::ostream& talk(std::ostream& cout) const;
+    
+    // get friendly data
+    bool isfriendly() const;
+    */
+
 
 // constructor
-NPC::NPC(const std::string nm, const std::string dscrpt, const std::string sayThings, const List<Stuff> sList, const int hLevel, const bool frndly) : health(hLevel),stuffList(sList)
+NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& list, const int& hlth, const bool& frndly): person(hlth, list, nm), description(dscrpt), says(sayThings), friendly(frndly)
 {
-    description = dscrpt;       // unique description of badguy / helper
-    sname = nm;                 // name of badguy
-    says = sayThings;           // what helper / badguy says to Alice
-    friendly = frndly;          // 1 = friend, 0 = not friend
+    //description = dscrpt;       // unique description of badguy / helper	//moved to inititiation list
+    //sname = nm;                 // name of badguy
+    //says = sayThings;           // what helper / badguy says to Alice
+    //friendly = frndly;          // 1 = friend, 0 = not friend
 }
 
 // destructor
 NPC::~NPC() {}
 
 // public function to set friendly status of NPC
-void NPC::setFriendly(int x)
+void NPC::setFriendly(const bool& x)
 {
     friendly = x;
 }
+
+//set NPC's description
+void NPC::setnarrate(const std::string& nar)
+{
+	description=nar;
+}
+
+//set what NPC says
+void NPC::settalk(const std::string& nar)
+{
+	says=nar;
+}
     
 // description of helper/badguy
-std::ostream& NPC::narrate(std::ostream& cout) const
+std::ostream& NPC::narrate(std::ostream& out) const
 {
-    return cout << description << endl;
+    out << description << endl;
+    return out;
 }
     
 // helpers/badguys talk to Alice
-std::ostream& NPC::talk(std::ostream& cout) const
+std::ostream& NPC::talk(std::ostream& out) const
 {
-    return cout << says << endl;
+    out << says << endl;
+    return out;
+}
+
+// get friendly data
+bool isfriendly() const
+{
+	return friendly;
 }
 
 /*
