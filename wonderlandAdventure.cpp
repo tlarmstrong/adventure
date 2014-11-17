@@ -30,7 +30,7 @@ void Person::move(Place& from, Place& to)
 // Does this mean we need Place to store a static list of all Place(s)? -- I added this to Place, but not sure if it was what you intended. //good instinct. If we do that, it would be in our main though. So our options are to just pass the list when we need it, or make the list of places static.
 
 // get name of Place where Person is
-Place* Person::whereAreYou(const List<Place>& places) const
+Place* Person::whereAreYou(const List<Place*>& places) const
 {
     //good instinct on places being a static list. The list though should not be a part of each place. Instead if we do the static option, it would need to be in main. Our other option is to pass our list of places (also in main) around. For now I will assume we pass our list of places around.
 //    int x = Place::getPlaceList().getSize()-1;
