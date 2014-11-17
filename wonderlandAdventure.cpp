@@ -341,12 +341,14 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Bandersnatch";
         std::string dscrpt = "I'm a bad guy";
         std::string sayThings = "I'm gonna get you";
-        sList[] = {eyeBall};    // inherits stuffList and health
+        Stuff* Iball=new Stuff(eyeBall);		//needs more input data
+        List<Stuff*> sList= {Iball};    // inherits stuffList and health
         hLevel = 10;            // variables from Person?
-        bool frndly = 0;
+        bool frndly = false;
         
         // testtube = new NPC(nm, dscrpt, threat, sList, hLevel, frndly); // instead of this
-        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?
+        Person* bandersnatch=new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?	//close, I don't think you can make a new thing and return it in the same line
+        return bandersnatch;
     }
     
     else if (who == "Jabberwocky")
@@ -354,11 +356,13 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Jabberwocky";
         std::string dscrpt = "I'm a really bad guy";
         std::string sayThings = "I'm really gonna get you";
-        sList[] = {sword};
+        Stuff* excalibur=new Stuff(sword);						//needs more input data
+        List<Stuff*> sList= {excalibur};
         hLevel = 10;
-        bool frndly = 0;
+        bool frndly = false;
         
-        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
+        Person* jabberwocky=new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?	//close, I don't think you can make a new thing and return it in the same line
+        return jabberwocky;
     }
     
     else if (who == "RedQueen")
@@ -366,11 +370,13 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "RedQueen";
         std::string dscrpt = "I'm an evil queen";
         std::string sayThings = "I'm gonna get you, my pretty";
-        sList[] = {potion};
+        Stuff* elixar=new Stuff(potion);						//needs more input data
+        List<Stuff*> sList= {elixar};
         hLevel = 10;
         bool frndly = 0;
         
-        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
+        Person* rqueen=new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?	//close, I don't think you can make a new thing and return it in the same line
+        return rqueen;
     }
     
     else if (who == "WhiteRabbit")
@@ -378,11 +384,13 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "WhiteRabbit";
         std::string dscrpt = "I'm a white rabbit";
         std::string sayThings = "I'm a friend";
-        sList[] = {watch};
+        Stuff* fob=new Stuff(watch);						//needs more input data
+        List<Stuff*> sList= {fob};
         hLevel = 10;
-        bool frndly = 1;
+        bool frndly = true;
         
-        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
+        Person* bugsbunny=new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?	//close, I don't think you can make a new thing and return it in the same line
+        return bugsbunny;
     }
     
     else if (who == "MadHatter")
@@ -390,11 +398,14 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "MadHatter";
         std::string dscrpt = "I like tea parties";
         std::string sayThings = "Would you like to come to my party?";
-        sList[] = {cupcake, tea};
+        Stuff* drink=new Stuff(Tea);
+        Stuff* cake=new Stuff(cupcake);						//needs more input data
+        List<Stuff*> sList= {cake, drink};										//I suspect we may new stuff in the creaton of slist but I am not sure
         hLevel = 10;
-        bool frndly = 1;
+        bool frndly = true;
         
-        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
+        Person* madhatter=new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?	//close, I don't think you can make a new thing and return it in the same line
+        return maddhatter;
     }
     
     else if (who == "CheshireCat")
@@ -402,11 +413,13 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "CheshireCat";
         std::string dscrpt = "I like to smile";
         std::string sayThings = "I'm a mysterious friend";
-        sList[] = {key};
+        Stuff* opener=new Stuff(key);						//needs more input data
+        List<Stuff*> sList= {opener};
         hLevel = 10;
-        bool frndly = 1;
+        bool frndly = ture;
         
-        return new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);
+        Person* cc=new NPC(nm, dscrpt, sayThings, sList, hLevel, frndly);     // do this?	//close, I don't think you can make a new thing and return it in the same line
+        return cc;
     }
 }
 
