@@ -78,119 +78,148 @@ string Person::getName()
 /*
  ----------------------------------
  Alice Class: Derived from Person
+	
  ----------------------------------
  */
+ 
+ /*
+private:
+    
+    List<NPC*> helperList;    // list of helpers with Alice
+    List<NPC*> badguyList;    // list of badguys with Alice
+    int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
+    
+    // constructor
+    Alice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const string& nm);
+    
+public:
+    
+    virtual ~Alice();        // destructor
+    
+    // Singleton
+    static Alice& makeAlice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const string& nm);
+    
+    void taggingAlong(const Person& tagger);  //adds a person to the list of Helpers
+    void ditched(const Person& ditcher);      //removes a person from the list of Helpers
+    
+    void pickup(const Stuff& item);                     //Alice adds item to the list of stuff
+    void drop(const Stuff& item);                       //Alice drops an item
+    void use(const Stuff& item);                        //Alice uses an item on herself
+    void use(const Stuff& item, Place& where);     		//Alice uses an item in a place
+    void use(const Stuff& item, Thing& what);      		//Alice uses an item on a thing
+    void use(const Stuff& item, Person& who);      		//Alice uses an item on a person
+    
+    int getBodySize() const;                   // Get size of Alice//her size is an int
+    
+    // output what she has, who she's met, body getSize, and health
+    std::ostream& render(std::ostream& cout) const;
+*/
 
 // constructor (private)
-Alice::Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hlevel) : health(hLevel), stuffList(sList)
+Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm): Person(hLevel, sList, nm)
 {
-    helperList.copyList(hList);    // list of helpers with Alice
-    badguyList.copyList(bList);    // list of badguys with Alice
+    helperList=hList;    // list of helpers with Alice
+    badguyList=bList;    // list of badguys with Alice
 
     // size of Alice (small(1), normal(2), big(3))
-    bodySize = 2;
+    bodySize = bSize;
 }
 
 // destructor
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice& Alice::makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel)
+Alice& Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
 {
-     static Alice alice(sList, hList, bList, bodySize, hLevel);
+     static Alice alice(sList, hList, bList, bSize, hLevel, nm);
         
      return &alice;
 }
 
 //adds a person to the list of Helpers
-void Alice::taggingAlong(const Person tagger)
+void Alice::taggingAlong(const NPC& tagger)
 {
-    helperList.push(tagger);
+    helperList.push(&tagger);
 }
 
 //removes a person from the list of Helpers
-void Alice::ditched(const Person ditcher)
+void Alice::ditched(const NPC& ditcher)
 {
-    helperList.pop(ditcher);
+    helperList.pop(&ditcher);
 }
 
+
 //Alice adds item to the list of stuff	//could we perhaps just use recieve maybe. it is is the same function. Also, we need to think about how we remove the item from place...
-void Alice::pickup(const Stuff item)
+void Alice::pickup(const Stuff& item)
 {
     recieve(item);
 }
 
 //Alice drops an item
-void Alice::drop(const Stuff item)
+void Alice::drop(const Stuff& item)
 {
-    stuffList.pop(item);
+    stuffList.pop(&item);
 }
 
 //to define the ones after this, I think it will be easier if we first define stuffs. I think we will need to create subclasses for stuff. 
 
 //Alice uses an item on herself
-void Alice::use(const Stuff item)
+void Alice::use(const Stuff& item)
 {
-    
+    item.useItem(this);		//the item will have a useItem function
 }
 
 //Alice uses an item in a place
-void Alice::use(const Stuff item, const Place where)
+void Alice::use(const Stuff& item, Place& where)
 {
-    
+    item.useItem(&where);
 }
 
 //Alice uses an item on a thing
-void Alice::use(const Stuff item, const Thing what)
+void Alice::use(const Stuff& item, Thing& what)
 {
-    
+    item.useItem(&what);
 }
 
 //Alice uses an item on a person
-void Alice::use(const Stuff item, const Person who)
+void Alice::use(const Stuff& item, Person& who)
 {
-    
+    item.useItem(&who);
 }
 
-std::string Alice::getBodySize() const
+int Alice::getBodySize() const
 {
-    if(bodySize == 1)
-        return "small";
-    
-    else if(bodySize == 3)
-        return "big";
-    
-    return "normal";
+    return bodySize;
 }
 
-// output what she has, who she's met, bodySize, and health
-std::ostream& Alice::render(std::ostream& cout) const
+// output what she has, who she's met, bodySize, and health	//I just renamed it to out instead of cout since cout is a thing already
+std::ostream& Alice::render(std::ostream& out) const
 {
-    cout << "Alice is " << getBodySize() << endl;
-    cout << "Her health level is " << health << endl;
+    out << "Alice is " << getBodySize() << endl;
+    out << "Her health level is " << health << endl;		//think we should have a gethealth function...
     
-    cout << "She has these items: ";
+    out << "She has these items: ";
     
-    // peek() will return a Stuff object (.name will return the actual name of the obj)
-    cout << (stuffList.peek()).name;
+    // peek() will return a Stuff object pointer (.getName will return the actual name of the obj)	//I made it so our lists all contain pointers so that our lists work better (note == is not always defined for our classes)
+    out << (stuffList.peek())->getName();
     
-    for(int i = 1; i < stuffList.getSize()-1; i++)
-        cout << " ," << (stuffList.peek()).name;
+    for(int i = 1; i < stuffList.getSize(); i++)
+        out << " ," << (stuffList.peek(i+1))->getName();
     
-    cout << "/nHer friends are: ";
-    cout << (helperList.peek()).name;
+    out << "/nHer friends are: ";
+    out << (helperList.peek())->getName();
     
-    for(int i = 1; i < helperList.getSize()-1; i++)
-        cout << " ," << (helperList.peek()).name;
+    for(int i = 1; i < helperList.getSize(); i++)
+        out << " ," << (helperList.peek(i+1))->getName();
     
-    cout << "/nHer enemies are: ";
-    cout << (badguyList.peek()).name;
+    out << "/nHer enemies are: ";
+    out << (badguyList.peek())->getName();
     
-    for(int i = 1; i < badguyList.getSize()-1; i++)
-        cout << " ," << (badguyList.peek()).name;
+    for(int i = 1; i < badguyList.getSize(); i++)
+        out << " ," << (badguyList.peek(i+1))->getName();
     
-    cout << endl;
-    return cout;
+    out << endl;
+    return out;
 }
 
 
