@@ -15,6 +15,7 @@ private:
     // prevent value semantics
     Person(const Person& other);            //copy constructor
     void operator = (const Person& other);  //assignment operator
+    string name;
     
 protected:
     
@@ -25,7 +26,7 @@ protected:
 public:
     
     // constructor -- all derived use (initialization list)
-    Person(const int& hLevel, const List<Stuff>& list);
+    Person(const int& hLevel, const List<Stuff>& list, string nm);
     virtual ~Person();                       // destructor
     
     void move(Place& from, Place& to);               // Person can move from place to place
@@ -35,6 +36,7 @@ public:
     void give(const Stuff& item, Person& other);     // gives an item to someone else
     void recieve(const Stuff& item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
+    std::string name();								// gets person's name
 }
 
 /*
