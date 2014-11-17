@@ -117,10 +117,10 @@ public:
     void settalk(const std::string& nar);
     
     // description of NPC
-    std::ostream& narrate(std::ostream& cout) const;
+    std::ostream& narrate(std::ostream& out) const;
     
     // What NPCs say to Alice
-    std::ostream& talk(std::ostream& cout) const;
+    std::ostream& talk(std::ostream& out) const;
     
     // get friendly data
     bool isfriendly() const;
@@ -136,7 +136,7 @@ class PersonFactory: public Person
 {
 private:
     
-    PersonFactory();		//makes a factory // constructor should be private (I moved it)?
+    PersonFactory();		//makes a factory // constructor should be private (I moved it)? I think having it in private will work, we just won't ever make one. The reason why I think it will work is because our function is static. Thus I think we can call it without instantiating factory.
     
 public:
     
