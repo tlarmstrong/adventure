@@ -26,7 +26,7 @@ protected:
 public:
     
     // constructor -- all derived use (initialization list)
-    Person(const int& hLevel, const List<Stuff>& list, string nm);
+    Person(const int& hLevel, const List<Stuff>& list, const string& nm);
     virtual ~Person();                       // destructor
     
     void move(Place& from, Place& to);               // Person can move from place to place
