@@ -70,9 +70,9 @@ void Person::hurt(const int& damage)
 }
 
 //gives the person's name
-std::string getName()
+string Person::getName()
 {
-		return name;
+	return name;
 }
 
 /*
