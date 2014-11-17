@@ -9,7 +9,7 @@ using namespace std;
  */
 
 
-Person::Person(const int& hlevel, const List<Stuff>& sList, const string& nm) : health(hLevel), name(nm)
+Person::Person(const int& hlevel, const List<Stuff>& sList, const std::string& nm) : health(hLevel), name(nm)
 {
     // copy list of stuff into Person's stuff list
     stuffList = sList;
@@ -52,7 +52,7 @@ void Person::give(const Stuff& item, Person& other)
         other.recieve(stuffList.pop(&item));
     
     else
-        cout << name() << " does not have " << item.name() << endl;
+        cout << getName() << " does not have " << item.getName() << endl;
     //it would be good if we could output the name of the person and object. Shouldn't be too difficult.
     //we would need to write these two functions
 }
@@ -70,7 +70,7 @@ void Person::hurt(const int& damage)
 }
 
 //gives the person's name
-string Person::getName()
+std::string Person::getName()
 {
 	return name;
 }
@@ -116,7 +116,7 @@ public:
 */
 
 // constructor (private)
-Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm): Person(hLevel, sList, nm)
+Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm): Person(hLevel, sList, nm)
 {
     helperList=hList;    // list of helpers with Alice
     badguyList=bList;    // list of badguys with Alice
@@ -129,7 +129,7 @@ Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice& Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
+Alice& Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm)
 {
      static Alice alice(sList, hList, bList, bSize, hLevel, nm);
         
