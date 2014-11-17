@@ -51,31 +51,31 @@ class Alice: public Person {
     
 private:
     
-    List<NPC> helperList;    // list of helpers with Alice
-    List<NPC> badguyList;    // list of badguys with Alice
+    List<NPC*> helperList;    // list of helpers with Alice
+    List<NPC*> badguyList;    // list of badguys with Alice
     int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
     
     // constructor
-    Alice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int health);
+    Alice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const string& nm);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice& makeAlice(const List<Stuff> sList, const List<Helper> hList, const List<BadGuy> bList, const int bodySize, const int hLevel);
+    static Alice& makeAlice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const string& nm);
     
-    void taggingAlong(const Person tagger);  //adds a person to the list of Helpers
-    void ditched(const Person ditcher);      //removes a person from the list of Helpers
+    void taggingAlong(const Person& tagger);  //adds a person to the list of Helpers
+    void ditched(const Person& ditcher);      //removes a person from the list of Helpers
     
-    void pickup(const Stuff item);                     //Alice adds item to the list of stuff
-    void drop(const Stuff item);                       //Alice drops an item
-    void use(const Stuff item);                        //Alice uses an item on herself
-    void use(const Stuff item, const Place where);     //Alice uses an item in a place
-    void use(const Stuff item, const Thing what);      //Alice uses an item on a thing
-    void use(const Stuff item, const Person who);      //Alice uses an item on a person
+    void pickup(const Stuff& item);                     //Alice adds item to the list of stuff
+    void drop(const Stuff& item);                       //Alice drops an item
+    void use(const Stuff& item);                        //Alice uses an item on herself
+    void use(const Stuff& item, Place& where);     		//Alice uses an item in a place
+    void use(const Stuff& item, Thing& what);      		//Alice uses an item on a thing
+    void use(const Stuff& item, Person& who);      		//Alice uses an item on a person
     
-    std::string getBodySize() const;                   // Get size of Alice
+    int getBodySize() const;                   // Get size of Alice//her size is an int
     
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& cout) const;
