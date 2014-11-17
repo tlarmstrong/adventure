@@ -22,12 +22,12 @@ protected:
     int health;                     //health level of the person
     List<Stuff*> stuffList;          // list of stuff each person has  //It is better as a pointer so that our list knows how to handle it (== is not always defined and we use ==)
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
-    string name;
+    std::string name;
 
 public:
     
     // constructor -- all derived use (initialization list)
-    Person(const int& hLevel, const List<Stuff>& list, const string& nm);
+    Person(const int& hLevel, const List<Stuff>& list, const std::string& nm);
     virtual ~Person();                       // destructor
     
     void move(Place& from, Place& to);               // Person can move from place to place
@@ -37,7 +37,7 @@ public:
     void give(const Stuff& item, Person& other);     // gives an item to someone else
     void recieve(const Stuff& item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
-    string getName();								// gets person's name
+    std::string getName();								// gets person's name
 }
 
 /*
@@ -56,14 +56,14 @@ private:
     int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
     
     // constructor
-    Alice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const string& nm);
+    Alice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice& makeAlice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const string& nm);
+    static Alice& makeAlice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
     
     void taggingAlong(const Person& tagger);  //adds a person to the list of Helpers
     void ditched(const Person& ditcher);      //removes a person from the list of Helpers
@@ -78,7 +78,7 @@ public:
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
     // output what she has, who she's met, body getSize, and health
-    std::ostream& render(std::ostream& cout) const;
+    std::ostream& render(std::ostream& out) const;
 };
 
 /*
