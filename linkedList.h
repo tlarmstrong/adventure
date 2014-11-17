@@ -24,20 +24,21 @@ public:
     List();                 // constructor
     ~List();                // destructor
     
-    void push(const T value);               // appends element to end of array
-    T pop(const T value);                   // removes and returns element from array
+    void push(const T& value);               // appends element to end of array
+    T pop(const T& value);                   // removes and returns element from array
     T pop();                                // removes first element
-    std::string peek();                     // returns element
+    T peek();			                     // returns element //which element first one. see note with code.
+    T peek(const int& num);					//peeks at the num'th element in the list
     
     // copy elements from one list to another
     void copyList(const List<T>& from);
     
-    // copy constructor for assignment operator
+    // copy constructor for assignment operator // this is not the copy constructor, it is the assignment operator. 
     List<T>& operator = (const List<T>& other) const;
     
     bool isEmpty() const;                   // returns true if array is empty
     int getSize() const;                    // returns the number of elements in array
-    bool contains(const T value) const;     // lets us know if a value is in a list
+    bool contains(const T& value) const;     // lets us know if a value is in a list
 };
 
 template <class T>
@@ -59,16 +60,16 @@ List<T>::~List()
     // "walk" through the list and destroy each node
     while(walker != NULL)
     {
-        Node <T>* remove = walker;
+        Node <T>* rmove = walker;	//remove was highlighted, so I wasn't sure if it was a keyword or not. 
         walker = walker->next;
-        delete remove;
+        delete rmove;
     }
     
     head = NULL;
 }
 
 template <class T>
-void List<T>::push(const T value)
+void List<T>::push(const T& value)
 {
     // allocate new node and set value
     Node<T>* n = new Node<T>;
@@ -94,7 +95,7 @@ void List<T>::push(const T value)
 
 // pop specific value
 template<class T>
-T List<T>::pop(const T value)
+T List<T>::pop(const T& value)
 {
     T popped;                   // return variable
     
@@ -103,7 +104,7 @@ T List<T>::pop(const T value)
         // create a walker node and set to head
         Node <T>* walker = head;
         
-        // if head's element equals the specified value and list has only one node
+        // if head's element equals the specified value and list has only one node	//something to think about: What does it mean for a place to be equal to a place? I don't think the computer knows that. It does know what it means for a pointer to be equal to another pointer. I think that if all our lists are lists of pointers we should be fine (they probably should be anyway). Thus we need to be careful to always pass by reference because a copy will have a different address.
         if(head->element == value && getSize() == 1)
         {
             popped = head->element; // assign value to return variable
@@ -121,12 +122,12 @@ T List<T>::pop(const T value)
                 {
                     popped = walker->element;           // if found, assign to return variable
                     
-                    Node<T>* remove = walker;           // create a node pointer to remove
+                    Node<T>* rmove = walker;           // create a node pointer to remove //was highlighted, not sure if key word
                     Node<T>* newWalker = walker->next;  // create a node pointer to next
                     newWalker->prev = walker->prev;     // reposition pointers
                     walker->prev->next = newWalker;
                     
-                    delete remove;                      // delete remove node
+                    delete rmove;                      // delete rmove node
                 }
                 
                 // if not found, keep "walking"
@@ -145,7 +146,7 @@ T List<T>::pop()
     
     // create a walker node and set to head
     Node <T>* walker = head;
-    
+    // what if list is empty? I suppose we cannot do anything about that. It could be a try throw catch thing, but we could just remember to make sure it is not empty before calling.
     // if list has only one node
     if(getSize() == 1)
     {
@@ -159,39 +160,55 @@ T List<T>::pop()
     {
         popped = walker->element;           // assign head to return variable
                 
-        Node<T>* remove = walker;           // create a node pointer to remove
+        Node<T>* rmove = walker;           // create a node pointer to remove
         Node<T>* newWalker = walker->next;  // create a node pointer to next
         newWalker->prev = walker->prev;     // reposition pointers
         walker->prev->next = newWalker;
         
-        delete remove;                      // delete remove node
+        delete rmove;                      // delete remove node
     }
     return popped;
 }
 
 // look at element in list without removing node
 template <class T>
-std::string List<T>::peek()
+T List<T>::peek()
 {
-    nodeReturn = pop();         // remove first value from list
+    T nodeReturn = pop();         // remove first value from list	//don't forget the type of nodereturn	//also if list is empty?
     push(nodeReturn);           // add node onto back of list
     
-    return nodeReturn->element;          // return the node
+    return nodeReturn;          // return the node//this is neither a string which you said you would return nor a node. it is a T element, otherwise your code is good. also node return isn't a node, it is a T. Look at your return type of pop.
+}
+
+template <class T>
+T List<T>::peek(const int& num)
+{
+	node<T>* walker=head;
+	
+	for (int i=1; i<num; i++){
+		walker=walker->next;
+	}
+	
+	return walker->element;
 }
 
 // copy elements from one list to another
 template<class T>
-// copy constructor for assignment operator
+// copy constructor for assignment operator	//not copy constructor, but assignment operator. Be careful, we could assign to a list that already has stuff in it. We need to delete that stuff first
 List<T>& List<T>::operator = (const List<T>& other) const
 {
     // check if assigning List to self
     if(this == &other)
         return *this;
     
+    for (i=0; i<getSize(); i++){	//empties list
+    	pop();
+    }
+    
     // make deep copy from other list to new list
     for(int i = 0; i < other.getSize(); i++)
     {
-        push(other.peek());
+        push(other.peek(i));		//be careful about filling a list with just the first element of the new list
     }
     
     return *this;
@@ -219,7 +236,7 @@ int List<T>::getSize() const
         head->prev->next = NULL;
         Node <T>* walker = head;
         
-        // "walk" through list and count nodes
+        // "walk" through list and count nodes		//I see why you broke the list instead of saying while not equal to head, since it starts with walker equal to head. another way to do it would include && count!=0
         while(walker != NULL)
         {
             walker = walker->next;
