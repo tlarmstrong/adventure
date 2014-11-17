@@ -19,7 +19,7 @@ private:
 protected:
     
     int health;                     //health level of the person
-    List<Stuff> stuffList;          // list of stuff each person has
+    List<Stuff*> stuffList;          // list of stuff each person has  //It is better as a pointer so that our list knows how to handle it (== is not always defined and we use ==)
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
 
 public:
@@ -30,7 +30,7 @@ public:
     
     void move(Place& from, Place& to);               // Person can move from place to place
     
-    Place* whereAreYou(list<Place> places) const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
+    Place* whereAreYou(list<Place*> places) const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
     void give(const Stuff& item, Person& other);     // gives an item to someone else
     void recieve(const Stuff& item);                 // recieves an item
