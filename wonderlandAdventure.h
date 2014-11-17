@@ -97,24 +97,33 @@ class NPC: public Person {
 private:
     
     std::string description;      // unique description of helper / badguy
-    std::string name;             // name of helper / badguy
+//    std::string name;             // name of helper / badguy		//I moved this to person
     std::string says;             // what helper / badguy says to Alice
-    bool friendly;                // 1 = friend, 0 = not friend
+    bool friendly;                // true = friend, false = not friend
     
 public:
     
     // constructor
-    NPC(const std::string nm, const std::string dscrpt, const std::string threat, const List<Stuff> list, const int hlth, const bool frndly);
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const List<Stuff*>& list, const int& hlth, const bool& frndly);
     ~NPC();               // destructor
     
     // set friendly status
-    void setFriendly(int x);
+    void setFriendly(const bool& x);
+    
+    // set NPC's narration					//adding these two for character progression
+    void setnarrate(const std::string& nar);
+    
+    // set what NPC says to Alice
+    void settalk(const std::string& nar);
     
     // description of NPC
     std::ostream& narrate(std::ostream& cout) const;
     
     // What NPCs say to Alice
     std::ostream& talk(std::ostream& cout) const;
+    
+    // get friendly data
+    bool isfriendly() const;
 };
 
 /*
