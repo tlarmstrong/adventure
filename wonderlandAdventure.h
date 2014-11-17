@@ -15,13 +15,14 @@ private:
     // prevent value semantics
     Person(const Person& other);            //copy constructor
     void operator = (const Person& other);  //assignment operator
-    string name;
+
     
 protected:
     
     int health;                     //health level of the person
     List<Stuff*> stuffList;          // list of stuff each person has  //It is better as a pointer so that our list knows how to handle it (== is not always defined and we use ==)
     // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
+    string name;
 
 public:
     
@@ -36,7 +37,7 @@ public:
     void give(const Stuff& item, Person& other);     // gives an item to someone else
     void recieve(const Stuff& item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
-    std::string name();								// gets person's name
+    string getName();								// gets person's name
 }
 
 /*
