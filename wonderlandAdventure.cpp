@@ -9,7 +9,7 @@ using namespace std;
  */
 
 
-Person::Person(const int& hlevel, const List<Stuff>& sList) : health(hLevel)
+Person::Person(const int& hlevel, const List<Stuff>& sList, const string& nm) : health(hLevel), name(nm)
 {
     // copy list of stuff into Person's stuff list
     stuffList = sList;
@@ -67,6 +67,12 @@ void Person::recieve(const Stuff& item)
 void Person::hurt(const int& damage)
 {
     health -= damage;
+}
+
+//gives the person's name
+std::string getName()
+{
+		return name;
 }
 
 /*
