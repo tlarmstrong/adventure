@@ -37,31 +37,30 @@ Place* Person::whereAreYou(const List<Place>& places) const
     
     for(int i = 0; i < places.getSize(); i++)
     {
-        Place* here = Place::getPlaceList.peek();
+        Place* here = places.peek(i);  //we do not want to look at the first thing in places each time.
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
-        if((here->whoHere()).contains(*this))
-           cout << name << " is in the " << Place::here->getPlaceName() << endl;
+        if((here->whoHere()).contains(this)) //BRILLIANT!!! I couldn't have said it better! I changed it to ask for the pointer to this because ethan said it would work better and our lists should be pointers.
+           return here;
     }
-
-    return cout;
 }
 
 //gives an item to someone else
 void Person::give(const Stuff& item, Person& other)
 {
-    if(stuffList.contains(item))
-        other.recieve(stuffList.pop(item));
+    if(stuffList.contains(&item))
+        other.recieve(stuffList.pop(&item));
     
     else
-        cout << name << " does not have " << item.name << endl;
+        cout << name() << " does not have " << item.name() << endl;
     //it would be good if we could output the name of the person and object. Shouldn't be too difficult.
+    //we would need to write these two functions
 }
 
 //recieves an item
 void Person::recieve(const Stuff& item)
 {
-    stuffList.push(item);
+    stuffList.push(&item);
 }
 
 //person takes damage
