@@ -174,6 +174,7 @@ class Place {
         
     public:
 
+        Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<People*>& who, const List<Thing*>& obj, const List<Place*>& trav);
         Place();                                    // constructor
         ~Place();                                   // destructor
         
@@ -183,24 +184,25 @@ class Place {
         //List<Place> getPlaceList() const;           // returns list of Place		//this might be useful ffor get list of places alice can go from here... I am not certain and haven't figured it out yet. Since I know you intended this for the static list of places I am going to comment it out for now.
         // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
         
-        void personEnters(const &Person enterer);   //somebody comes into the place
-        void personLeaves(const &Person leaver);    //removes somebody from a place
+        void personEnters(const Person& enterer);   //somebody comes into the place
+        void personLeaves(const Person& leaver);    //removes somebody from a place
         
         List<Stuff> whatsHere() const;              //returns the list of stuff here
-        void dropped(const Stuff drop);             //someone dropped an item here, so it is now laying around
-        void picked(const Stuff pick);              //somebody picked up an item here
+        void dropped(const Stuff& drop);             //someone dropped an item here, so it is now laying around
+        void picked(const Stuff& pick);              //somebody picked up an item here
         
         // output description of Place
-        std::ostream& narrate(std::ostream& cout) const;
+        std::ostream& narrate(std::ostream& out) const;
         
         // what Alice can do in particular place
-        std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it, but I will leave it for now.
+        //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
 };
 
 /*
  ----------------------------------
  PlaceFactory Class: Derived from Place to make places
  ----------------------------------
+ // well actually I not sure if we need place factory because place doesn't have derived classes... I am going to wait to edit this until we have a better idea of what we are doing... I maybe we should just have a function that builds the game and we could create all the places there... hmm I am not sure... I suppose we could do it a couple ways. Our data could be in main, or we could create a game builder object... Not sure, this is getting towards the end where we need to start writing main.
  */
 
 class PlaceFactory: public Place
@@ -224,7 +226,7 @@ class PlaceFactory: public Place
  
  generic class will instantiate individual stuff dynamically (on demand)
  uses Chain of Responsibility
- 
+ As I thought of it later, it may be better if it is not chain of responsibility. This one is hard... 
 */
 
 class Stuff {
