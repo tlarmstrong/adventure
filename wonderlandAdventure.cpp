@@ -526,9 +526,9 @@ void Place::dropped(const Stuff& drop)    // someone dropped an item, so now it 
     stuffHere.push(drop);
 }
 
-void Place::pickedUp(const Stuff& leftBehind)      //somebody picked up an item here	//hmm good thought to call person's recieve. That doesn't remove it from our list though. Also, if we do something like this, it may make more sense to call it from person. But because the place doesn't exist in the person, we probably cannot do that. We will just have to call it in main twice. That would be one advantage of using a static list of places in our main function. We could easily call the place's pickup and drop from person.
+void Place::pickedUp(const Stuff& pick)      //somebody picked up an item here	//hmm good thought to call person's recieve. That doesn't remove it from our list though. Also, if we do something like this, it may make more sense to call it from person. But because the place doesn't exist in the person, we probably cannot do that. We will just have to call it in main twice. That would be one advantage of using a static list of places in our main function. We could easily call the place's pickup and drop from person.
 {
-    stuffHere.pop(leftBehind);
+    stuffHere.pop(pick);
 }
 
 // output description of Place
@@ -563,12 +563,13 @@ Place* PlaceFactory::makePlace(const std::string where)
     {
         name = "Tree";
         description = "Alice woke up under a big oak tree. She saw a white rabbit run by.";
-        action = "Should she follow the white rabbit?";
-        peopleHere[] = {WhiteRabbit};       // to make these lists of People, Stuff, and Thing
-        stuffHere[] = {};                   // objects, do we need to instatiate them and then
-        thingHere[] = {};                   // add them to the list?
+        //action = "Should she follow the white rabbit?";
+        List<Person*> peopleHere = {new Person (WhiteRabbit)};       // to make these lists of People, Stuff, and Thing
+        List<Stuff*> stuffHere = {};                   // objects, do we need to instatiate them and then
+        List<Thing*> thingHere = {};                   // add them to the list?
+        List<Place*> placeHereTo = {}			//
         
-        return new Place(name, description, action, peopleHere, stuffHere, thingsHere);
+        return new Place(name, description, peopleHere, stuffHere, thingsHere, placeHereTo);
     }
     
     else if(where == "Garden")
