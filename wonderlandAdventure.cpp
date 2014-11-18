@@ -432,75 +432,119 @@ Person* PersonFactory::makePerson(std::string who)
  Place will be Tree, Garden, Woods, TeaParty, Castle, Battlefield, Home
  
  */
+ 
+ /*
+ protected:
+        
+        std::string description;         // unique description of Place
+        //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
+        std::string name;                // name of Place
+        List<Person*> peopleHere;         // everybody in Place
+        List<Stuff*> stuffHere;           // list of things in a Place
+        List<Thing*> thingHere;			 // list of things here
+        List<Place*> placeTo;			 // list of Place Alice can go from here
+        
+        //static List<Place> placeList;    // list of Place in game //should be in our main.
+        
+    public:
 
-// should we also make a factory for Place? (see below for PlaceFactory class)
+        Place();                                    // constructor
+        ~Place();                                   // destructor
+        
+        List<Person*> whoHere() const;               //returns a list of everybody here
+        
+        std::string getPlaceName() const;           // returns name of Place
+        //List<Place> getPlaceList() const;           // returns list of Place		//this might be useful ffor get list of places alice can go from here... I am not certain and haven't figured it out yet. Since I know you intended this for the static list of places I am going to comment it out for now.
+        // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
+        
+        void personEnters(const &Person enterer);   //somebody comes into the place
+        void personLeaves(const &Person leaver);    //removes somebody from a place
+        
+        List<Stuff> whatsHere() const;              //returns the list of stuff here
+        void dropped(const Stuff drop);             //someone dropped an item here, so it is now laying around
+        void picked(const Stuff pick);              //somebody picked up an item here
+        
+        // output description of Place
+        std::ostream& narrate(std::ostream& cout) const;
+        
+        // what Alice can do in particular place
+        std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it, but I will leave it for now.
+*/
+ 
+
+// should we also make a factory for Place? (see below for PlaceFactory class)	//YES! BRILLIANT!!!
 
 // constructor
-Place::Place(const std::string nm, const std::string dscpt, const std::string act, const List<Stuff> what, const List<People> who, const List<Thing> obj,)
+Place::Place(const std::string& nm, const std::string& dscpt,/*const std::string act,*/ const List<Stuff*>& what, const List<People*>& who, const List<Thing*>& obj, const List<Place*>& trav): name(nm), description(dscrpt), 
 {
-    name = nm;                      // name of Place
+    /*name = nm;                      // name of Place			//added these to initiation list
     description = dscrpt;           // unique description of Place
-    action = act;                   // what Alice can do here
+    action = act;                   // what Alice can do here*/
     peopleHere = who;               // everybody in Place
     stuffHere = what;               // list of things in a Place
     thingHere = obj;                // list of things here
-    placeList.push(this*);          // add to master Place list
+    placeTo=trav;
+    //placeList.push(this*);          // add to master Place list
 }
 
 Place::~Place() {}                         // destructor
 
-List<Person> Place::whoHere() const     //returns a list of everybody here
+List<Person*> Place::whoHere() const     //returns a list of everybody here
 {
     return peopleHere;
 }
 
 // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
-std::string Place::getPlaceName() const  // returns name of Place
+std::string Place::getPlaceName() const  // returns name of Place	//I like this
 {
     return name;
 }
 
-List<Place> Place::getPlaceList() const   // returns list of Place
+/*List<Place> Place::getPlaceList() const   // returns list of Place
 {
     return placeList;
 }
+*/
 
-void Place::personEnters(const &Person enterer)  // somebody comes into the place
+void Place::personEnters(const Person& enterer)  // somebody comes into the place
 {
     peopleHere.push(enterer);
 }
 
-void Place::personLeaves(const &Person leaver)   // removes somebody from a place
+void Place::personLeaves(const Person& leaver)   // removes somebody from a place
 {
     peopleHere.pop(leaver);
 }
 
-List<Stuff> Place::whatsHere() const              // returns the list of stuff here
+List<Stuff*> Place::whatsHere() const              // returns the list of stuff here
 {
     return stuffHere;
 }
 
-void Place::dropped(const Stuff drop)    // someone dropped an item, so now it is laying around
+void Place::dropped(const Stuff& drop)    // someone dropped an item, so now it is laying around	//good thinking
 {
     stuffHere.push(drop);
 }
 
-void Place::pickedUp(const Stuff leftBehind)      //somebody picked up an item here
+void Place::pickedUp(const Stuff& leftBehind)      //somebody picked up an item here	//hmm good thought to call person's recieve. That doesn't remove it from our list though. Also, if we do something like this, it may make more sense to call it from person. But because the place doesn't exist in the person, we probably cannot do that. We will just have to call it in main twice. That would be one advantage of using a static list of places in our main function. We could easily call the place's pickup and drop from person.
 {
-    Person::recieve(leftBehind);
+    stuffHere.pop(leftBehind);
 }
 
 // output description of Place
-std::ostream& Place::narrate(std::ostream& cout) const
+std::ostream& Place::narrate(std::ostream& out) const
 {
-    return cout << description << endl;
+    out << description << endl;
+    return out;
 }
 
-// what Alice can do in particular place
-std::string Place::canDo(const std::string)
+/*// what Alice can do in particular place		//until we nail down that we need this and more exactly what we want it to do, I don't want to have this function written
+std::string Place::canDo(const std::string )
 {
-    return cout << action << endl;
+    out << action << endl;
+    return out
 }
+*/
 
 /*
  ----------------------------------
