@@ -163,24 +163,24 @@ class Place {
     protected:
         
         std::string description;         // unique description of Place
-        std::string action;              // what Alice can do here
+        //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
         std::string name;                // name of Place
-        List<Person> peopleHere;         // everybody in Place
-        List<Stuff> stuffHere;           // list of things in a Place
-        List<Thing> thingHere;			 // list of things here
-        List<Place> placeTo;			 // list of Place Alice can go from here
+        List<Person*> peopleHere;         // everybody in Place
+        List<Stuff*> stuffHere;           // list of things in a Place
+        List<Thing*> thingHere;			 // list of things here
+        List<Place*> placeTo;			 // list of Place Alice can go from here
         
-        static List<Place> placeList;    // list of Place in game
+        //static List<Place> placeList;    // list of Place in game //should be in our main.
         
     public:
 
         Place();                                    // constructor
         ~Place();                                   // destructor
         
-        List<Person> whoHere() const;               //returns a list of everybody here
+        List<Person*> whoHere() const;               //returns a list of everybody here
         
         std::string getPlaceName() const;           // returns name of Place
-        List<Place> getPlaceList() const;           // returns list of Place
+        //List<Place> getPlaceList() const;           // returns list of Place		//this might be useful ffor get list of places alice can go from here... I am not certain and haven't figured it out yet. Since I know you intended this for the static list of places I am going to comment it out for now.
         // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
         
         void personEnters(const &Person enterer);   //somebody comes into the place
@@ -194,7 +194,7 @@ class Place {
         std::ostream& narrate(std::ostream& cout) const;
         
         // what Alice can do in particular place
-        std::string canDo(const std::string);
+        std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it, but I will leave it for now.
 };
 
 /*
