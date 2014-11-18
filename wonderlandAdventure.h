@@ -264,6 +264,33 @@ public:
  
  */
 
+class growStuff
+{
+    useItem(Person* who) {who.bodySize+=result;}
+};
+    
+class healthStuff
+{
+    useItem(Person* who) {who.health+=result;}
+};
+
+class friender
+{
+    useItem(NPC* who) {who.friendly=result;}
+};
+
+class Key
+{
+    useItem(Thing* what) {what.status=(status+result)%2
+};
+    
+main
+    {
+        tree.getStuffList.push(new healthStuff cake(feklfa,fwjlef,efjewf jowef))
+        tree.getStuffList.push(new healthStuff tea(feklfa,fwjlef,efjewf jowef))
+        tree.getStuffList.push(new healthStuff cake(feklfa,fwjlef,efjewf jowef))
+    }
+
 class BandersnatchEye : public Stuff {
     
     public:
@@ -393,5 +420,82 @@ public:
     // effects of openThing()
     std::ostream& render(const std::ostream&);
 };
+
+
+/*
+ ----------------------------------
+ Game Class: Base
+ ----------------------------------
+*/
+/*
+class Game
+{
+private:
+    static? List<Place*> places;
+    List<Person*> people;
+    void makePlaces(){     
+ 
+         make list of stuff for each place
+         call constructor to make stuff
+         push into place's stuff list
+         
+         tree.getStuffList.push(new healthStuff cake(feklfa,fwjlef,efjewf jowef))
+         tree.getStuffList.push(new healthStuff tea(feklfa,fwjlef,efjewf jowef))
+         tree.getStuffList.push(new healthStuff cake(feklfa,fwjlef,efjewf jowef))
+ 
+        name = "Battlefield";
+        description = "Alice is all suited up and ready to fight.";
+        action = "Do you think she will win?";
+        peopleHere[] = {WhiteQueen};
+        stuffHere[] = {JabberBlood};
+        thingHere[] = {};
+        
+        places.push(new Place(name, description, action, peopleHere, stuffHere, thingsHere));
+        
+        name = "tree";
+        description = "Alice is all suited up and ready to fight.";
+        action = "Do you think she will win?";
+        peopleHere[] = {WhiteQueen};
+        stuffHere[] = {JabberBlood};
+        thingHere[] = {};
+        
+        places.push(new Place(name, description, action, peopleHere, stuffHere, thingsHere));
+        
+        places.peek(battlefield)->newplacetogo(places.peek(tree));
+ 
+
+ 
+
+}
+    void makePeoplefefjwoiief {
+        make(Bandersnatch)
+    }
+    void makeStuff
+
+public:
+    void newPlace (efahfew, fejifhsf){places.push(new Place(sfkefefh, sehiufhf))}
+    newPersonfjgjhhg
+    
+    
+};
+
+    
+    Game()
+    {
+        places.push(tree, efkfwufehif,feiufhw)
+        places.push(castle, ewafwifh,wjofejew)
+        tree.placego(castle)
+        
+        
+    }
+    main
+    {
+        Game AliceinWonderland()
+        
+    }
+*/
+/*
+ places.peek(shjefe)->personEnters(WhiteRabbit);
+ */
 
 

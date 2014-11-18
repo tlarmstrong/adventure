@@ -37,7 +37,7 @@ Place* Person::whereAreYou(const List<Place*>& places) const
     
     for(int i = 0; i < places.getSize(); i++)
     {
-        Place* here = places.peek(i);  //we do not want to look at the first thing in places each time.
+        Place* here = places.peek();  //we do not want to look at the first thing in places each time.
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
         if((here->whoHere()).contains(this)) //BRILLIANT!!! I couldn't have said it better! I changed it to ask for the pointer to this because ethan said it would work better and our lists should be pointers.
@@ -341,8 +341,8 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Bandersnatch";
         std::string dscrpt = "I'm a bad guy";
         std::string sayThings = "I'm gonna get you";
-        Stuff* Iball=new Stuff(eyeBall);		//needs more input data
-        List<Stuff*> sList= {Iball};    // inherits stuffList and health
+        friender* Iball=;		//needs more input data
+        List<Stuff*> sList= {new friender(eyeBall,descrpt,reust),bjhgggjh};    // inherits stuffList and health
         hLevel = 10;            // variables from Person?
         bool frndly = false;
         
