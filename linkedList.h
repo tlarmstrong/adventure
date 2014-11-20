@@ -27,8 +27,13 @@ public:
     void push(const T& value);               // appends element to end of array
     T pop(const T& value);                   // removes and returns element from array
     T pop();                                // removes first element
+<<<<<<< .merge_file_B7U1D9
     T peek();			                     // returns element //which element first one. see note with code.
     T peek(const int& num) const;					//peeks at the num'th element in the list
+=======
+//    T peek();			                     // returns element //which element first one. see note with code.
+    T peek(const int& num) const;			//peeks at the num'th element in the list
+>>>>>>> .merge_file_QoV72h
     
     // copy elements from one list to another
     void copyList(const List<T>& from);
@@ -171,7 +176,7 @@ T List<T>::pop()
 }
 
 // look at element in list without removing node
-template <class T>
+/*template <class T>
 T List<T>::peek()
 {
     T nodeReturn = pop();         // remove first value from list	//don't forget the type of nodereturn	//also if list is empty?
@@ -179,6 +184,7 @@ T List<T>::peek()
     
     return nodeReturn;          // return the node//this is neither a string which you said you would return nor a node. it is a T element, otherwise your code is good. also node return isn't a node, it is a T. Look at your return type of pop.
 }
+*/
 
 template <class T>
 T List<T>::peek(const int& num) const

@@ -18,7 +18,11 @@ Person::Person() {}
 Person::~Person() {}
 
 //allows each person to move from place to place
+<<<<<<< HEAD
 void Person::move(Place& to)
+=======
+void Person::move(Place& from, Place& to) const
+>>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
 {
     Place from = *this->whereAreYou();
     from.personLeaves(this);        // remove person from current location
@@ -26,6 +30,7 @@ void Person::move(Place& to)
 }
 
 // get name of Place where Person is
+<<<<<<< HEAD
 Place* Person::whereAreYou()
 {
     Place* here = nullptr;
@@ -33,6 +38,15 @@ Place* Person::whereAreYou()
     for(int i = 0; i < Game::places.getSize(); i++)
     {
         here = Game::places.peek(i);
+=======
+Place* Person::whereAreYou(const List<Place*>& places) const
+{
+    Place* here = nullptr;
+    
+    for(int i = 1; i <= places.getSize(); i++)
+    {
+        here = places.peek(i);
+>>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
         if((here->whoHere()).contains(this))
@@ -169,6 +183,7 @@ std::ostream& Alice::render(std::ostream& out) const
     out << "She has these items: ";
     
     // peek() will return a Stuff object pointer (.getName will return the actual name of the obj)	//I made it so our lists all contain pointers so that our lists work better (note == is not always defined for our classes)
+<<<<<<< HEAD
     out << (stuffList.peek(0))->getName();
     
     for(int i = 1; i < stuffList.getSize(); i++)
@@ -184,6 +199,23 @@ std::ostream& Alice::render(std::ostream& out) const
     out << (badguyList.peek(0))->getName();
     
     for(int i = 1; i < badguyList.getSize(); i++)
+=======
+    out << (stuffList.peek(1))->getName();
+    
+    for(int i = 2; i <= stuffList.getSize(); i++)
+        out << " ," << (stuffList.peek(i))->getName();
+    
+    out << "/nHer friends are: ";
+    out << (helperList.peek(1))->getName();
+    
+    for(int i = 1; i <= helperList.getSize(); i++)
+        out << " ," << (helperList.peek(i))->getName();
+    
+    out << "/nHer enemies are: ";
+    out << (badguyList.peek(1))->getName();
+    
+    for(int i = 1; i <= badguyList.getSize(); i++)
+>>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
         out << " ," << (badguyList.peek(i))->getName();
     
     out << endl;
@@ -274,7 +306,12 @@ Person* PersonFactory::makePerson(std::string who)
         List<Stuff*> bList;
         bList.push(bandersnatchEye);
         
+<<<<<<< HEAD
         int hLevel = 10;            // variables from Person?
+=======
+        List<Stuff*> sList= {new FriendStuff(eyeBall,descrpt,reust),bjhgggjh};    // inherits stuffList and health
+        int hLevel = 10;            // variables from Person? I don't understand the question...
+>>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
         bool frndly = false;
         
         Person* bandersnatch=new NPC(nm, dscrpt, sayThings, bList, hLevel, frndly);
@@ -689,6 +726,21 @@ void Game::makePlaces()
     
     Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...", hStuff, hPeople, hThing, trav);
     places.push(home);
+<<<<<<< HEAD
+=======
+    
+    Place* walker1;
+    Place* walker2;
+    for (int i=1; i<=places.getSize(); i++){
+    	if(places.peek(i)->getName()=="battlefield"){
+    		walker1=places.peek(i)
+    	}
+    	if(places.peek(i)->getName()=="tree"){
+    		walker2=places.peek(i)
+    	}
+    }
+    walker1->newPlacetoGo(walker2);
+>>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
 }
 
 void Game::makePeople()
@@ -725,7 +777,7 @@ void Game::makePeople()
     people.push(alice);
 }
 
-// make list of stuff for each place, call Stuff constructor to make stuff, push into place's stuff list
+// make list of stuff for each place, call Stuff constructor to make stuff, push into place's stuff list //this is good :) I hadn't planned it like this i dont think but I really like this. It works pretty darn well.
 void Game::makeStuff()
 {
     // Tree
@@ -733,6 +785,7 @@ void Game::makeStuff()
     
     //Garden
     Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", true, 1);
+<<<<<<< HEAD
     Stuff* whiteRose = new HealthStuff("White Rose", "The Red Queen hates white roses", 3, 1);
     
     for(int i = 0; i < places.getSize(); i++)
@@ -746,6 +799,11 @@ void Game::makeStuff()
         if(people.peek(i)->getName() == "Bandersnatch")
             people.peek(i)->getStuffList().push(bandersnatchEye);
     }
+=======
+    Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
+    places.whatsHere().push(bandersnatchEye);
+    garden.whatsHere().push(whiteRose);
+>>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
     
     // Woods
     Stuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);
