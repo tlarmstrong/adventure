@@ -27,8 +27,8 @@ public:
     void push(const T& value);               // appends element to end of array
     T pop(const T& value);                   // removes and returns element from array
     T pop();                                // removes first element
-    T peek();			                     // returns element //which element first one. see note with code.
-    T peek(const int& num);					//peeks at the num'th element in the list
+//    T peek();			                     // returns element //which element first one. see note with code.
+    T peek(const int& num) const;			//peeks at the num'th element in the list
     
     // copy elements from one list to another
     void copyList(const List<T>& from);
