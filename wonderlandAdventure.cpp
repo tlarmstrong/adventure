@@ -605,6 +605,25 @@ void MoveStuff::useItem(Person* who, Place* where)
 
 /*
  ----------------------------------
+ Thing classes: Base
+ ----------------------------------
+ */
+ Thing::Thing(const bool& stat):status(stat){} 
+ /*
+ ----------------------------------
+ Thing classes: Door
+ ----------------------------------
+ */
+Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
+{
+	
+}
+
+
+
+
+/*
+ ----------------------------------
  Game Class: Base
  ----------------------------------
  */
