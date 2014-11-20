@@ -8,6 +8,7 @@ class Place;
 class Person;
 class NPC;
 class Thing;
+class Game;
 
 /*
  ------------------------------------------------------------
@@ -38,13 +39,15 @@ public:
     Person(const int& hLevel, const List<Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
-    void move(Place& from, Place& to);               // Person can move from place to place
+    void move(Place& to);               // Person can move from place to place
     
-    Place* whereAreYou(List<Place*>& places); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
+    Place* whereAreYou(); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
     void give(Stuff& item, Person& other);     // gives an item to someone else
     void recieve(Stuff& item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
+    
+    List<Stuff*> getStuffList() const;
     std::string getName() const;								// gets person's name
 };
 
@@ -192,12 +195,15 @@ public:
     //List<Place> getPlaceList() const;           // returns list of Place		//this might be useful ffor get list of places alice can go from here... I am not certain and haven't figured it out yet. Since I know you intended this for the static list of places I am going to comment it out for now.
     // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
     
-    void personEnters(const Person& enterer);   //somebody comes into the place
-    void personLeaves(const Person& leaver);    //removes somebody from a place
+    void personEnters(Person* enterer);   //somebody comes into the place
+    void personLeaves(Person* leaver);    //removes somebody from a place
     
-    List<Stuff> whatsHere() const;              //returns the list of stuff here
-    void dropped(const Stuff& drop);             //someone dropped an item here, so it is now laying around
-    void picked(const Stuff& pick);              //somebody picked up an item here
+    List<Stuff*> whatsHere() const;              //returns the list of stuff here
+    void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
+    void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
+    
+    void newPlaceToGo(Place* goTo);
+    List<Place*> getNewPlaceToGo() const;
     
     // output description of Place
     std::ostream& narrate(std::ostream& out) const;
@@ -220,6 +226,7 @@ class Stuff {
     
 protected:
     
+    Stuff* next;        //"next" pointer in the base class
     bool status;                // if used, status = 0; if not, status = 1
     std::string name;           // name of stuff object
     std::string description;    // description of Stuff
@@ -231,9 +238,13 @@ public:
     Stuff(const std::string name, const std::string description, const int result,const bool status);
     virtual ~Stuff();       // destructor
     
-    virtual void useItem(Person* who)=0;
-    virtual void useItem(Place* where)=0;
-    virtual void useItem(Thing* what)=0;
+    // chain of responsibility
+    void setNext(Stuff* n);
+
+    void add(Stuff* n);
+    
+    //use or delegate to next obj
+    virtual void useItem(const Person* who);
     
     std::string getName() const;
     
@@ -254,41 +265,42 @@ class GrowStuff : public Stuff
 {
     
     public:
-        GrowStuff(std::string name, std::string description, int result, int status);
+        GrowStuff(std::string name, std::string description, int result, bool status);
         ~GrowStuff();
+
         void useItem(const Person* who);
 };
 
 class HealthStuff : public Stuff
 {
     public:
-        HealthStuff(std::string name, std::string description, int result, int status);
+        HealthStuff(std::string name, std::string description, int result, bool status);
         ~HealthStuff();
-        void useItem(const Person* who);
+        void useItem(Person* who);
 };
 
 class FriendStuff : public Stuff
 {
     public:
-        FriendStuff(std::string name, std::string description, int result, int status);
+        FriendStuff(std::string name, std::string description, int result, bool status);
         ~FriendStuff();
-        void useItem(const NPC* who);
+        void useItem(Person* who);
 };
 
 class OpenStuff : public Stuff
 {
     public:
-        OpenStuff(std::string name, std::string description, int result, int status);
+        OpenStuff(std::string name, std::string description, int result, bool status);
         ~OpenStuff();
-    void useItem(const Thing* what);
+    void useItem(Thing* what, Person* who);
 };
 
 class MoveStuff : public Stuff
 {
     public:
-        MoveStuff(std::string name, std::string description, int result, int status);
+        MoveStuff(std::string name, std::string description, int result, bool status);
         ~MoveStuff();
-        void useItem(const Alice* alice, Place* goHome);
+        void useItem(Person* who, Place* where);
 };
 
 
@@ -370,16 +382,19 @@ class MoveStuff : public Stuff
      
      private:
      
-         static List<Place*> places;    // Game class keeps static list of Places in Wonderland
-         static List<Person*> people;   // Game class keeps static list of People in Wonderland
+     
          void makePlaces();             // instantiates Places and adds to static list
          void makePeople();             // instantiates People and adds to static list
          void makeStuff();              // instantiates Stuff and adds to Place's stuff list
          
      public:
+     static List<Place*> places;    // Game class keeps static list of Places in Wonderland
+     static List<Person*> people;   // Game class keeps static list of People in Wonderland
      
          Game();                        // constructor
          ~Game();                       // destructor
+        List<Place*> getPlaceList() const;
+        List<Person*> getPeopleList() const;
  };
 
 
