@@ -38,9 +38,9 @@ public:
     Person(const int& hLevel, const List<Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
-    void move(Place& from, Place& to);               // Person can move from place to place
+    void move(Place& from, Place& to) const;               // Person can move from place to place
     
-    Place* whereAreYou(List<Place*>& places); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
+    Place* whereAreYou(const List<Place*>& places) const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
     void give(Stuff& item, Person& other);     // gives an item to someone else
     void recieve(Stuff& item);                 // recieves an item
