@@ -33,7 +33,7 @@ public:
     // copy elements from one list to another
     void copyList(const List<T>& from);
     
-    // copy constructor for assignment operator // this is not the copy constructor, it is the assignment operator. 
+    // copy constructor for assignment operator // this is not the copy constructor, it is the assignment operator.
     List<T>& operator = (const List<T>& other) const;
     
     bool isEmpty() const;                   // returns true if array is empty
@@ -60,7 +60,7 @@ List<T>::~List()
     // "walk" through the list and destroy each node
     while(walker != NULL)
     {
-        Node <T>* rmove = walker;	//remove was highlighted, so I wasn't sure if it was a keyword or not. 
+        Node <T>* rmove = walker;	//remove was highlighted, so I wasn't sure if it was a keyword or not.
         walker = walker->next;
         delete rmove;
     }
@@ -159,7 +159,7 @@ T List<T>::pop()
     else
     {
         popped = walker->element;           // assign head to return variable
-                
+        
         Node<T>* rmove = walker;           // create a node pointer to remove
         Node<T>* newWalker = walker->next;  // create a node pointer to next
         newWalker->prev = walker->prev;     // reposition pointers
@@ -183,13 +183,13 @@ T List<T>::peek()
 template <class T>
 T List<T>::peek(const int& num)
 {
-	node<T>* walker=head;
-	
-	for (int i=1; i<num; i++){
-		walker=walker->next;
-	}
-	
-	return walker->element;
+    Node<T>* walker=head;
+    
+    for (int i=1; i<num; i++){
+        walker=walker->next;
+    }
+    
+    return walker->element;
 }
 
 // copy elements from one list to another
@@ -201,8 +201,8 @@ List<T>& List<T>::operator = (const List<T>& other) const
     if(this == &other)
         return *this;
     
-    for (i=0; i<getSize(); i++){	//empties list
-    	pop();
+    for (int i = 0; i < getSize(); i++){	//empties list
+        pop();
     }
     
     // make deep copy from other list to new list
@@ -250,7 +250,7 @@ int List<T>::getSize() const
 }
 
 template <class T>
-bool List<T>::contains(const T value) const
+bool List<T>::contains(const T& value) const
 {
     Node <T>* walker = head;
     
