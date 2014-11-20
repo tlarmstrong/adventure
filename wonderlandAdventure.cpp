@@ -18,11 +18,7 @@ Person::Person() {}
 Person::~Person() {}
 
 //allows each person to move from place to place
-<<<<<<< HEAD
 void Person::move(Place& to)
-=======
-void Person::move(Place& from, Place& to) const
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
 {
     Place from = *this->whereAreYou();
     from.personLeaves(this);        // remove person from current location
@@ -30,7 +26,6 @@ void Person::move(Place& from, Place& to) const
 }
 
 // get name of Place where Person is
-<<<<<<< HEAD
 Place* Person::whereAreYou()
 {
     Place* here = nullptr;
@@ -38,15 +33,6 @@ Place* Person::whereAreYou()
     for(int i = 0; i < Game::places.getSize(); i++)
     {
         here = Game::places.peek(i);
-=======
-Place* Person::whereAreYou(const List<Place*>& places) const
-{
-    Place* here = nullptr;
-    
-    for(int i = 1; i <= places.getSize(); i++)
-    {
-        here = places.peek(i);
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
         if((here->whoHere()).contains(this))
@@ -111,11 +97,11 @@ Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice& Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
+Alice* Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
 {
     static Alice alice(sList, hList, bList, bSize, hLevel, nm);
     
-    return alice;
+    return &alice;
 }
 
 //adds a person to the list of Helpers
@@ -183,7 +169,7 @@ std::ostream& Alice::render(std::ostream& out) const
     out << "She has these items: ";
     
     // peek() will return a Stuff object pointer (.getName will return the actual name of the obj)	//I made it so our lists all contain pointers so that our lists work better (note == is not always defined for our classes)
-<<<<<<< HEAD
+
     out << (stuffList.peek(0))->getName();
     
     for(int i = 1; i < stuffList.getSize(); i++)
@@ -199,23 +185,6 @@ std::ostream& Alice::render(std::ostream& out) const
     out << (badguyList.peek(0))->getName();
     
     for(int i = 1; i < badguyList.getSize(); i++)
-=======
-    out << (stuffList.peek(1))->getName();
-    
-    for(int i = 2; i <= stuffList.getSize(); i++)
-        out << " ," << (stuffList.peek(i))->getName();
-    
-    out << "/nHer friends are: ";
-    out << (helperList.peek(1))->getName();
-    
-    for(int i = 1; i <= helperList.getSize(); i++)
-        out << " ," << (helperList.peek(i))->getName();
-    
-    out << "/nHer enemies are: ";
-    out << (badguyList.peek(1))->getName();
-    
-    for(int i = 1; i <= badguyList.getSize(); i++)
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
         out << " ," << (badguyList.peek(i))->getName();
     
     out << endl;
@@ -306,12 +275,7 @@ Person* PersonFactory::makePerson(std::string who)
         List<Stuff*> bList;
         bList.push(bandersnatchEye);
         
-<<<<<<< HEAD
-        int hLevel = 10;            // variables from Person?
-=======
-        List<Stuff*> sList= {new FriendStuff(eyeBall,descrpt,reust),bjhgggjh};    // inherits stuffList and health
-        int hLevel = 10;            // variables from Person? I don't understand the question...
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
+        int hLevel = 10;
         bool frndly = false;
         
         Person* bandersnatch=new NPC(nm, dscrpt, sayThings, bList, hLevel, frndly);
@@ -399,6 +363,18 @@ Person* PersonFactory::makePerson(std::string who)
         
         Person* chesireCat = new NPC(nm, dscrpt, sayThings, cList, hLevel, frndly);
         return chesireCat;
+    }
+    else if (who == "Alice")
+    {
+        List<Stuff*> aList;
+        List<NPC*> hList;
+        List<NPC*> bList;
+        int bSize = 2;
+        int hLevel = 10;
+        string nm = "Alice";
+        
+        Person* alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm);
+        return alice;
     }
 }
 
@@ -554,10 +530,10 @@ GrowStuff::GrowStuff(const string name, const string description, const int resu
 
 GrowStuff::~GrowStuff() {}
 
-void GrowStuff::useItem(const Person* who)
+void GrowStuff::useItem(const Alice* who)
 {
     if((this->name == "Cake" || this->name == "Tea") && who->getName() == "Alice")
-            who->bodySize += result;        // how to convert to Alice to get member data?
+            who->getBodySize() += result;        // how to convert to Alice to get member data?
 
     else
         Stuff::useItem(who);
@@ -570,11 +546,8 @@ HealthStuff::~HealthStuff() {}
 
 void HealthStuff::useItem(Person* who)
 {
-    if(this->name == "Sword" || this->name == "White Rose")
         who->hurt(result);
-    
-    else
-        Stuff::useItem(who);
+    status=0;
 }
 
 // FriendStuff
@@ -582,7 +555,7 @@ FriendStuff::FriendStuff(const string name, const string description, const int 
 
 FriendStuff::~FriendStuff() {}
 
-void FriendStuff::useItem(Person* who)
+void FriendStuff::useItem(NPC* who)
 {
     if(who->getName() == "BandersnatchEye")
         who->setFriendly(result);      // how to convert to NPC to get member function?
@@ -674,6 +647,18 @@ void Game::makePlaces()
     Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a white rabbit run by.", tStuff, tPeople, tThing, places);
     places.push(tree);
     
+    Place* walker1;
+    Place* walker2;
+    for (int i=1; i<=places.getSize(); i++){
+        if(places.peek(i)->getPlaceName()=="battlefield"){
+            walker1 = places.peek(i);
+        }
+        if(places.peek(i)->getPlaceName()=="tree"){
+            walker2=places.peek(i);
+        }
+    }
+    walker1->newPlaceToGo(walker2);
+    
     // Garden
     List<Person*> gPeople;
     List<Stuff*> gStuff;
@@ -726,21 +711,6 @@ void Game::makePlaces()
     
     Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...", hStuff, hPeople, hThing, trav);
     places.push(home);
-<<<<<<< HEAD
-=======
-    
-    Place* walker1;
-    Place* walker2;
-    for (int i=1; i<=places.getSize(); i++){
-    	if(places.peek(i)->getName()=="battlefield"){
-    		walker1=places.peek(i)
-    	}
-    	if(places.peek(i)->getName()=="tree"){
-    		walker2=places.peek(i)
-    	}
-    }
-    walker1->newPlacetoGo(walker2);
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
 }
 
 void Game::makePeople()
@@ -766,14 +736,7 @@ void Game::makePeople()
     Person* cheshireCat = PersonFactory::makePerson("ChesireCat");
     people.push(cheshireCat);
     
-    List<Stuff*> aList;
-    List<NPC*> hList;
-    List<NPC*> bList;
-    int bSize = 2;
-    int hLevel = 10;
-    string nm = "Alice";
-    
-    Alice alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm);
+    Person* alice = PersonFactory::makePerson("Alice");
     people.push(alice);
 }
 
@@ -785,7 +748,7 @@ void Game::makeStuff()
     
     //Garden
     Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", true, 1);
-<<<<<<< HEAD
+    
     Stuff* whiteRose = new HealthStuff("White Rose", "The Red Queen hates white roses", 3, 1);
     
     for(int i = 0; i < places.getSize(); i++)
@@ -799,11 +762,6 @@ void Game::makeStuff()
         if(people.peek(i)->getName() == "Bandersnatch")
             people.peek(i)->getStuffList().push(bandersnatchEye);
     }
-=======
-    Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
-    places.whatsHere().push(bandersnatchEye);
-    garden.whatsHere().push(whiteRose);
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
     
     // Woods
     Stuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);

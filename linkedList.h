@@ -27,19 +27,14 @@ public:
     void push(const T& value);               // appends element to end of array
     T pop(const T& value);                   // removes and returns element from array
     T pop();                                // removes first element
-<<<<<<< .merge_file_B7U1D9
-    T peek();			                     // returns element //which element first one. see note with code.
+
     T peek(const int& num) const;					//peeks at the num'th element in the list
-=======
-//    T peek();			                     // returns element //which element first one. see note with code.
-    T peek(const int& num) const;			//peeks at the num'th element in the list
->>>>>>> .merge_file_QoV72h
     
     // copy elements from one list to another
     void copyList(const List<T>& from);
     
     // copy constructor for assignment operator // this is not the copy constructor, it is the assignment operator.
-    List<T>& operator = (const List<T>& other) const;
+    List<T>& operator = (const List<T>& other);
     
     bool isEmpty() const;                   // returns true if array is empty
     int getSize() const;                    // returns the number of elements in array
@@ -201,7 +196,7 @@ T List<T>::peek(const int& num) const
 // copy elements from one list to another
 template<class T>
 // copy constructor for assignment operator	//not copy constructor, but assignment operator. Be careful, we could assign to a list that already has stuff in it. We need to delete that stuff first
-List<T>& List<T>::operator = (const List<T>& other) const
+List<T>& List<T>::operator = (const List<T>& other)
 {
     // check if assigning List to self
     if(this == &other)

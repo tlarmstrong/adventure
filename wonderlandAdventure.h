@@ -39,15 +39,9 @@ public:
     Person(const int& hLevel, const List<Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
-<<<<<<< HEAD
     void move(Place& to);               // Person can move from place to place
     
     Place* whereAreYou(); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
-=======
-    void move(Place& from, Place& to) const;               // Person can move from place to place
-    
-    Place* whereAreYou(const List<Place*>& places) const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
->>>>>>> 23deead59d3ca9f12f02ccabe443ac3bdc5f894a
     
     void give(Stuff& item, Person& other);     // gives an item to someone else
     void recieve(Stuff& item);                 // recieves an item
@@ -80,7 +74,7 @@ public:
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice& makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
+    static Alice* makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
     
     void taggingAlong(NPC& tagger);  //adds a person to the list of Helpers
     void ditched(NPC& ditcher);      //removes a person from the list of Helpers
@@ -198,8 +192,6 @@ public:
     List<Person*> whoHere() const;               //returns a list of everybody here
     
     std::string getPlaceName() const;           // returns name of Place
-    //List<Place> getPlaceList() const;           // returns list of Place		//this might be useful ffor get list of places alice can go from here... I am not certain and haven't figured it out yet. Since I know you intended this for the static list of places I am going to comment it out for now.
-    // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
     
     void personEnters(Person* enterer);   //somebody comes into the place
     void personLeaves(Person* leaver);    //removes somebody from a place
@@ -224,8 +216,6 @@ public:
  ----------------------------------
  
  generic class will instantiate individual stuff dynamically (on demand)
- uses Chain of Responsibility
- As I thought of it later, it may be better if it is not chain of responsibility. This one is hard...
  */
 
 class Stuff {
@@ -243,14 +233,6 @@ public:
     // constructor
     Stuff(const std::string name, const std::string description, const int result,const bool status);
     virtual ~Stuff();       // destructor
-    
-    // chain of responsibility
-    void setNext(Stuff* n);
-
-    void add(Stuff* n);
-    
-    //use or delegate to next obj
-    virtual void useItem(const Person* who);
     
     std::string getName() const;
     
@@ -274,7 +256,7 @@ class GrowStuff : public Stuff
         GrowStuff(std::string name, std::string description, int result, bool status);
         ~GrowStuff();
 
-        void useItem(const Person* who);
+        void useItem(const Alice * who);
 };
 
 class HealthStuff : public Stuff
@@ -290,7 +272,7 @@ class FriendStuff : public Stuff
     public:
         FriendStuff(std::string name, std::string description, int result, bool status);
         ~FriendStuff();
-        void useItem(Person* who);
+        void useItem(NPC* who);
 };
 
 class OpenStuff : public Stuff
