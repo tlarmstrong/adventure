@@ -25,13 +25,13 @@ void Person::move(Place& from, Place& to)
 }
 
 // get name of Place where Person is
-Place* Person::whereAreYou(List<Place*>& places)
+Place* Person::whereAreYou(const List<Place*>& places) const
 {
     Place* here = nullptr;
     
-    for(int i = 0; i < places.getSize(); i++)
+    for(int i = 1; i <= places.getSize(); i++)
     {
-        here = places.peek();
+        here = places.peek(i);
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
         if((here->whoHere()).contains(this))
@@ -163,22 +163,22 @@ std::ostream& Alice::render(std::ostream& out) const
     out << "She has these items: ";
     
     // peek() will return a Stuff object pointer (.getName will return the actual name of the obj)	//I made it so our lists all contain pointers so that our lists work better (note == is not always defined for our classes)
-    out << (stuffList.peek())->getName();
+    out << (stuffList.peek(1))->getName();
     
-    for(int i = 1; i < stuffList.getSize(); i++)
-        out << " ," << (stuffList.peek())->getName();
+    for(int i = 2; i <= stuffList.getSize(); i++)
+        out << " ," << (stuffList.peek(i))->getName();
     
     out << "/nHer friends are: ";
-    out << (helperList.peek())->getName();
+    out << (helperList.peek(1))->getName();
     
-    for(int i = 1; i < helperList.getSize(); i++)
-        out << " ," << (helperList.peek())->getName();
+    for(int i = 1; i <= helperList.getSize(); i++)
+        out << " ," << (helperList.peek(i))->getName();
     
     out << "/nHer enemies are: ";
-    out << (badguyList.peek())->getName();
+    out << (badguyList.peek(1))->getName();
     
-    for(int i = 1; i < badguyList.getSize(); i++)
-        out << " ," << (badguyList.peek())->getName();
+    for(int i = 1; i <= badguyList.getSize(); i++)
+        out << " ," << (badguyList.peek(i))->getName();
     
     out << endl;
     return out;
