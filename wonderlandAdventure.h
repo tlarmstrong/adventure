@@ -306,7 +306,7 @@ class MoveStuff : public Stuff
         
     public:
         
-        Thing();            // constructor
+        Thing(const bool& stat);            // constructor
         virtual ~Thing();   // destructor
         
         // open thing, depend on Place & Alice's bodySize
@@ -320,9 +320,12 @@ class MoveStuff : public Stuff
     // derived class of Thing
     class Door : public Thing {
         
+    private:
+    	List<place*> between;
+        
     public:
         
-        Door(const bool status);             // constructor
+        Door(const bool& stat, const List<Place*>& betwn);             // constructor
         ~Door();            // destructor
         
         // open Door to find Chest
