@@ -18,7 +18,7 @@ Person::Person() {}
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::move(Place& from, Place& to)
+void Person::move(Place& from, Place& to) const
 {
     from.personLeaves(*this);        // remove person from current location
     to.personEnters(*this);          // move a person to another place
@@ -266,7 +266,7 @@ Person* PersonFactory::makePerson(std::string who)
         std::string sayThings = "I'm gonna get you";
         
         List<Stuff*> sList= {new FriendStuff(eyeBall,descrpt,reust),bjhgggjh};    // inherits stuffList and health
-        int hLevel = 10;            // variables from Person?
+        int hLevel = 10;            // variables from Person? I don't understand the question...
         bool frndly = false;
         
         // testtube = new NPC(nm, dscrpt, threat, sList, hLevel, frndly); // instead of this
@@ -583,7 +583,17 @@ void Game::makePlaces()
     Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...", hPeople, hStuff, hThing);
     places.push(home);
     
-    places.peek(battlefield)->newplacetogo(places.peek(tree));
+    Place* walker1;
+    Place* walker2;
+    for (int i=1; i<=places.getSize(); i++){
+    	if(places.peek(i)->getName()=="battlefield"){
+    		walker1=places.peek(i)
+    	}
+    	if(places.peek(i)->getName()=="tree"){
+    		walker2=places.peek(i)
+    	}
+    }
+    walker1->newPlacetoGo(walker2);
 }
 
 void Game::makePeople()
@@ -591,7 +601,7 @@ void Game::makePeople()
     
 }
 
-// make list of stuff for each place, call Stuff constructor to make stuff, push into place's stuff list
+// make list of stuff for each place, call Stuff constructor to make stuff, push into place's stuff list //this is good :) I hadn't planned it like this i dont think but I really like this. It works pretty darn well.
 void Game::makeStuff()
 {
     // Tree
@@ -600,7 +610,7 @@ void Game::makeStuff()
     //Garden
     Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", true, 1);
     Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
-    places..whatsHere().push(bandersnatchEye);
+    places.whatsHere().push(bandersnatchEye);
     garden.whatsHere().push(whiteRose);
     
     // Woods
