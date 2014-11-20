@@ -166,19 +166,19 @@ std::ostream& Alice::render(std::ostream& out) const
     out << (stuffList.peek())->getName();
     
     for(int i = 1; i < stuffList.getSize(); i++)
-        out << " ," << (stuffList.peek(i+1))->getName();
+        out << " ," << (stuffList.peek())->getName();
     
     out << "/nHer friends are: ";
     out << (helperList.peek())->getName();
     
     for(int i = 1; i < helperList.getSize(); i++)
-        out << " ," << (helperList.peek(i+1))->getName();
+        out << " ," << (helperList.peek())->getName();
     
     out << "/nHer enemies are: ";
     out << (badguyList.peek())->getName();
     
     for(int i = 1; i < badguyList.getSize(); i++)
-        out << " ," << (badguyList.peek(i+1))->getName();
+        out << " ," << (badguyList.peek())->getName();
     
     out << endl;
     return out;
