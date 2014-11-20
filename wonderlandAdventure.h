@@ -2,6 +2,13 @@
 #include "linkedList.h"
 #include <iostream>
 
+// declare Stuff, NPC, Place, Thing, Person
+class Stuff;
+class Place;
+class Person;
+class NPC;
+class Thing;
+
 /*
  ------------------------------------------------------------
  Person Class: Base class for Alice, NPC, and personFactory
@@ -27,17 +34,18 @@ protected:
 public:
     
     // constructor -- all derived use (initialization list)
+    Person();
     Person(const int& hLevel, const List<Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
     void move(Place& from, Place& to);               // Person can move from place to place
     
-    Place* whereAreYou(List<Place*>& places) const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
+    Place* whereAreYou(List<Place*>& places); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
-    void give(const Stuff& item, Person& other);     // gives an item to someone else
-    void recieve(const Stuff& item);                 // recieves an item
+    void give(Stuff& item, Person& other);     // gives an item to someone else
+    void recieve(Stuff& item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
-    std::string getName();								// gets person's name
+    std::string getName() const;								// gets person's name
 };
 
 /*
@@ -63,17 +71,17 @@ public:
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice& makeAlice(const List<Stuff*>& sList, const List<Helper*>& hList, const List<BadGuy*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
+    static Alice& makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
     
-    void taggingAlong(const Person& tagger);  //adds a person to the list of Helpers
-    void ditched(const Person& ditcher);      //removes a person from the list of Helpers
+    void taggingAlong(NPC& tagger);  //adds a person to the list of Helpers
+    void ditched(NPC& ditcher);      //removes a person from the list of Helpers
     
-    void pickup(const Stuff& item);                     //Alice adds item to the list of stuff
-    void drop(const Stuff& item);                       //Alice drops an item
-    void use(const Stuff& item);                        //Alice uses an item on herself
-    void use(const Stuff& item, Place& where);     		//Alice uses an item in a place
-    void use(const Stuff& item, Thing& what);      		//Alice uses an item on a thing
-    void use(const Stuff& item, Person& who);      		//Alice uses an item on a person
+    void pickup(Stuff& item);                     //Alice adds item to the list of stuff
+    void drop(Stuff& item);                       //Alice drops an item
+    void use(Stuff& item);                        //Alice uses an item on herself
+    void use(Stuff& item, Place& where);     		//Alice uses an item in a place
+    void use(Stuff& item, Thing& what);      		//Alice uses an item on a thing
+    void use(Stuff& item, Person& who);      		//Alice uses an item on a person
     
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
@@ -174,7 +182,7 @@ protected:
     
 public:
     
-    Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<People*>& who, const List<Thing*>& obj, const List<Place*>& trav);
+    Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav);
     Place();                                    // constructor
     ~Place();                                   // destructor
     
@@ -196,27 +204,6 @@ public:
     
     // what Alice can do in particular place
     //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
-};
-
-/*
- ----------------------------------
- PlaceFactory Class: Derived from Place to make places
- ----------------------------------
- // well actually I not sure if we need place factory because place doesn't have derived classes... I am going to wait to edit this until we have a better idea of what we are doing... I maybe we should just have a function that builds the game and we could create all the places there... hmm I am not sure... I suppose we could do it a couple ways. Our data could be in main, or we could create a game builder object... Not sure, this is getting towards the end where we need to start writing main.
- */
-
-class PlaceFactory: public Place
-{
-private:
-    
-    PlaceFactory();         // constructor makes a factory
-    
-public:
-    
-    ~PlaceFactory();		// destructor destroys a factory
-    
-    //make a specific Place
-    static Place* makePlace (std::string where);
 };
 
 /*
@@ -244,7 +231,11 @@ public:
     Stuff(const std::string name, const std::string description, const int result,const bool status);
     virtual ~Stuff();       // destructor
     
-    virtual void useItem()=0;
+    virtual void useItem(Person* who)=0;
+    virtual void useItem(Place* where)=0;
+    virtual void useItem(Thing* what)=0;
+    
+    std::string getName() const;
     
     // output description of Stuff
     std::ostream& narrate(std::ostream&) const;
@@ -265,7 +256,7 @@ class GrowStuff : public Stuff
     public:
         GrowStuff(std::string name, std::string description, int result, int status);
         ~GrowStuff();
-        void useItem(Person* who);
+        void useItem(const Person* who);
 };
 
 class HealthStuff : public Stuff
@@ -273,7 +264,7 @@ class HealthStuff : public Stuff
     public:
         HealthStuff(std::string name, std::string description, int result, int status);
         ~HealthStuff();
-        void useItem(Person* who);
+        void useItem(const Person* who);
 };
 
 class FriendStuff : public Stuff
@@ -281,7 +272,7 @@ class FriendStuff : public Stuff
     public:
         FriendStuff(std::string name, std::string description, int result, int status);
         ~FriendStuff();
-        void useItem(NPC* who);
+        void useItem(const NPC* who);
 };
 
 class OpenStuff : public Stuff
@@ -289,7 +280,7 @@ class OpenStuff : public Stuff
     public:
         OpenStuff(std::string name, std::string description, int result, int status);
         ~OpenStuff();
-    void useItem(Thing* what);
+    void useItem(const Thing* what);
 };
 
 class MoveStuff : public Stuff
@@ -297,7 +288,7 @@ class MoveStuff : public Stuff
     public:
         MoveStuff(std::string name, std::string description, int result, int status);
         ~MoveStuff();
-        void useItem(Alice* alice, Place* goHome);
+        void useItem(const Alice* alice, Place* goHome);
 };
 
 

@@ -9,10 +9,10 @@ using namespace std;
  */
 
 
-Person::Person(const int& hLevel, const List<Stuff*>& sList, const string& nm) : health(hLevel), name(nm)
-{
-    stuffList = sList;
-}
+Person::Person(const int& hLevel, const List<Stuff*>& sList, const string& nm) : health(hLevel), name(nm), stuffList(sList) {}
+
+// default constructor for Person Factory to work
+Person::Person() {}
 
 // destructor
 Person::~Person() {}
@@ -25,30 +25,36 @@ void Person::move(Place& from, Place& to)
 }
 
 // get name of Place where Person is
-Place Person::whereAreYou(const List<Place*>& places) const
+Place* Person::whereAreYou(List<Place*>& places)
 {
+    Place* here = nullptr;
+    
     for(int i = 0; i < places.getSize(); i++)
     {
-        Place here = places.peek(); 
+        here = places.peek();
         
         // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
-        if((here.whoHere()).contains(*this))
+        if((here->whoHere()).contains(this))
             return here;
     }
+    return here;
 }
 
 //gives an item to someone else
-void Person::give(const Stuff& item, Person& other)
+void Person::give(Stuff& item, Person& other)
 {
     if(stuffList.contains(&item))
-        other.recieve(stuffList.pop(&item));
+    {
+        Stuff* popped = stuffList.pop(&item);
+        other.recieve(*popped);
+    }
     
     else
         cout << getName() << " does not have " << item.getName() << endl;
 }
 
 //recieves an item
-void Person::recieve(const Stuff& item)
+void Person::recieve(Stuff& item)
 {
     stuffList.push(&item);
 }
@@ -60,7 +66,7 @@ void Person::hurt(const int& damage)
 }
 
 //gives the person's name
-std::string Person::getName()
+std::string Person::getName() const
 {
     return name;
 }
@@ -72,7 +78,7 @@ std::string Person::getName()
  */
 
 // constructor (private)
-Alice::Alice(const List<Stuff*>& sList, const List<PersonFactory*>& hList, const List<PersonFactory*>& bList, const int& bSize, const int& hLevel, const std::string& nm) : Person(sList, hLevel, nm)
+Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm) : Person(hLevel, sList, nm)
 {
     helperList = hList;    // list of helpers with Alice
     badguyList = bList;    // list of badguys with Alice
@@ -85,34 +91,34 @@ Alice::Alice(const List<Stuff*>& sList, const List<PersonFactory*>& hList, const
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice& Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm)
+Alice& Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
 {
     static Alice alice(sList, hList, bList, bSize, hLevel, nm);
     
-    return &alice;
+    return alice;
 }
 
 //adds a person to the list of Helpers
-void Alice::taggingAlong(const NPC& tagger)
+void Alice::taggingAlong(NPC& tagger)
 {
     helperList.push(&tagger);
 }
 
 //removes a person from the list of Helpers
-void Alice::ditched(const NPC& ditcher)
+void Alice::ditched(NPC& ditcher)
 {
     helperList.pop(&ditcher);
 }
 
 
 //Alice adds item to the list of stuff	//could we perhaps just use recieve maybe. it is is the same function. Also, we need to think about how we remove the item from place...
-void Alice::pickup(const Stuff& item)
+void Alice::pickup(Stuff& item)
 {
     recieve(item);
 }
 
 //Alice drops an item
-void Alice::drop(const Stuff& item)
+void Alice::drop(Stuff& item)
 {
     stuffList.pop(&item);
 }
@@ -120,25 +126,25 @@ void Alice::drop(const Stuff& item)
 //to define the ones after this, I think it will be easier if we first define stuffs. I think we will need to create subclasses for stuff.
 
 //Alice uses an item on herself
-void Alice::use(const Stuff& item)
+void Alice::use(Stuff& item)
 {
     item.useItem(this);		//the item will have a useItem function
 }
 
 //Alice uses an item in a place
-void Alice::use(const Stuff& item, Place& where)
+void Alice::use(Stuff& item, Place& where)
 {
     item.useItem(&where);
 }
 
 //Alice uses an item on a thing
-void Alice::use(const Stuff& item, Thing& what)
+void Alice::use(Stuff& item, Thing& what)
 {
     item.useItem(&what);
 }
 
 //Alice uses an item on a person
-void Alice::use(const Stuff& item, Person& who)
+void Alice::use(Stuff& item, Person& who)
 {
     item.useItem(&who);
 }
@@ -189,10 +195,7 @@ std::ostream& Alice::render(std::ostream& out) const
  */
 
 // constructor
-NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& slist, const int& hlth, const bool& frndly): description(dscrpt), says(sayThings), health(hlth), friendly(frndly), stuffList(sList)
-{
-    stuffList = sList;
-}
+NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly) {}
 
 // destructor
 NPC::~NPC() {}
@@ -230,7 +233,7 @@ std::ostream& NPC::talk(std::ostream& out) const
 }
 
 // get friendly data
-bool isfriendly() const
+bool NPC::isfriendly() const
 {
     return friendly;
 }
@@ -261,9 +264,9 @@ Person* PersonFactory::makePerson(std::string who)
         std::string nm = "Bandersnatch";
         std::string dscrpt = "I'm a bad guy";
         std::string sayThings = "I'm gonna get you";
-        friender* Iball=;		//needs more input data
+        
         List<Stuff*> sList= {new FriendStuff(eyeBall,descrpt,reust),bjhgggjh};    // inherits stuffList and health
-        hLevel = 10;            // variables from Person?
+        int hLevel = 10;            // variables from Person?
         bool frndly = false;
         
         // testtube = new NPC(nm, dscrpt, threat, sList, hLevel, frndly); // instead of this
@@ -434,6 +437,11 @@ std::ostream& Place::narrate(std::ostream& out) const
 Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts) {}
 
 Stuff::~Stuff() {}                // destructor
+
+string Stuff::getName() const
+{
+    return this->name;
+}
 
 // output description of Stuff
 std::ostream& Stuff::narrate(std::ostream&) const
