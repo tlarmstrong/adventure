@@ -9,5 +9,5 @@ int main()
     Game one;
     string input;
     
-    cout << one.getPlaceList().peek(0)->getPlaceName();
+    cout << one.getPlaceList().peek(0)->getPlaceName() << endl;
 }

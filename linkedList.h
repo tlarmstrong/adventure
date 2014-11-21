@@ -245,11 +245,8 @@ int List<T>::getSize() const
         while(walker != head && count != 0)
         {
         // "walk" through list and count nodes		//I see why you broke the list instead of saying while not equal to head, since it starts with walker equal to head. another way to do it would include && count!=0
-            while(walker != NULL)
-            {
-                walker = walker->next;
-                count++;
-            }
+            walker = walker->next;
+            count++;
         }
         
         // make the list circular again

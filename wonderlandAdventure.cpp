@@ -414,7 +414,7 @@ List<Person*> Place::whoHere() const     //returns a list of everybody here
 }
 
 // thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
-std::string Place::getPlaceName() const  // returns name of Place	//I like this
+string Place::getPlaceName() const  // returns name of Place	
 {
     return name;
 }
@@ -700,7 +700,7 @@ List<Stuff*>& Chest::whatsinside()
 Game::Game()
 {
     makePeople();
-    makePeople();
+    makePlaces();
     makeStuff();
 }
 
@@ -768,7 +768,7 @@ void Game::makePlaces()
     List<Stuff*> pStuff;
     List<Thing*> pThing;
     
-    Place* teaParty = new Place("Tea Party", "Alice goes to a Tea Party.", pStuff, pPeople, pThing, places);
+    Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.", pStuff, pPeople, pThing, places);
     places.push(teaParty);
     
     //Castle
@@ -837,7 +837,7 @@ void Game::makeStuff()
     //Garden
     Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", true, 1);
     
-    Stuff* whiteRose = new HealthStuff("White Rose", "The Red Queen hates white roses", 3, 1);
+    Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
     
     for(int i = 0; i < places.getSize(); i++)
     {
@@ -866,7 +866,7 @@ void Game::makeStuff()
     
     for(int i = 0; i < places.getSize(); i++)
     {
-        if(places.peek(i)->getPlaceName() == "Tea Party")
+        if(places.peek(i)->getPlaceName() == "TeaParty")
         {
             (places.peek(i))->whatsHere().push(cake);
             (places.peek(i))->whatsHere().push(tea);
