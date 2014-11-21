@@ -6,8 +6,10 @@
 class Stuff;
 class Place;
 class Person;
+class PersonFactory;
 class NPC;
 class Thing;
+class Chest;
 class Game;
 
 /*
@@ -82,10 +84,10 @@ public:
     void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
     void pickup(Stuff& item);                     //Alice adds item to the list of stuff
     void drop(Stuff& item);                       //Alice drops an item
-    void use(Stuff& item);                        //Alice uses an item on herself
-    void use(Stuff& item, Place& where);     		//Alice uses an item in a place
-    void use(Stuff& item, Thing& what);      		//Alice uses an item on a thing
-    void use(Stuff& item, Person& who);      		//Alice uses an item on a person
+    void use(Stuff* item);                        //Alice uses an item on herself
+    void use(Stuff* item, Place* where);     		//Alice uses an item in a place
+    void use(Stuff* item, Thing* what);      		//Alice uses an item on a thing
+    void use(Stuff* item, Person* who);      		//Alice uses an item on a person
     
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
@@ -107,7 +109,9 @@ public:
  */
 
 class NPC: public Person {
-friend PersonFactory;
+    
+    friend class PersonFactory;
+    
 private:
     
     std::string description;      // unique description of helper / badguy
@@ -149,6 +153,7 @@ public:
 
 class PersonFactory: public Person
 {
+    
 private:
     
     PersonFactory();		//makes a factory // constructor should be private (I moved it)? I think having it in private will work, we just won't ever make one. The reason why I think it will work is because our function is static. Thus I think we can call it without instantiating factory.
@@ -204,8 +209,9 @@ public:
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     
-    void newPlaceToGo(const Place* goTo);
-    void blockPlaceToGo(const Place* block);
+    void newPlaceToGo(Place* goTo);
+    void blockPlaceToGo(Place* block);
+    
     List<Place*> getNewPlaceToGo() const;
     
     // output description of Place
@@ -244,6 +250,8 @@ public:
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
+    virtual void useItem(Person* who, Place* where)=0;
+    virtual void useItem(Thing* what, Person* who)=0;
                          
     std::string getName() const;
     
@@ -267,12 +275,14 @@ class GrowStuff : public Stuff
         GrowStuff(std::string name, std::string description, int result, bool status);
         ~GrowStuff();
 
-        void useItem(Alice * who);
+        void useItem(Alice* who);
     
         void useItem(Place* where);
         void useItem(Person* who);
         void useItem(NPC* who);
         void useItem(Thing* what);
+        void useItem(Person* who, Place* where);
+        void useItem(Thing* what, Person* who);
 };
 
 class HealthStuff : public Stuff
@@ -287,6 +297,8 @@ class HealthStuff : public Stuff
         void useItem(Place* where);
         void useItem(NPC* who);
         void useItem(Thing* what);
+        void useItem(Person* who, Place* where);
+        void useItem(Thing* what, Person* who);
 };
 
 class FriendStuff : public Stuff
@@ -301,6 +313,8 @@ class FriendStuff : public Stuff
         void useItem(Person* who);
         void useItem(Place* where);
         void useItem(Thing* what);
+        void useItem(Person* who, Place* where);
+        void useItem(Thing* what, Person* who);
 };
 
 class OpenStuff : public Stuff
@@ -309,13 +323,14 @@ class OpenStuff : public Stuff
         OpenStuff(std::string name, std::string description, int result, bool status);
         ~OpenStuff();
     
-        void useItem(Thing* what);
+        void useItem(Thing* what, Person* who);
         
-        void useItem(Alice* who);
-        void useItem(NPC* where);
-        void useItem(Person* who);
-        void useItem(Place* where);
-    
+        void useItem(Alice*);
+        void useItem(Place*);
+        void useItem(Person*);
+        void useItem(NPC*);
+        void useItem(Thing*);
+        void useItem(Person* who, Place* where);
 };
 
 class MoveStuff : public Stuff
@@ -324,20 +339,21 @@ class MoveStuff : public Stuff
         MoveStuff(std::string name, std::string description, int result, bool status);
         ~MoveStuff();
     
-        void useItem(Place* where);
+        void useItem(Person* who, Place* where);
     
-        void useItem(Thing* what);
-        void useItem(Alice* who);
-        void useItem(NPC* where);
-        void useItem(Person* who);
+        void useItem(Alice*);
+        void useItem(Place*);
+        void useItem(Person*);
+        void useItem(NPC*);
+        void useItem(Thing*);
+        void useItem(Thing* what, Person* who);
 };
 
-
-    /*
-     ----------------------------------
-     Thing Class: Base
-     ----------------------------------
-     */
+/*
+ ----------------------------------
+ Thing Class: Base
+ ----------------------------------
+ */
     
 class Thing {
     
@@ -363,7 +379,7 @@ public:
 class Door : public Thing {
      
 private:
-	List<place*> between;
+	//List<Place*> between; // unused?
         
 public:
         
@@ -383,32 +399,32 @@ public:
     void closeThing();      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
         
     // effects of openThing()
-    std::ostream& render(const std::ostream&);
+    //std::ostream& render(const std::ostream&);
 };
     
-    // derived class of Thing
-    class Chest : public Thing {
-        
-    private:
-        
-        List<Stuff*> inside;		//list of stuff inside the chest
-        
-    public:
-        
-        Chest(const bool stat, const List<Stuff*>& contains);  // constructor
-        ~Chest();               // destructor
-        
-        // open Chest to find Sword
-        // must be tall (bodySize = 3)
-        void openThing();
-        void closeThing();
-        
-        void takeStuff(const Stuff* tk);
-        List<Stuff*>& whatsinside() const;
-        
-        // effects of openThing()
-        std::ostream& render(const std::ostream&);
-    };
+// derived class of Thing
+class Chest : public Thing {
+    
+private:
+    
+    List<Stuff*> inside;		//list of stuff inside the chest
+    
+public:
+    
+    Chest(const bool stat, const List<Stuff*>& contains);  // constructor
+    ~Chest();               // destructor
+    
+    // open Chest to find Sword
+    // must be tall (bodySize = 3)
+    void openThing();
+    void closeThing();
+    
+    void takeStuff(Stuff* tk);
+    List<Stuff*>& whatsinside();
+    
+    // effects of openThing()
+    //std::ostream& render(const std::ostream&);
+};
     
     
 /*
@@ -427,11 +443,12 @@ public:
          void makeStuff();              // instantiates Stuff and adds to Place's stuff list
          
      public:
-     static List<Place*> places;    // Game class keeps static list of Places in Wonderland
-     static List<Person*> people;   // Game class keeps static list of People in Wonderland
      
-         Game();                        // constructor
-         ~Game();                       // destructor
+        static List<Place*> places;    // Game class keeps static list of Places in Wonderland
+        static List<Person*> people;   // Game class keeps static list of People in Wonderland
+         
+        Game();                        // constructor
+        ~Game();                       // destructor
         List<Place*> getPlaceList() const;
         List<Person*> getPeopleList() const;
  };

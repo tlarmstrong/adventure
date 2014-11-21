@@ -184,10 +184,11 @@ T List<T>::peek()
 template <class T>
 T List<T>::peek(const int& num) const
 {
-    Node<T>* walker=head;
+    Node<T>* walker = head;
     
-    for (int i=1; i<num; i++){
-        walker=walker->next;
+    for (int i = 0; i < num; i++)
+    {
+        walker = walker->next;
     }
     
     return walker->element;
@@ -234,18 +235,21 @@ int List<T>::getSize() const
     else
     {
         // temporarily break the circular list
-        head->prev->next = NULL;
+        //head->prev->next = NULL;
         Node <T>* walker = head;
         
-        // "walk" through list and count nodes		//I see why you broke the list instead of saying while not equal to head, since it starts with walker equal to head. another way to do it would include && count!=0
-        while(walker != NULL)
+        while(walker != head && count != 0)
         {
-            walker = walker->next;
-            count++;
+        // "walk" through list and count nodes		//I see why you broke the list instead of saying while not equal to head, since it starts with walker equal to head. another way to do it would include && count!=0
+            while(walker != NULL)
+            {
+                walker = walker->next;
+                count++;
+            }
         }
         
         // make the list circular again
-        head->prev->next = head;
+        //head->prev->next = head;
     }
     return count;
 }

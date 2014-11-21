@@ -6,6 +6,8 @@ using namespace std;
 
 int main()
 {
+    Game one;
+    string input;
     
-    
+    cout << one.getPlaceList().peek(0)->getPlaceName();
 }
