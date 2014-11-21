@@ -185,18 +185,17 @@ template <class T>
 T List<T>::peek(const int& num) const
 {
     Node<T>* walker = head;
-    Node<T>* returnVal = nullptr;
     
-    if(num > getSize())
+    if(num < getSize())
     {
         for (int i = 0; i < num; i++)
         {
             walker = walker->next;
         }
-        returnVal = walker->element
+        return walker->element
     }
     
-    return returnVal;
+    return NULL;
 }
 
 // copy elements from one list to another
