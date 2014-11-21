@@ -192,7 +192,7 @@ T List<T>::peek(const int& num) const
         {
             walker = walker->next;
         }
-        return walker->element
+        return walker->element;
     }
     
     return NULL;
