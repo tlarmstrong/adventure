@@ -671,9 +671,9 @@ Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
 
 Door::~Door()
 {
-	for (int i=0;i<between.getSize();i++)
+	for (int i=0;i<getbetween.getSize();i++)
 	{
-		delete between.pop()
+        delete getbetween.pop();
 	}
 }
 
@@ -713,7 +713,7 @@ Chest::~Chest()
 {
 	for (int i=0;i<inside.getSize();i++)
 	{
-		delete inside.pop()
+        delete inside.pop();
 	}
 }
 
@@ -753,11 +753,11 @@ Game::~Game()
 {
     for (int i=0;i<places.getSize();i++)
 	{
-		delete places.pop()
+        delete places.pop();
 	}
 	for (int i=0;i<people.getSize();i++)
 	{
-		delete people.pop()
+        delete people.pop();
 	}
 	
 }
