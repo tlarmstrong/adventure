@@ -379,7 +379,7 @@ public:
 class Door : public Thing {
      
 private:
-	//List<Place*> between; // unused?
+	List<Place*> between; // unused?
         
 public:
         
@@ -390,8 +390,6 @@ public:
     // must be small (bodySize = 1) and must have key
         
     //should this take other input, how does open and close thing know alice's getSize? Should take person? -- yes, more specifically, should it just be an Alice? I suppose it could just be an alice, although then rabbit cannot open the door, but we might not care about that... I guess it needs to be an alice if it involves her getSize.
-        
-    List<Place*> getbetween;
         
     //could this be in thing class
     // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
