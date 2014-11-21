@@ -88,6 +88,8 @@ public:
     
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
+    void setBodySize(const int s);
+    
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;
 };
@@ -234,6 +236,12 @@ public:
     Stuff(const std::string name, const std::string description, const int result,const bool status);
     virtual ~Stuff();       // destructor
     
+    virtual void useItem(Alice*)=0;
+    virtual void useItem(Place*)=0;
+    virtual void useItem(Person*)=0;
+    virtual void useItem(NPC*)=0;
+    virtual void useItem(Thing*)=0;
+                         
     std::string getName() const;
     
     // output description of Stuff
@@ -256,7 +264,12 @@ class GrowStuff : public Stuff
         GrowStuff(std::string name, std::string description, int result, bool status);
         ~GrowStuff();
 
-        void useItem(const Alice * who);
+        void useItem(Alice * who);
+    
+        void useItem(Place* where);
+        void useItem(Person* who);
+        void useItem(NPC* who);
+        void useItem(Thing* what);
 };
 
 class HealthStuff : public Stuff
@@ -264,7 +277,13 @@ class HealthStuff : public Stuff
     public:
         HealthStuff(std::string name, std::string description, int result, bool status);
         ~HealthStuff();
+    
         void useItem(Person* who);
+    
+        void useItem(Alice* who);
+        void useItem(Place* where);
+        void useItem(NPC* who);
+        void useItem(Thing* what);
 };
 
 class FriendStuff : public Stuff
@@ -272,7 +291,13 @@ class FriendStuff : public Stuff
     public:
         FriendStuff(std::string name, std::string description, int result, bool status);
         ~FriendStuff();
+    
         void useItem(NPC* who);
+    
+        void useItem(Alice* who);
+        void useItem(Person* who);
+        void useItem(Place* where);
+        void useItem(Thing* what);
 };
 
 class OpenStuff : public Stuff
@@ -280,7 +305,14 @@ class OpenStuff : public Stuff
     public:
         OpenStuff(std::string name, std::string description, int result, bool status);
         ~OpenStuff();
-    void useItem(Thing* what, Person* who);
+    
+        void useItem(Thing* what);
+        
+        void useItem(Alice* who);
+        void useItem(NPC* where);
+        void useItem(Person* who);
+        void useItem(Place* where);
+    
 };
 
 class MoveStuff : public Stuff
@@ -288,7 +320,13 @@ class MoveStuff : public Stuff
     public:
         MoveStuff(std::string name, std::string description, int result, bool status);
         ~MoveStuff();
-        void useItem(Person* who, Place* where);
+    
+        void useItem(Place* where);
+    
+        void useItem(Thing* what);
+        void useItem(Alice* who);
+        void useItem(NPC* where);
+        void useItem(Person* who);
 };
 
 

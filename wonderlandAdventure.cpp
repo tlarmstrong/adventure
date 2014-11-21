@@ -132,13 +132,13 @@ void Alice::drop(Stuff& item)
 //to define the ones after this, I think it will be easier if we first define stuffs. I think we will need to create subclasses for stuff.
 
 //Alice uses an item on herself
-void Alice::use(Stuff& item)
+void Alice::use(Stuff* item)
 {
     item.useItem(this);		//the item will have a useItem function
 }
 
 //Alice uses an item in a place
-void Alice::use(Stuff& item, Place& where)
+void Alice::use(Stuff& item, Place* where)
 {
     item.useItem(&where);
 }
@@ -479,31 +479,9 @@ std::ostream& Place::narrate(std::ostream& out) const
  */
 
 // constructor
-Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts)
-{
-    next = 0;
-}
+Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts) {}
 
 Stuff::~Stuff() {}                // destructor
-
-void Stuff::setNext(Stuff* n)
-{
-    next = n;
-}
-
-void Stuff::add(Stuff* n)
-{
-    if (next)
-        next->add(n);
-    else
-        next = n;
-}
-
-//use or delegate to next obj
-void Stuff::useItem(const Person* who)
-{
-    next->useItem(who);
-}
 
 string Stuff::getName() const
 {
@@ -530,14 +508,17 @@ GrowStuff::GrowStuff(const string name, const string description, const int resu
 
 GrowStuff::~GrowStuff() {}
 
-void GrowStuff::useItem(const Alice* who)
+void GrowStuff::useItem(Alice* who)
 {
-    if((this->name == "Cake" || this->name == "Tea") && who->getName() == "Alice")
-            who->getBodySize() += result;        // how to convert to Alice to get member data?
-
-    else
-        Stuff::useItem(who);
+    who->setBodySize(who->getBodySize()+result);
+    status = 0;
+    
 }
+
+void GrowStuff::useItem(Place* where) {}
+void GrowStuff::useItem(Person* who) {}
+void GrowStuff::useItem(NPC* who) {}
+void GrowStuff::useItem(Thing* what) {}
 
 // HealthStuff
 HealthStuff::HealthStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -546,9 +527,14 @@ HealthStuff::~HealthStuff() {}
 
 void HealthStuff::useItem(Person* who)
 {
-        who->hurt(result);
-    status=0;
+    who->hurt(result);
+    status = 0;
 }
+
+void HealthStuff::useItem(Alice* who) {}
+void HealthStuff::useItem(Place* where) {}
+void HealthStuff::useItem(NPC* who) {}
+void HealthStuff::useItem(Thing* what) {}
 
 // FriendStuff
 FriendStuff::FriendStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -557,11 +543,8 @@ FriendStuff::~FriendStuff() {}
 
 void FriendStuff::useItem(NPC* who)
 {
-    if(who->getName() == "BandersnatchEye")
-        who->setFriendly(result);      // how to convert to NPC to get member function?
-    
-    else
-        Stuff::useItem(who);
+    who->setFriendly(result);
+    status = 0;
 }
 
 // OpenStuff
@@ -571,11 +554,8 @@ OpenStuff::~OpenStuff() {}
 
 void OpenStuff::useItem(Thing* what, Person* who)
 {
-    if(this->name == "Key")
-        what->open();
-        
-    else
-        Stuff::useItem(who);
+    what->open();
+    status = 0;
 }
 
 MoveStuff::MoveStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -584,22 +564,17 @@ MoveStuff::~MoveStuff() {}
 
 void MoveStuff::useItem(Person* who, Place* where)
 {
-    if(this->name == "JabberBlood" && who->getName() == "Alice")
-    {
-        List<Place*> go = where->getNewPlaceToGo();
+    List<Place*> go = where->getNewPlaceToGo();
         
-        for(int i = 0; i < go.getSize(); i++)
+    for(int i = 0; i < go.getSize(); i++)
+    {
+        if(go.peek(i)->getPlaceName() == "Home")
         {
-            if(go.peek(i)->getPlaceName() == "Home")
-            {
-                Place* there = go.peek(i);
-                who->move(*there);
-            }
+            Place* there = go.peek(i);
+            who->move(*there);
         }
     }
-    
-    else
-        Stuff::useItem(who);
+    status = 0;
 }
                  
 
