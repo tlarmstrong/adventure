@@ -737,7 +737,7 @@ void Game::makePlaces()
     
     Place* walker1 = nullptr;
     Place* walker2 = nullptr;
-    for (int i=1; i<=places.getSize(); i++){
+    for (int i=1; i<places.getSize(); i++){
         if(places.peek(i)->getPlaceName()=="battlefield"){
             walker1 = places.peek(i);
         }
