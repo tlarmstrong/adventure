@@ -16,4 +16,5 @@ int main()
     cout << "Place List: " << plist.getSize() << endl;
 
     cout << one.getPeopleList().peek(0)->getName() << endl;
+    cout << one.getPlaceList().peek(0)->getPlaceName() << endl;
 }
