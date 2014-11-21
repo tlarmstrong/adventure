@@ -79,6 +79,7 @@ public:
     void taggingAlong(NPC& tagger);  //adds a person to the list of Helpers
     void ditched(NPC& ditcher);      //removes a person from the list of Helpers
     
+    void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
     void pickup(Stuff& item);                     //Alice adds item to the list of stuff
     void drop(Stuff& item);                       //Alice drops an item
     void use(Stuff& item);                        //Alice uses an item on herself
@@ -200,7 +201,8 @@ public:
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     
-    void newPlaceToGo(Place* goTo);
+    void newPlaceToGo(const Place* goTo);
+    void blockPlaceToGo(const Place* block);
     List<Place*> getNewPlaceToGo() const;
     
     // output description of Place
@@ -298,65 +300,72 @@ class MoveStuff : public Stuff
      ----------------------------------
      */
     
-    class Thing {
-        
-    protected:
-        
-        bool status;        // status of door: 1 = open, 0 = closed
-        
-    public:
-        
-        Thing(const bool& stat);            // constructor
-        virtual ~Thing();   // destructor
-        
-        // open thing, depend on Place & Alice's bodySize
-        // pure virtual function, each derived will have own
-        virtual void openThing()=0;
-        
-        // output of what Alice has opened (will pass to derived)
-        virtual std::ostream& render(const std::ostream&)=0;
-    };
+class Thing {
     
-    // derived class of Thing
-    class Door : public Thing {
+protected:
         
-    private:
-    	List<place*> between;
+    bool status;        // status of door: 1 = open, 0 = closed
         
-    public:
+public:
         
-        Door(const bool& stat, const List<Place*>& betwn);             // constructor
-        ~Door();            // destructor
+    Thing(const bool& stat);            // constructor
+    virtual ~Thing();   // destructor
         
-        // open Door to find Chest
-        // must be small (bodySize = 1) and must have key
+    // open thing, depend on Place & Alice's bodySize
+    // pure virtual function, each derived will have own
+    virtual void openThing()=0;
+    virtual void closeThing()=0;
         
-        //should this take other input, how does open and close thing know alice's getSize? Should take person? -- yes, more specifically, should it just be an Alice? I suppose it could just be an alice, although then rabbit cannot open the door, but we might not care about that... I guess it needs to be an alice if it involves her getSize.
+    // output of what Alice has opened (will pass to derived)
+    virtual std::ostream& render(const std::ostream&)=0;
+};
+    
+// derived class of Thing
+class Door : public Thing {
+     
+private:
+	List<place*> between;
         
-        //could this be in thing class
-        // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
-        void openThing(const Alice alice);
-        void closeThing(const Alice alice);      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
+public:
         
-        // effects of openThing()
-        std::ostream& render(const std::ostream&);
-    };
+    Door(const bool& stat, const List<Place*>& betwn);             // constructor
+    ~Door();            // destructor
+        
+    // open Door to find Chest
+    // must be small (bodySize = 1) and must have key
+        
+    //should this take other input, how does open and close thing know alice's getSize? Should take person? -- yes, more specifically, should it just be an Alice? I suppose it could just be an alice, although then rabbit cannot open the door, but we might not care about that... I guess it needs to be an alice if it involves her getSize.
+        
+    List<Place*> getbetween;
+        
+    //could this be in thing class
+    // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
+    void openThing();
+    void closeThing();      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
+        
+    // effects of openThing()
+    std::ostream& render(const std::ostream&);
+};
     
     // derived class of Thing
     class Chest : public Thing {
         
     private:
         
-        List<Stuff> inside;		//list of stuff inside the chest
+        List<Stuff*> inside;		//list of stuff inside the chest
         
     public:
         
-        Chest(const bool status, const List<Stuff> contains);  // constructor
+        Chest(const bool stat, const List<Stuff*>& contains);  // constructor
         ~Chest();               // destructor
         
         // open Chest to find Sword
         // must be tall (bodySize = 3)
         void openThing();
+        void closeThing();
+        
+        void takeStuff(const Stuff* tk);
+        List<Stuff*>& whatsinside() const;
         
         // effects of openThing()
         std::ostream& render(const std::ostream&);
