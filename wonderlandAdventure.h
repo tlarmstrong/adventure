@@ -105,18 +105,19 @@ public:
  */
 
 class NPC: public Person {
-    
+friend PersonFactory;
 private:
     
     std::string description;      // unique description of helper / badguy
     //    std::string name;             // name of helper / badguy		//I moved this to person
     std::string says;             // what helper / badguy says to Alice
     bool friendly;                // true = friend, false = not friend
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const List<Stuff*>& list, const int& hlth, const bool& frndly);
+
     
 public:
     
     // constructor
-    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const List<Stuff*>& list, const int& hlth, const bool& frndly);
     ~NPC();               // destructor
     
     // set friendly status
