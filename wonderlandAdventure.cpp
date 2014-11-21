@@ -406,7 +406,25 @@ Place::Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>
     placeTo = trav;
 }
 
-Place::~Place() {}                         // destructor
+Place::~Place() 
+{
+	for (int i=0;i<peopleHere.getSize();i++)
+	{
+		delete peopleHere.pop();
+	}
+	for (int i=0;i<stuffHere.getSize();i++)
+	{
+		delete stuffHere.pop();
+	}
+	for (int i=0;i<thingHere.getSize();i++)
+	{
+		delete thingHere.pop();
+	}
+	for (int i=0;i<placeTo.getSize();i++)
+	{
+		delete placeTo.pop();
+	}
+}                         // destructor
 
 List<Person*> Place::whoHere() const     //returns a list of everybody here
 {
@@ -636,7 +654,13 @@ Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
 	getbetween = betwn;
 }
 
-Door::~Door() {}
+Door::~Door()
+{
+	for (int i=0;i<between.getSize();i++)
+	{
+		delete between.pop()
+	}
+}
 
 void Door::openThing()
 {
@@ -670,7 +694,13 @@ Chest::Chest(const bool stat, const List<Stuff*>& contains):Thing(stat)
 	inside=contains;
 }
 
-Chest::~Chest() {}
+Chest::~Chest() 
+{
+	for (int i=0;i<inside.getSize();i++)
+	{
+		delete inside.pop()
+	}
+}
 
 void Chest::openThing()
 {
@@ -706,7 +736,15 @@ Game::Game()
 
 Game::~Game()
 {
-    
+    for (int i=0;i<places.getSize();i++)
+	{
+		delete places.pop()
+	}
+	for (int i=0;i<people.getSize();i++)
+	{
+		delete people.pop()
+	}
+	
 }
 
 List<Place*> Game::getPlaceList() const
