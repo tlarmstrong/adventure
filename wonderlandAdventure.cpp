@@ -444,9 +444,14 @@ void Place::pickedUp(Stuff* pick, Person* who)
     who->recieve(*pick);
 }
 
-void Place::newPlaceToGo(Place* goTo)
+void Place::newPlaceToGo(const Place* goTo)
 {
     placeTo.push(goTo);
+}
+
+void Place::blockPlaceToGo(const Place* block)
+{
+	PlaceTo.pop(block);
 }
 
 List<Place*> Place::getNewPlaceToGo() const
@@ -611,17 +616,65 @@ void MoveStuff::useItem(Person* who, Place* where)
  Thing::Thing(const bool& stat):status(stat){} 
  /*
  ----------------------------------
- Thing classes: Door
+ Door classes: Derived from Thing 
  ----------------------------------
  */
 Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
 {
-	
+	between=betwn;
 }
 
+void Door::openThing()
+{
+	if(status==0)
+	{
+		getbetween().peek(0)->newPlaceToGo(getbetween().peek(1));
+		getbetween().peek(1)->newPlaceToGo(getbetween().peek(0));
+		status=1;
+	}
+		
+	}
 
+void Door::closeThing()
+{
+	if(status==1)
+	{
+		getbetween().peek(0)->blockPlaceToGo(getbetween().peek(1));
+		getbetween().peek(1)->blockPlaceToGo(getbetween().peek(0));
+		status=0;
+	}
+}
 
+/*
+ ----------------------------------
+ Chest classes: Derived from Thing 
+ ----------------------------------
+*/
 
+Chest::Chest(const bool stat, const List<Stuff*>& contains):Thing(stat)
+{
+	inside=contains;
+}
+
+void Chest::openThing()
+{
+	status=1;
+}
+
+void Chest::closeThing()
+{
+	status=0;
+}
+
+void Chest::takeStuff(const Stuff* tk)
+{
+	inside.pop(tk);
+}
+
+List<Stuff*> whatsinside() const
+{
+	return inside;
+}
 /*
  ----------------------------------
  Game Class: Base
