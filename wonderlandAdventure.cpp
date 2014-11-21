@@ -15,7 +15,11 @@ Person::Person(const int& hLevel, const List<Stuff*>& sList, const string& nm) :
 Person::Person() {}
 
 // destructor
-Person::~Person() {}
+Person::~Person()
+{
+    for(int i = 0; i < stuffList.getSize(); i++)
+        delete stuffList.pop();
+}
 
 //allows each person to move from place to place
 void Person::move(Place& to)
@@ -94,7 +98,14 @@ Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*
 }
 
 // destructor
-Alice::~Alice() {}
+Alice::~Alice()
+{
+    for(int i = 0; i < helperList.getSize(); i++)
+        delete helperList.pop();
+    
+    for(int i = 0; i < badguyList.getSize(); i++)
+        delete badguyList.pop();
+}
 
 // Alice is a Singleton
 Alice* Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
@@ -210,7 +221,11 @@ std::ostream& Alice::render(std::ostream& out) const
 NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly) {}
 
 // destructor
-NPC::~NPC() {}
+NPC::~NPC()
+{
+    for(int i = 0; i < stuffList.getSize(); i++)
+        delete stuffList.pop();
+}
 
 // public function to set friendly status of NPC
 void NPC::setFriendly(const bool& x)
