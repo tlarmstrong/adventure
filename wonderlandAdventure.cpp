@@ -681,8 +681,8 @@ void Door::openThing()
 {
 	if(status==0)
 	{
-		getbetween.peek(0)->newPlaceToGo(getbetween.peek(1));
-		getbetween.peek(1)->newPlaceToGo(getbetween.peek(0));
+		between.peek(0)->newPlaceToGo(between.peek(1));
+		between.peek(1)->newPlaceToGo(between.peek(0));
 		status=1;
 	}
 		
@@ -692,8 +692,8 @@ void Door::closeThing()
 {
 	if(status==1)
 	{
-		getbetween.peek(0)->blockPlaceToGo(getbetween.peek(1));
-		getbetween.peek(1)->blockPlaceToGo(getbetween.peek(0));
+		between.peek(0)->blockPlaceToGo(between.peek(1));
+		between.peek(1)->blockPlaceToGo(between.peek(0));
 		status=0;
 	}
 }
