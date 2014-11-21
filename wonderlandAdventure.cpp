@@ -704,7 +704,10 @@ Game::Game()
     makeStuff();
 }
 
-Game::~Game(){}
+Game::~Game()
+{
+    
+}
 
 List<Place*> Game::getPlaceList() const
 {
