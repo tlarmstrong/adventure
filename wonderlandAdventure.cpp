@@ -666,7 +666,7 @@ Thing::~Thing() {}
  */
 Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
 {
-	getbetween = betwn;
+	between = betwn;
 }
 
 Door::~Door()
@@ -697,6 +697,7 @@ void Door::closeThing()
 		status=0;
 	}
 }
+
 
 /*
  ----------------------------------
