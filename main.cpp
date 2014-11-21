@@ -9,5 +9,11 @@ int main()
     Game one;
     string input;
     
-    cout << one.getPlaceList().peek(0)->getPlaceName() << endl;
+    List<Person*> list = one.getPeopleList();
+    cout << "Person List: " << list.getSize() << endl;
+    
+    List<Place*> plist = one.getPlaceList();
+    cout << "Place List: " << plist.getSize() << endl;
+
+    cout << one.getPeopleList().peek(0)->getName() << endl;
 }

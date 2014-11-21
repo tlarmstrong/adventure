@@ -30,8 +30,7 @@ private:
 protected:
     
     int health;                     //health level of the person
-    List<Stuff*> stuffList;          // list of stuff each person has  //It is better as a pointer so that our list knows how to handle it (== is not always defined and we use ==)
-    // Example: WhiteRabbit may have a watch and give it to Alice | Alice can add this to her list
+    List<Stuff*> stuffList;          // list of stuff each person has  
     std::string name;
     
 public:
@@ -50,7 +49,7 @@ public:
     void hurt(const int& damage);					 // person takes damage
     
     List<Stuff*> getStuffList() const;
-    std::string getName() const;								// gets person's name
+    std::string getName();								// gets person's name
 };
 
 /*
@@ -195,11 +194,10 @@ protected:
 public:
     
     Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav);
-    Place();                                    // constructor
+    //Place();                                    // constructor
     ~Place();                                   // destructor
     
-    List<Person*> whoHere() const;               //returns a list of everybody here
-    
+    List<Person*> whoHere() const;               //constructed list
     std::string getPlaceName() const;           // returns name of Place
     
     void personEnters(Person* enterer);   //somebody comes into the place

@@ -45,6 +45,7 @@ template <class T>
 List<T>::List()             // no-arg constructor
 {
     head = NULL;            // first link point to NULL
+    std::cout << "constructed list" << std::endl;
 }
 
 template <class T>
@@ -54,17 +55,16 @@ List<T>::~List()
         return;                         // nothing to do
     
     //if not empty, break the circular list
-    head->prev->next = NULL;
+    //head->prev->next = NULL;
     Node <T>* walker = head;
     
     // "walk" through the list and destroy each node
-    while(walker != NULL)
+    while((walker != head) && (getSize() != 0))
     {
         Node <T>* rmove = walker;	//remove was highlighted, so I wasn't sure if it was a keyword or not.
         walker = walker->next;
         delete rmove;
     }
-    
     head = NULL;
 }
 
@@ -81,6 +81,7 @@ void List<T>::push(const T& value)
         head = n;
         head->prev = head;
         head->next = head;
+        std::cout << "head" << std::endl;
     }
     
     // otherwise, set pointers to nodes before and after it
@@ -90,7 +91,9 @@ void List<T>::push(const T& value)
         n->prev = head->prev;
         head->prev->next = n;
         head->prev = n;
+        std::cout << "other nodes" << std::endl;
     }
+    std::cout << "pushed" << std::endl;
 }
 
 // pop specific value
@@ -204,12 +207,12 @@ template<class T>
 List<T>& List<T>::operator = (const List<T>& other)
 {
     // check if assigning List to self
-    if(this == &other)
-        return *this;
+//    if(this == &other)
+//        return *this;
     
-    for (int i = 0; i < getSize(); i++){	//empties list
-        pop();
-    }
+//    for (int i = 0; i < getSize(); i++){	//empties list
+//        pop();
+//    }
     
     // make deep copy from other list to new list
     for(int i = 0; i < other.getSize(); i++)
@@ -234,24 +237,30 @@ int List<T>::getSize() const
     
     // Handle empty list as special case
     if( head == NULL )
+    {
+        std::cout << "list empty" << std::endl;
         return count;
+    }
     
     else
     {
         // temporarily break the circular list
         //head->prev->next = NULL;
+        count ++;
         Node <T>* walker = head;
         
-        while(walker != head && count != 0)
+        while(walker->next != head && count != 0)
         {
         // "walk" through list and count nodes		//I see why you broke the list instead of saying while not equal to head, since it starts with walker equal to head. another way to do it would include && count!=0
             walker = walker->next;
+            //std::cout << "count in walker " << count << std::endl;
             count++;
         }
         
         // make the list circular again
         //head->prev->next = head;
     }
+    //std::cout << "outside of while " << count << std::endl;
     return count;
 }
 
