@@ -13,6 +13,56 @@ class Chest;
 class Game;
 
 /*
+ ----------------------------------
+ Place Class: Base
+ ----------------------------------
+ 
+ generic class will instantiate individual Place dynamically (on demand)
+ Place will be Tree, Garden, Woods, TeaParty, Castle, Battlefield, Home
+ 
+ */
+
+class Place {
+    
+protected:
+    
+    std::string description;         // unique description of Place
+    //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
+    std::string name;                // name of Place
+    List<Person*> peopleHere;         // everybody in Place
+    List<Stuff*> stuffHere;           // list of things in a Place
+    List<Thing*> thingHere;			 // list of things here
+    List<Place*> placeTo;			 // list of Place Alice can go from here
+    
+public:
+    
+    Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav);
+    //Place();                                    // constructor
+    ~Place();                                   // destructor
+    
+    List<Person*> whoHere() const;               //constructed list
+    std::string getPlaceName() const;           // returns name of Place
+    
+    void personEnters(Person* enterer);   //somebody comes into the place
+    void personLeaves(Person* leaver);    //removes somebody from a place
+    
+    List<Stuff*> whatsHere() const;              //returns the list of stuff here
+    void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
+    void pickedUp(Stuff*& pick, Person*& who);              //somebody picked up an item here
+    
+    void newPlaceToGo(Place* goTo);
+    void blockPlaceToGo(Place* block);
+    
+    List<Place*> getNewPlaceToGo() const;
+    
+    // output description of Place
+    std::ostream& narrate(std::ostream& out) const;
+    
+    // what Alice can do in particular place
+    //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
+};
+
+/*
  ------------------------------------------------------------
  Person Class: Base class for Alice, NPC, and personFactory
  ------------------------------------------------------------
@@ -40,7 +90,7 @@ public:
     Person(const int& hLevel, const List<Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
-    void move(Place& to);               // Person can move from place to place
+    void move(Place* to);               // Person can move from place to place
     
     Place* whereAreYou(); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
@@ -48,8 +98,12 @@ public:
     void recieve(Stuff& item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
     
+    int getHealth() const;
+    
     List<Stuff*> getStuffList() const;
-    std::string getName();								// gets person's name
+    std::string getName() const;								// gets person's name
+    virtual std::ostream& narrate(std::ostream& out) const=0;
+    virtual std::ostream& render(std::ostream& out) const=0;
 };
 
 /*
@@ -66,16 +120,17 @@ private:
     List<NPC*> helperList;    // list of helpers with Alice
     List<NPC*> badguyList;    // list of badguys with Alice
     int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
+    std::string description;
     
     // constructor
-    Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
+    Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice* makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm);
+    static Alice* makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
     
     void taggingAlong(NPC& tagger);  //adds a person to the list of Helpers
     void ditched(NPC& ditcher);      //removes a person from the list of Helpers
@@ -94,6 +149,8 @@ public:
     
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;
+    
+    std::ostream& narrate(std::ostream& out) const;
 };
 
 /*
@@ -142,6 +199,8 @@ public:
     
     // get friendly data
     bool isfriendly() const;
+    
+    std::ostream& render(std::ostream& out) const;
 };
 
 /*
@@ -164,59 +223,7 @@ public:
     //make a test tube baby
     static Person* makePerson (const std::string who);
     
-    //from here for npc's we will call their constructor but for alice we will call getalice
-};
-
-/*
- ----------------------------------
- Place Class: Base
- ----------------------------------
- 
- generic class will instantiate individual Place dynamically (on demand)
- Place will be Tree, Garden, Woods, TeaParty, Castle, Battlefield, Home
- 
- */
-
-class Place {
-    
-protected:
-    
-    std::string description;         // unique description of Place
-    //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
-    std::string name;                // name of Place
-    List<Person*> peopleHere;         // everybody in Place
-    List<Stuff*> stuffHere;           // list of things in a Place
-    List<Thing*> thingHere;			 // list of things here
-    List<Place*> placeTo;			 // list of Place Alice can go from here
-    
-    //static List<Place> placeList;    // list of Place in game //should be in our main.
-    
-public:
-    
-    Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav);
-    //Place();                                    // constructor
-    ~Place();                                   // destructor
-    
-    List<Person*> whoHere() const;               //constructed list
-    std::string getPlaceName() const;           // returns name of Place
-    
-    void personEnters(Person* enterer);   //somebody comes into the place
-    void personLeaves(Person* leaver);    //removes somebody from a place
-    
-    List<Stuff*> whatsHere() const;              //returns the list of stuff here
-    void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
-    void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
-    
-    void newPlaceToGo(Place* goTo);
-    void blockPlaceToGo(Place* block);
-    
-    List<Place*> getNewPlaceToGo() const;
-    
-    // output description of Place
-    std::ostream& narrate(std::ostream& out) const;
-    
-    // what Alice can do in particular place
-    //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
+    //from here for npc's we will call their constructor but for alice we will call makeAlice
 };
 
 /*
@@ -447,6 +454,7 @@ public:
         ~Game();                       // destructor
         List<Place*> getPlaceList() const;
         List<Person*> getPeopleList() const;
+        void delegate(const std::string input);
  };
 
 

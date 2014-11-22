@@ -42,10 +42,9 @@ public:
 };
 
 template <class T>
-List<T>::List()             // no-arg constructor
+List<T>::List()            // no-arg constructor
 {
     head = NULL;            // first link point to NULL
-    std::cout << "constructed list" << std::endl;
 }
 
 template <class T>
@@ -81,7 +80,6 @@ void List<T>::push(const T& value)
         head = n;
         head->prev = head;
         head->next = head;
-        std::cout << "head" << std::endl;
     }
     
     // otherwise, set pointers to nodes before and after it
@@ -91,9 +89,7 @@ void List<T>::push(const T& value)
         n->prev = head->prev;
         head->prev->next = n;
         head->prev = n;
-        std::cout << "other nodes" << std::endl;
     }
-    std::cout << "pushed" << std::endl;
 }
 
 // pop specific value
@@ -129,7 +125,9 @@ T List<T>::pop(const T& value)
                     Node<T>* newWalker = walker->next;  // create a node pointer to next
                     newWalker->prev = walker->prev;     // reposition pointers
                     walker->prev->next = newWalker;
+                    walker->prev = newWalker;
                     
+                    head = newWalker;
                     delete rmove;                      // delete rmove node
                 }
                 
@@ -149,7 +147,7 @@ T List<T>::pop()
     
     // create a walker node and set to head
     Node <T>* walker = head;
-    // what if list is empty? I suppose we cannot do anything about that. It could be a try throw catch thing, but we could just remember to make sure it is not empty before calling.
+
     // if list has only one node
     if(getSize() == 1)
     {
@@ -172,17 +170,6 @@ T List<T>::pop()
     }
     return popped;
 }
-
-// look at element in list without removing node
-/*template <class T>
-T List<T>::peek()
-{
-    T nodeReturn = pop();         // remove first value from list	//don't forget the type of nodereturn	//also if list is empty?
-    push(nodeReturn);           // add node onto back of list
-    
-    return nodeReturn;          // return the node//this is neither a string which you said you would return nor a node. it is a T element, otherwise your code is good. also node return isn't a node, it is a T. Look at your return type of pop.
-}
-*/
 
 template <class T>
 T List<T>::peek(const int& num) const
@@ -207,17 +194,17 @@ template<class T>
 List<T>& List<T>::operator = (const List<T>& other)
 {
     // check if assigning List to self
-//    if(this == &other)
-//        return *this;
+    if(this == &other)
+        return *this;
     
-//    for (int i = 0; i < getSize(); i++){	//empties list
-//        pop();
-//    }
+    for (int i = 0; i < getSize(); i++){	//empties list
+        pop();
+    }
     
     // make deep copy from other list to new list
     for(int i = 0; i < other.getSize(); i++)
     {
-        push(other.peek(i));		//be careful about filling a list with just the first element of the new list
+        push(other.peek(i));
     }
     
     return *this;
@@ -237,10 +224,7 @@ int List<T>::getSize() const
     
     // Handle empty list as special case
     if( head == NULL )
-    {
-        std::cout << "list empty" << std::endl;
         return count;
-    }
     
     else
     {
@@ -251,16 +235,11 @@ int List<T>::getSize() const
         
         while(walker->next != head && count != 0)
         {
-        // "walk" through list and count nodes		//I see why you broke the list instead of saying while not equal to head, since it starts with walker equal to head. another way to do it would include && count!=0
+        // "walk" through list and count nodes
             walker = walker->next;
-            //std::cout << "count in walker " << count << std::endl;
             count++;
         }
-        
-        // make the list circular again
-        //head->prev->next = head;
     }
-    //std::cout << "outside of while " << count << std::endl;
     return count;
 }
 

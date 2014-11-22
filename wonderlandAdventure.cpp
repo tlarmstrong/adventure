@@ -2,35 +2,113 @@
 #include "wonderlandAdventure.h"
 using namespace std;
 
+
+/*
+ ----------------------------------
+ Place Class: Base
+ ----------------------------------
+ 
+ generic class will instantiate individual Place dynamically (on demand)
+ Place will be Tree, Garden, Woods, TeaParty, Castle, Battlefield, Home
+ 
+ */
+
+// constructor
+Place::Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav): name(nm), description(dscpt), stuffHere(what), peopleHere(who), thingHere(obj), placeTo(trav) {}
+
+// linkedList.h destroys list of places (kicking a dead horse if delete here, too
+Place::~Place() {}
+
+List<Person*> Place::whoHere() const     //returns a list of everybody here
+{
+    return peopleHere;
+}
+
+// thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
+string Place::getPlaceName() const  // returns name of Place
+{
+    return name;
+}
+
+void Place::personEnters(Person* enterer)  // somebody comes into the place
+{
+    peopleHere.push(enterer);
+}
+
+void Place::personLeaves(Person* leaver)   // removes somebody from a place
+{
+    peopleHere.pop(leaver);
+}
+
+List<Stuff*> Place::whatsHere() const              // returns the list of stuff here
+{
+    return stuffHere;
+}
+
+// someone dropped an item, so now it is laying around
+void Place::dropped(Stuff* drop, Person* who)
+{
+    who->getStuffList().pop(drop);
+    stuffHere.push(drop);
+}
+
+//somebody picked up an item here
+void Place::pickedUp(Stuff*& pick, Person*& who)
+{
+    stuffHere.pop(pick);
+    who->recieve(*pick);
+}
+
+void Place::newPlaceToGo(Place* goTo)
+{
+    placeTo.push(goTo);
+}
+
+void Place::blockPlaceToGo(Place* block)
+{
+    placeTo.pop(block);
+}
+
+List<Place*> Place::getNewPlaceToGo() const
+{
+    return placeTo;
+}
+
+// output description of Place
+std::ostream& Place::narrate(std::ostream& out) const
+{
+    out << description << endl;
+    return out;
+}
+
+/*// what Alice can do in particular place		//until we nail down that we need this and more exactly what we want it to do, I don't want to have this function written
+ std::string Place::canDo(const std::string )
+ {
+ out << action << endl;
+ return out
+ }
+ */
+
 /*
  -----------------------------------------------------------
  Person Class: Base class for Alice, NPC, and personFactory
  -----------------------------------------------------------
  */
 
-
-Person::Person(const int& hLevel, const List<Stuff*>& sList, const string& nm) : health(hLevel), stuffList(sList), name(nm)
-{
-    //stuffList = sList;
-    std::cout << "constructed Person" << std::endl;
-}
+Person::Person(const int& hLevel, const List<Stuff*>& sList, const string& nm) : health(hLevel), stuffList(sList), name(nm) {}
 
 // default constructor for Person Factory to work
 Person::Person() {}
 
 // destructor
-Person::~Person()
-{
-//    for(int i = 0; i < stuffList.getSize(); i++)
-//        delete stuffList.pop();
-}
+Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::move(Place& to)
+void Person::move(Place* to)
 {
-    Place from = *this->whereAreYou();
-    from.personLeaves(this);        // remove person from current location
-    to.personEnters(this);          // move a person to another place
+    Place* from = this->whereAreYou();
+    from->personLeaves(this);        // remove person from current location
+    to->personEnters(this);          // move a person to another place
 }
 
 // get name of Place where Person is
@@ -74,19 +152,20 @@ void Person::hurt(const int& damage)
     health -= damage;
 }
 
+int Person::getHealth() const
+{
+    return health;
+}
+
 List<Stuff*> Person::getStuffList() const
 {
     return stuffList;
 }
 
 //gives the person's name
-string Person::getName()
+string Person::getName() const
 {
-    //string x = "greatgreat";
-    //std::cout << "great" << std::endl;
     return name;
-    
-    //return x;
 }
 
 /*
@@ -96,31 +175,15 @@ string Person::getName()
  */
 
 // constructor (private)
-Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm) : Person(hLevel, sList, nm)
-{
-    helperList = hList;    // list of helpers with Alice
-    badguyList = bList;    // list of badguys with Alice
-    
-    // size of Alice (small(1), normal(2), big(3))
-    bodySize = bSize;
-    
-    std::cout << "constructed Alice" << std::endl;
-}
+Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt) : Person(hLevel, sList, nm), helperList(hList), badguyList(bList), bodySize(bSize), description(dscpt) {}
 
 // destructor
-Alice::~Alice()
-{
-//    for(int i = 0; i < helperList.getSize(); i++)
-//        delete helperList.pop();
-//    
-//    for(int i = 0; i < badguyList.getSize(); i++)
-//        delete badguyList.pop();
-}
+Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice* Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm)
+Alice* Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt)
 {
-    static Alice alice(sList, hList, bList, bSize, hLevel, nm);
+    static Alice alice(sList, hList, bList, bSize, hLevel, nm, dscpt);
     
     return &alice;
 }
@@ -137,8 +200,7 @@ void Alice::ditched(NPC& ditcher)
     helperList.pop(&ditcher);
 }
 
-
-//Alice adds item to the list of stuff	//could we perhaps just use recieve maybe. it is is the same function. Also, we need to think about how we remove the item from place...
+//Alice adds item to the list of stuff
 void Alice::pickup(Stuff& item)
 {
     recieve(item);
@@ -189,34 +251,64 @@ void Alice::setBodySize(const int s)
 // output what she has, who she's met, bodySize, and health	//I just renamed it to out instead of cout since cout is a thing already
 std::ostream& Alice::render(std::ostream& out) const
 {
-    out << "Alice is " << getBodySize() << endl;
-    out << "Her health level is " << health << endl;		//think we should have a gethealth function...
+    string s;
+    if(getBodySize() == 2)
+        s = "normal size";
+    if(getBodySize() == 3)
+        s = "BIG";
+    if(getBodySize() == 1)
+        s = "small";
+        
+    out << "Alice is " << s << endl;
+    out << "Her health level is " << getHealth() << endl;
     
     out << "She has these items: ";
-    
-    // peek() will return a Stuff object pointer (.getName will return the actual name of the obj)	//I made it so our lists all contain pointers so that our lists work better (note == is not always defined for our classes)
 
-    out << (stuffList.peek(0))->getName();
+    if(!stuffList.isEmpty())
+    {
+        out << (stuffList.peek(0))->getName();
+        
+        for(int i = 1; i < stuffList.getSize(); i++)
+            out << ", " << (stuffList.peek(i))->getName();
+    }
     
-    for(int i = 1; i < stuffList.getSize(); i++)
-        out << " ," << (stuffList.peek(i))->getName();
+    else
+        out << "nothing" << endl;
     
-    out << "/nHer friends are: ";
-    out << (helperList.peek(0))->getName();
+    if(!helperList.isEmpty())
+    {
+        out << "/nHer friends are: ";
+        out << (helperList.peek(0))->getName();
+        
+        for(int i = 1; i < helperList.getSize(); i++)
+            out << ", " << (helperList.peek(i))->getName();
+    }
     
-    for(int i = 1; i < helperList.getSize(); i++)
-        out << " ," << (helperList.peek(i))->getName();
+    else
+        out << "no friends, yet" << endl;;
     
-    out << "/nHer enemies are: ";
-    out << (badguyList.peek(0))->getName();
+    if(!stuffList.isEmpty())
+    {
+        out << "/nHer enemies are: ";
+        out << (badguyList.peek(0))->getName();
+        
+        for(int i = 1; i < badguyList.getSize(); i++)
+            out << ", " << (badguyList.peek(i))->getName();
+    }
     
-    for(int i = 1; i < badguyList.getSize(); i++)
-        out << " ," << (badguyList.peek(i))->getName();
+    else
+        out << "no enemies, yet" << endl;
     
     out << endl;
     return out;
 }
 
+// description of Alice
+std::ostream& Alice::narrate(std::ostream& out) const
+{
+    out << description << endl;
+    return out;
+}
 
 /*
  ----------------------------------
@@ -228,17 +320,10 @@ std::ostream& Alice::render(std::ostream& out) const
  */
 
 // constructor
-NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly)
-{
-    std::cout << "constructed NPC" << std::endl;
-}
+NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly) {}
 
 // destructor
-NPC::~NPC()
-{
-//    for(int i = 0; i < stuffList.getSize(); i++)
-//        delete stuffList.pop();
-}
+NPC::~NPC() {}
 
 // public function to set friendly status of NPC
 void NPC::setFriendly(const bool& x)
@@ -278,6 +363,34 @@ bool NPC::isfriendly() const
     return friendly;
 }
 
+ostream& NPC::render(ostream& out) const
+{
+    string s;
+    if(isfriendly() == true)
+        s = "a friend";
+    else
+        s = "not a friend";
+        
+    out << name << " is " << s << endl;
+    out << "Health level is: " << getHealth() << endl;
+    
+    out << name << " has these items: ";
+    
+    if(!stuffList.isEmpty())
+    {
+        out << (stuffList.peek(0))->getName();
+        
+        for(int i = 1; i < stuffList.getSize(); i++)
+            out << ", " << (stuffList.peek(i))->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    out << endl;
+    return out;
+}
+
 /*
  --------------------------------------------------
  Factory Class: Derived from Person to make people
@@ -297,7 +410,6 @@ PersonFactory::~PersonFactory() {}
 // dynamically create characters based on input
 Person* PersonFactory::makePerson(std::string who)
 {
-    std::cout << "PersonFactory" << std::endl;
     Person* returnValue;
     
     if (who == "Bandersnatch")
@@ -398,7 +510,7 @@ Person* PersonFactory::makePerson(std::string who)
         bool frndly = true;
         
         Person* cheshireCat = new NPC(nm, dscrpt, sayThings, cList, hLevel, frndly);
-        cout << "cheshireCat" << endl;
+        
         return cheshireCat;
     }
     
@@ -410,128 +522,15 @@ Person* PersonFactory::makePerson(std::string who)
         int bSize = 2;
         int hLevel = 10;
         string nm = "Alice";
+        string dscpt = "I'm a little girl.";
         
-        Person* alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm);
+        Person* alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm, dscpt);
+        
         return alice;
     }
+    
     return returnValue;
 }
-
-/*
- ----------------------------------
- Place Class: Base
- ----------------------------------
- 
- generic class will instantiate individual Place dynamically (on demand)
- Place will be Tree, Garden, Woods, TeaParty, Castle, Battlefield, Home
- 
- */
-
-// constructor
-Place::Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav): name(nm), description(dscpt), stuffHere(what), peopleHere(who), thingHere(obj), placeTo(trav)
-{
-    //peopleHere = who;               // everybody in Place
-    //stuffHere = what;               // list of things in a Place
-    //thingHere = obj;                // list of things here
-    //placeTo = trav;
-    
-    std::cout << "constructed Place" << std::endl;
-}
-
-Place::~Place() 
-{
-//	for (int i=0;i<peopleHere.getSize();i++)
-//	{
-//		delete peopleHere.pop();
-//	}
-//	for (int i=0;i<stuffHere.getSize();i++)
-//	{
-//		delete stuffHere.pop();
-//	}
-//	for (int i=0;i<thingHere.getSize();i++)
-//	{
-//		delete thingHere.pop();
-//	}
-//	for (int i=0;i<placeTo.getSize();i++)
-//	{
-//		delete placeTo.pop();
-//	}
-}                         // destructor
-
-List<Person*> Place::whoHere() const     //returns a list of everybody here
-{
-    return peopleHere;
-}
-
-// thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
-string Place::getPlaceName() const  // returns name of Place
-{
-    return name;
-}
-
-/*List<Place> Place::getPlaceList() const   // returns list of Place
-{
-    return placeList;
-}*/
-
-void Place::personEnters(Person* enterer)  // somebody comes into the place
-{
-    peopleHere.push(enterer);
-}
-
-void Place::personLeaves(Person* leaver)   // removes somebody from a place
-{
-    peopleHere.pop(leaver);
-}
-
-List<Stuff*> Place::whatsHere() const              // returns the list of stuff here
-{
-    return stuffHere;
-}
-
-// someone dropped an item, so now it is laying around
-void Place::dropped(Stuff* drop, Person* who)
-{
-    who->getStuffList().pop(drop);
-    stuffHere.push(drop);
-}
-
-//somebody picked up an item here
-void Place::pickedUp(Stuff* pick, Person* who)
-{
-    stuffHere.pop(pick);
-    who->recieve(*pick);
-}
-
-void Place::newPlaceToGo(Place* goTo)
-{
-    placeTo.push(goTo);
-}
-
-void Place::blockPlaceToGo(Place* block)
-{
-	placeTo.pop(block);
-}
-
-List<Place*> Place::getNewPlaceToGo() const
-{
-    return placeTo;
-}
-
-// output description of Place
-std::ostream& Place::narrate(std::ostream& out) const
-{
-    out << description << endl;
-    return out;
-}
-
-/*// what Alice can do in particular place		//until we nail down that we need this and more exactly what we want it to do, I don't want to have this function written
- std::string Place::canDo(const std::string )
- {
- out << action << endl;
- return out
- }
- */
 
 /*
  ----------------------------------
@@ -543,7 +542,7 @@ std::ostream& Place::narrate(std::ostream& out) const
  */
 
 // constructor
-Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts) {std::cout << "constructed Stuff" << std::endl;}
+Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts) {}
 
 Stuff::~Stuff() {}                // destructor
 
@@ -562,16 +561,12 @@ std::ostream& Stuff::narrate(std::ostream&) const
  ----------------------------------
  subStuff classes: Derived from Stuff
  ----------------------------------
- 
  BandersnatchEye, Key, WhiteRose, Cake, Tea, Sword, JabberBlood...
  
  */
 
 // GrowStuff
-GrowStuff::GrowStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status)
-{
-    std::cout << "constructed GrowStuff" << std::endl;
-}
+GrowStuff::GrowStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 GrowStuff::~GrowStuff() { }
 
@@ -590,7 +585,7 @@ void GrowStuff::useItem(Person* who, Place* where) {}
 void GrowStuff::useItem(Thing* what, Person* who) {}
 
 // HealthStuff
-HealthStuff::HealthStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {std::cout << "constructed HealthStuff" << std::endl;}
+HealthStuff::HealthStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 HealthStuff::~HealthStuff() {}
 
@@ -608,7 +603,7 @@ void HealthStuff::useItem(Person* who, Place* where) {}
 void HealthStuff::useItem(Thing* what, Person* who) {}
 
 // FriendStuff
-FriendStuff::FriendStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {std::cout << "constructed FriendStuff" << std::endl;}
+FriendStuff::FriendStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 FriendStuff::~FriendStuff() {}
 
@@ -626,7 +621,7 @@ void FriendStuff::useItem(Person* who, Place* where) {}
 void FriendStuff::useItem(Thing* what, Person* who) {}
 
 // OpenStuff
-OpenStuff::OpenStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {std::cout << "constructed OpenStuff" << std::endl;}
+OpenStuff::OpenStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 OpenStuff::~OpenStuff() {}
 
@@ -643,10 +638,7 @@ void OpenStuff::useItem(Place* where) {}
 void OpenStuff::useItem(Thing*) {}
 void OpenStuff::useItem(Person* who, Place* where) {}
 
-MoveStuff::MoveStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status)
-{
-    std::cout << "constructed MoveStuff" << std::endl;
-}
+MoveStuff::MoveStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 MoveStuff::~MoveStuff() {}
 
@@ -659,7 +651,7 @@ void MoveStuff::useItem(Person* who, Place* where)
         if(go.peek(i)->getPlaceName() == "Home")
         {
             Place* there = go.peek(i);
-            who->move(*there);
+            who->move(there);
         }
     }
     status = 0;
@@ -678,7 +670,7 @@ void MoveStuff::useItem(Thing* what, Person* who) {}
  ----------------------------------
  */
 
-Thing::Thing(const bool& stat):status(stat){std::cout << "constructed Thing" << std::endl;}
+Thing::Thing(const bool& stat):status(stat){}
 
 Thing::~Thing() {}
 
@@ -690,16 +682,10 @@ Thing::~Thing() {}
 Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
 {
 	between = betwn;
-    std::cout << "constructed Door" << std::endl;
+    //std::cout << "constructed Door" << std::endl;
 }
 
-Door::~Door()
-{
-//	for (int i=0;i<between.getSize();i++)
-//	{
-//        delete between.pop();
-//	}
-}
+Door::~Door() {}
 
 void Door::openThing()
 {
@@ -710,7 +696,7 @@ void Door::openThing()
 		status=1;
 	}
 		
-	}
+}
 
 void Door::closeThing()
 {
@@ -732,16 +718,10 @@ void Door::closeThing()
 Chest::Chest(const bool stat, const List<Stuff*>& contains):Thing(stat)
 {
 	inside=contains;
-    std::cout << "constructed Chest" << std::endl;
+    //std::cout << "constructed Chest" << std::endl;
 }
 
-Chest::~Chest() 
-{
-//	for (int i=0;i<inside.getSize();i++)
-//	{
-//        delete inside.pop();
-//	}
-}
+Chest::~Chest() {}
 
 void Chest::openThing()
 {
@@ -762,6 +742,7 @@ List<Stuff*>& Chest::whatsinside()
 {
 	return inside;
 }
+
 /*
  ----------------------------------
  Game Class: Base
@@ -770,23 +751,12 @@ List<Stuff*>& Chest::whatsinside()
 
 Game::Game()
 {
-    makePeople();
     makePlaces();
+    makePeople();
     makeStuff();
 }
 
-Game::~Game()
-{
-//    for (int i=0;i<places.getSize();i++)
-//	{
-//        delete places.pop();
-//	}
-//	for (int i=0;i<people.getSize();i++)
-//	{
-//        delete people.pop();
-//	}
-	
-}
+Game::~Game() {}
 
 List<Place*> Game::getPlaceList() const
 {
@@ -800,15 +770,6 @@ List<Person*> Game::getPeopleList() const
                  
 void Game::makePlaces()
 {
-    /*
-     EX:
-     places.push(new Place(name, description, action, peopleHere, stuffHere, thingsHere));
-     
-     places.push(tree, efkfwufehif,feiufhw)
-     places.push(castle, ewafwifh,wjofejew)
-     tree.placego(castle)
-     */
-    
     // Tree
     List<Person*> tPeople;
     List<Stuff*> tStuff;
@@ -836,7 +797,7 @@ void Game::makePlaces()
     List<Thing*> gThing;
     List<Place*> gtrav;
     
-    Place* garden = new Place("Garden", "Alice is in a beautiful garden.", gStuff, gPeople, gThing, gtrav);
+    Place* garden = new Place("Garden", "Alice follows the White Rabbit to a beautiful garden full of white roses. Should she pick one?", gStuff, gPeople, gThing, gtrav);
     places.push(garden);
     
     // Woods
@@ -897,29 +858,73 @@ void Game::makePeople()
     Person* bandersnatch = PersonFactory::makePerson("Bandersnatch");
     people.push(bandersnatch);
     
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "Garden")
+            (places.peek(i))->personEnters(bandersnatch);
+    }
+    
     // (2)
     Person* jabberwocky = PersonFactory::makePerson("Jabberwocky");
     people.push(jabberwocky);
+    
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "Castle")
+            (places.peek(i))->personEnters(jabberwocky);
+    }
     
     // (3)
     Person* redQueen = PersonFactory::makePerson("RedQueen");
     people.push(redQueen);
     
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "Castle")
+            (places.peek(i))->personEnters(redQueen);
+    }
+    
     // (4)
     Person* whiteRabbit = PersonFactory::makePerson("WhiteRabbit");
+    
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "Tree")
+            (places.peek(i))->personEnters(whiteRabbit);
+    }
+    
     people.push(whiteRabbit);
     
     // (5)
     Person* madHatter = PersonFactory::makePerson("MadHatter");
     people.push(madHatter);
     
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "TeaParty")
+            (places.peek(i))->personEnters(madHatter);
+    }
+    
     // (6)
     Person* cheshireCat = PersonFactory::makePerson("CheshireCat");
     people.push(cheshireCat);
     
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "Woods")
+            (places.peek(i))->personEnters(cheshireCat);
+    }
+    
     // (7)
     Person* alice = PersonFactory::makePerson("Alice");
     people.push(alice);
+    
+    for(int i = 0; i < places.getSize(); i++)
+    {
+        if(places.peek(i)->getPlaceName() == "Tree")
+            (places.peek(i))->personEnters(alice);
+    }
+    
 }
 
 // make list of stuff for each place, call Stuff constructor to make stuff, push into place's stuff list //this is good :) I hadn't planned it like this i dont think but I really like this. It works pretty darn well.
@@ -929,28 +934,12 @@ void Game::makeStuff()
     // Tree has nothing in list
     
     // (2) Garden
-    Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", true, 1);
-    
     Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
     
     for(int i = 0; i < places.getSize(); i++)
     {
-        cout << "place name Garden1: " << places.peek(i)->getPlaceName() << endl;
         if(places.peek(i)->getPlaceName() == "Garden")
-        {
-            cout << "white rose push " << places.getSize() << endl;
             (places.peek(i))->whatsHere().push(whiteRose);
-        }
-    }
-    
-    for(int i = 0; i < people.getSize(); i++)
-    {
-        cout << "place name Garden2: " << people.peek(i)->getName() << endl;
-        if(people.peek(i)->getName() == "Bandersnatch")
-        {
-            cout << "bandersnatch eye push " << places.getSize() << endl;
-            people.peek(i)->getStuffList().push(bandersnatchEye);
-        }
     }
     
     // (3) Woods
@@ -958,12 +947,8 @@ void Game::makeStuff()
 
     for(int i = 0; i < places.getSize(); i++)
     {
-        cout << "place name Woods: " << places.peek(i)->getPlaceName() << endl;
         if(places.peek(i)->getPlaceName() == "Woods")
-        {
-            cout << "key push " << places.getSize() << endl;
             places.peek(i)->whatsHere().push(key);
-        }
     }
     
     // (4) TeaParty
@@ -999,15 +984,41 @@ void Game::makeStuff()
     
     // (7) Home
     // Home has nothing in list
-    
-    /*
-     EX:
-     tree.getStuffList.push(new healthStuff tea(feklfa,fwjlef,efjewf jowef))
-     tree.getStuffList.push(new healthStuff cake(feklfa,fwjlef,efjewf jowef))
-     */
 }
 
+void Game::delegate(const string input)
+{
+    if(input == "follow")
+    {
+        // move white rabbit and Alice to Garden
+        while(!getPlaceList().peek(0)->whoHere().isEmpty())
+        {
+            string n = getPlaceList().peek(0)->whoHere().peek(0)->getName();
+            
+            getPlaceList().peek(0)->whoHere().peek(0)->move(getPlaceList().peek(1));
+            
+            cout << n << " moved to " << getPlaceList().peek(1)->getPlaceName() << endl;
+        }
+        getPlaceList().peek(1)->narrate(cout);
+    }
+    
+    else if(input == "yes")
+    {
+        Stuff* rose = getPlaceList().peek(0)->whatsHere().peek(0);
+        Person* alice = nullptr;
+        
+        for(int i = 0; i < getPlaceList().peek(0)->whoHere().getSize(); i++)
+        {
+            if(getPlaceList().peek(0)->whoHere().peek(i)->getName() == "Alice")
+                alice = getPlaceList().peek(0)->whoHere().peek(i);
+        }
+        
+        getPlaceList().peek(1)->pickedUp(rose, alice);
+        alice->render(cout);
+    }
+}
 
+// needed to make static lists work
 List<Place*> Game::places;
 List<Person*> Game::people;
 
