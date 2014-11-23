@@ -29,31 +29,31 @@ protected:
     std::string description;         // unique description of Place
     //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
     std::string name;                // name of Place
-    List<Person*> peopleHere;         // everybody in Place
-    List<Stuff*> stuffHere;           // list of things in a Place
-    List<Thing*> thingHere;			 // list of things here
-    List<Place*> placeTo;			 // list of Place Alice can go from here
+    map<string, Person*> peopleHere;         // everybody in Place
+    multimap<string, Stuff*> stuffHere;           // list of things in a Place
+    multimap<string, Thing*> thingHere;			 // list of things here
+    map<string, Place*> placeTo;			 // list of Place Alice can go from here
     
 public:
     
-    Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav);
+    Place(const std::string& nm, const std::string& dscpt, const multimap<string, Stuff*>& what, const map<string, Person*>& who, const multimap<string,Thing*>& obj, const map<string, Place*>& trav);
     //Place();                                    // constructor
     ~Place();                                   // destructor
     
-    List<Person*> whoHere() const;               //constructed list
+    map<string, Person*> whoHere() const;               //constructed list
     std::string getPlaceName() const;           // returns name of Place
     
     void personEnters(Person* enterer);   //somebody comes into the place
     void personLeaves(Person* leaver);    //removes somebody from a place
     
-    List<Stuff*> whatsHere() const;              //returns the list of stuff here
+    multimap<string, Stuff*> whatsHere() const;              //returns the list of stuff here
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff*& pick, Person*& who);              //somebody picked up an item here
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
     
-    List<Place*> getNewPlaceToGo() const;
+    map<string, Place*> getNewPlaceToGo() const;
     
     // output description of Place
     std::ostream& narrate(std::ostream& out) const;

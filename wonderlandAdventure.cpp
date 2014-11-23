@@ -14,12 +14,33 @@ using namespace std;
  */
 
 // constructor
-Place::Place(const std::string& nm, const std::string& dscpt, const List<Stuff*>& what, const List<Person*>& who, const List<Thing*>& obj, const List<Place*>& trav): name(nm), description(dscpt), stuffHere(what), peopleHere(who), thingHere(obj), placeTo(trav) {}
+Place::Place(const std::string& nm, const std::string& dscpt, const multimap<string, Stuff*>& what, const map<string, Person*>& who, const multimap<string, Thing*>& obj, const map<string, Place*>& trav): name(nm), description(dscpt), stuffHere(what), peopleHere(who), thingHere(obj), placeTo(trav) {}
 
-// linkedList.h destroys list of places (kicking a dead horse if delete here, too
-Place::~Place() {}
+// linkedList.h destroys list of places (kicking a dead horse if delete here, too //but since linkedlist is templetized, it cannot delete the allocated data that the data members are pointing to //was there a problem when the deletes were in there? Oh and if it was a segmentation fault, I think i figured it out... we shouldn't have a list of people in game because each place holds the people. I am sorry if this gets confusing. I am sorry if it seems like I am changing my mind, if you feel like you have trouble reading my mind, but I really am figuring this out as we go. 
+Place::~Place()
+{
+	/* I am going to leave the commented code so that we can talk about it
+	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
+	{
+		
+		for (map<string, )
+		
+		
+		delete *((*i).second);
+	}
+	
+		for (map<string, Stuff*>::iterator i=stuffHere.begin(); i!=stuffHere.end(); i++)	//deletes all the stuff in a place
+	{
+		delete *((*i).second);
+	}
+	
+			for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
+	{
+		delete *((*i).second);
+	}
+}
 
-List<Person*> Place::whoHere() const     //returns a list of everybody here
+map<string, Person*> Place::whoHere() const     //returns a list of everybody here
 {
     return peopleHere;
 }
