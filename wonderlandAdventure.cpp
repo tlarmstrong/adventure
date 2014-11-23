@@ -83,10 +83,15 @@ void Place::dropped(const Stuff* drop, Person* who)
 }
 
 //somebody picked up an item here
-void Place::pickedUp(Stuff* pick, Person* who)
+void Place::pickedUp(const Stuff* pick, Person* who)
 {
     stuffHere.erase(stuffHere.find(pick->getName()));
     who->recieve(pick);
+}
+
+void Place::genStuff(const Stuff* gen)
+{
+	stuffHere.insert(pair<string, Stuff*>(gen->getName(), gen));
 }
 
 void Place::newPlaceToGo(Place* goTo)
@@ -220,6 +225,18 @@ void Alice::taggingAlong(NPC* tagger)
 void Alice::ditched(NPC* ditcher)
 {
     helperList.erase(helperList.find(ditcher->getName()));
+}
+
+//now alice's friends can come with her
+void Alice::move(Place* to)
+{
+	Place* from = whereAreYou();
+	from->personLeaves(this);        // remove person from current location
+    	to->personEnters(this);          // move a person to another place
+    	for(map<string, Person*>::iterator i=helperList.begin(); i!=helperList.end(); i++)
+    	{
+    		(i->second)->move(to);
+    	}
 }
 
 //Alice adds item to the list of stuff
@@ -805,12 +822,12 @@ Game::Game()
 
 Game::~Game() {}
 
-List<Place*> Game::getPlaceList() const
+map<string, Place*> Game::getPlaceList() const
 {
     return places;
 }
 
-List<Person*> Game::getPeopleList() const
+map<string, Person*> Game::getPeopleList() const
 {
     return people;
 }
@@ -824,7 +841,7 @@ void Game::makePlaces()
     List<Place*> ttrav;
     
     Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a white rabbit run by.", tStuff, tPeople, tThing, ttrav);
-    places.push(tree);
+    places.insert(pair<string, Place*>(tree->getPlaceName(), tree));
     
 //    Place* walker1 = nullptr;
 //    Place* walker2 = nullptr;
@@ -845,7 +862,7 @@ void Game::makePlaces()
     List<Place*> gtrav;
     
     Place* garden = new Place("Garden", "Alice follows the White Rabbit to a beautiful garden full of white roses. Should she pick one?", gStuff, gPeople, gThing, gtrav);
-    places.push(garden);
+    places.insert(pair<string, Place*>(garden->getPlaceName(), garden));
     
     // Woods
     List<Person*> wPeople;
@@ -854,7 +871,7 @@ void Game::makePlaces()
     List<Place*> wtrav;
     
     Place* woods = new Place("Woods", "Alice is in the Woods. She sees a cat in a tree.", wStuff, wPeople, wThing, wtrav);
-    places.push(woods);
+    places.insert(pair<string, Place*>(woods->getPlaceName(), woods));
     
     // TeaParty
     List<Person*> pPeople;
@@ -863,7 +880,7 @@ void Game::makePlaces()
     List<Place*> ptrav;
     
     Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.", pStuff, pPeople, pThing, ptrav);
-    places.push(teaParty);
+    places.insert(pair<string, Place*>(teaParty->getPlaceName(), teaParty));
     
     //Castle
     List<Person*> cPeople;
@@ -872,7 +889,7 @@ void Game::makePlaces()
     List<Place*> ctrav;
     
     Place* castle = new Place("Castle", "Alice is taken to the Red Queen's Castle.", cStuff, cPeople, cThing, ctrav);
-    places.push(castle);
+    places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
     // Battlefield
     List<Person*> bPeople;
@@ -884,7 +901,7 @@ void Game::makePlaces()
     
     // places.peek(battlefield)->newPlaceToGo(places.peek(tree));
     
-    places.push(battlefield);
+    places.insert(pair<string, Place*>(battlefield->getPlaceName(), battlefield));
     
     // Home
     List<Person*> hPeople;
@@ -893,7 +910,7 @@ void Game::makePlaces()
     List<Place*> htrav;
     
     Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...", hStuff, hPeople, hThing, trav);
-    places.push(home);
+    places.insert(pair<string, Place*>(home->getPlaceName(), home));
 }
 
 void Game::makePeople()
@@ -903,74 +920,32 @@ void Game::makePeople()
     
     //(1)
     Person* bandersnatch = PersonFactory::makePerson("Bandersnatch");
-    people.push(bandersnatch);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Garden")
-            (places.peek(i))->personEnters(bandersnatch);
-    }
+    places.find("Garden")->second->personEnters(bandersnatch)
+
     
     // (2)
     Person* jabberwocky = PersonFactory::makePerson("Jabberwocky");
-    people.push(jabberwocky);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Castle")
-            (places.peek(i))->personEnters(jabberwocky);
-    }
+    places.find("Castle")->second->personEnters(jabberwocky)
     
     // (3)
     Person* redQueen = PersonFactory::makePerson("RedQueen");
-    people.push(redQueen);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Castle")
-            (places.peek(i))->personEnters(redQueen);
-    }
+    places.find("Castle")->second->personEnters(redQueen)
     
     // (4)
     Person* whiteRabbit = PersonFactory::makePerson("WhiteRabbit");
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Tree")
-            (places.peek(i))->personEnters(whiteRabbit);
-    }
-    
-    people.push(whiteRabbit);
+    places.find("Tree")->second->personEnters(whiteRabbit)
     
     // (5)
     Person* madHatter = PersonFactory::makePerson("MadHatter");
-    people.push(madHatter);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "TeaParty")
-            (places.peek(i))->personEnters(madHatter);
-    }
+    places.find("TeaParty")->second->personEnters(madHatter)
     
     // (6)
     Person* cheshireCat = PersonFactory::makePerson("CheshireCat");
-    people.push(cheshireCat);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Woods")
-            (places.peek(i))->personEnters(cheshireCat);
-    }
+    places.find("Woods")->second->personEnters(cheshireCat)
     
     // (7)
     Person* alice = PersonFactory::makePerson("Alice");
-    people.push(alice);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Tree")
-            (places.peek(i))->personEnters(alice);
-    }
+    places.find("Tree")->second->personEnters(alice)
     
 }
 
@@ -982,62 +957,43 @@ void Game::makeStuff()
     
     // (2) Garden
     Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Garden")
-            (places.peek(i))->whatsHere().push(whiteRose);
-    }
+    places.find("Garden")->second->genStuff(whiteRose);
     
     // (3) Woods
     Stuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);
-
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Woods")
-            places.peek(i)->whatsHere().push(key);
-    }
+    places.find("Woods")->second->genStuff(key);
     
-    // (4) TeaParty
+    // (4) TeaParty	//how does she get to normal size? Do you want me to make these just iterators so cake makes her one size bigger and tea makes her one size smaller
     Stuff* cake = new GrowStuff("Cake", "The cake will make Alice big!", 3, 1);
     Stuff* tea = new GrowStuff("Tea", "Drinking the tea will make Alice small.", 1, 1);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "TeaParty")
-        {
-            (places.peek(i))->whatsHere().push(cake);
-            (places.peek(i))->whatsHere().push(tea);
-        }
-    }
+    places.find("TeaParty")->second->genStuff(cake);
+    places.find("TeaParty")->second->genStuff(tea);
     
     // (5) Castle
-    Stuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 3);
-    
-    for(int i = 0; i < places.getSize(); i++)
-    {
-        if(places.peek(i)->getPlaceName() == "Castle")
-            (places.peek(i))->whatsHere().push(sword);
-    }
+    Stuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 1);
+    places.find("Castle")->second->genStuff(sword);
     
     // (6) Battlefield
     Stuff* jabberBlood = new MoveStuff("JabberBlood", "Drinking the Jabberwocky's purple blood will take Alice home", 1, 1);
     
-    for(int i = 0; i < people.getSize(); i++)
+    for(map<string, Place*>::iterator i = places.begin(); i!=places.end(); i++)
     {
-        if(people.peek(i)->getName() == "Jabberwocky")
-            people.peek(i)->getStuffList().push(jabberBlood);
+        if(((((i->second)->whoHere()).find("Jabberwocky")))!=((i->second)-whoHere()).end())
+            ((((i->second)->whoHere()).find("Jabberwocky"))->second)->recieve(jabberBlood);
     }
     
     // (7) Home
     // Home has nothing in list
 }
 
+//before I change this I want to talk about the plan...
 void Game::delegate(const string input)
 {
     if(input == "follow")
     {
         // move white rabbit and Alice to Garden
+        
+        
         while(!getPlaceList().peek(0)->whoHere().isEmpty())
         {
             string n = getPlaceList().peek(0)->whoHere().peek(0)->getName();
