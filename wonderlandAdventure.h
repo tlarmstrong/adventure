@@ -174,7 +174,7 @@ private:
     //    std::string name;             // name of helper / badguy		//I moved this to person
     std::string says;             // what helper / badguy says to Alice
     bool friendly;                // true = friend, false = not friend
-    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const List<Stuff*>& list, const int& hlth, const bool& frndly);
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const multimap<string, Stuff*>& sList, const int& hlth, const bool& frndly);
 
     
 public:
