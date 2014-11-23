@@ -59,6 +59,10 @@ public:
     // output description of Place
     std::ostream& narrate(std::ostream& out) const;
     
+    //output current information
+    std::ostream& render(std::ostream& out) const;
+    
+    
     // what Alice can do in particular place
     //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
 };
