@@ -91,9 +91,9 @@ public:
     Person(const int& hLevel, const std::multimap<std::string, Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
-    virtual void move(Place* to);               // Person can move from place to place
+    virtual void move(Place* to) const;               // Person can move from place to place
     
-    Place* whereAreYou(); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
+    Place* whereAreYou() const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
     void give(Stuff* item, Person* other);     // gives an item to someone else
     void recieve(Stuff* item);                 // recieves an item
@@ -135,7 +135,7 @@ public:
     
     void taggingAlong(NPC* tagger);  //adds a person to the list of Helpers
     void ditched(NPC* ditcher);      //removes a person from the list of Helpers
-    void move(Place* to);               // Alice can move from place to place with her friends
+    void move(Place* to) const;               // Alice can move from place to place with her friends
 
     
     void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
@@ -258,7 +258,7 @@ public:
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
-    virtual void useItem(Person* who, Place* where)=0;
+    virtual void useItem(const Person* who, Place* where)=0;
                          
     std::string getName() const;
     
@@ -288,8 +288,7 @@ class GrowStuff : public Stuff
         void useItem(Person* who);
         void useItem(NPC* who);
         void useItem(Thing* what);
-        void useItem(Person* who, Place* where);
-        void useItem(Thing* what, Person* who);
+        void useItem(const Person* who, Place* where);
 };
 
 class HealthStuff : public Stuff
@@ -304,8 +303,7 @@ class HealthStuff : public Stuff
         void useItem(Place* where);
         void useItem(NPC* who);
         void useItem(Thing* what);
-        void useItem(Person* who, Place* where);
-        void useItem(Thing* what, Person* who);
+        void useItem(const Person* who, Place* where);
 };
 
 class FriendStuff : public Stuff
@@ -320,8 +318,7 @@ class FriendStuff : public Stuff
         void useItem(Person* who);
         void useItem(Place* where);
         void useItem(Thing* what);
-        void useItem(Person* who, Place* where);
-        void useItem(Thing* what, Person* who);
+        void useItem(const Person* who, Place* where);
 };
 
 class OpenStuff : public Stuff
@@ -336,7 +333,7 @@ class OpenStuff : public Stuff
         void useItem(Place* where);
         void useItem(Person* who);
         void useItem(NPC* who);
-        void useItem(Person* who, Place* where);
+        void useItem(const Person* who, Place* where);
 };
 
 class MoveStuff : public Stuff
@@ -345,7 +342,7 @@ class MoveStuff : public Stuff
         MoveStuff(std::string name, std::string description, int result, bool status);
         ~MoveStuff();
     
-        void useItem(Person* who, Place* where);
+        void useItem(const Person* who, Place* where);
     
         void useItem(Alice* who);
         void useItem(Place* where);
