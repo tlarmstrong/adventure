@@ -48,7 +48,7 @@ public:
     
     multimap<string, Stuff*> whatsHere() const;              //returns the list of stuff here
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
-    void pickedUp(Stuff*& pick, Person*& who);              //somebody picked up an item here
+    void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
@@ -69,9 +69,8 @@ public:
  */
 
 class Person {
-    
+    friend class PersonFactory; 
 private:
-    
     // prevent value semantics
     Person(const Person& other);            //copy constructor
     void operator = (const Person& other);  //assignment operator
@@ -80,27 +79,28 @@ private:
 protected:
     
     int health;                     //health level of the person
-    List<Stuff*> stuffList;          // list of stuff each person has  
+    multimap<string, Stuff*> stuffList;          // list of stuff each person has  
     std::string name;
+    Person();
     
 public:
     
     // constructor -- all derived use (initialization list)
-    Person();
-    Person(const int& hLevel, const List<Stuff*>& sList, const std::string& nm);
+
+    Person(const int& hLevel, const multimap<string, Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
     void move(Place* to);               // Person can move from place to place
     
     Place* whereAreYou(); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
-    void give(Stuff& item, Person& other);     // gives an item to someone else
-    void recieve(Stuff& item);                 // recieves an item
+    void give(Stuff* item, Person* other);     // gives an item to someone else
+    void recieve(Stuff* item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
     
     int getHealth() const;
     
-    List<Stuff*> getStuffList() const;
+    multimap<string, Stuff*> getStuffList() const;
     std::string getName() const;								// gets person's name
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
@@ -117,27 +117,27 @@ class Alice: public Person {
     
 private:
     
-    List<NPC*> helperList;    // list of helpers with Alice
-    List<NPC*> badguyList;    // list of badguys with Alice
+    map<string, NPC*> helperList;    // list of helpers with Alice
+    map<string, NPC*> badguyList;    // list of badguys with Alice
     int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
     std::string description;
     
     // constructor
-    Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
+    Alice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice* makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
+    static Alice* makeAlice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string,NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
     
-    void taggingAlong(NPC& tagger);  //adds a person to the list of Helpers
-    void ditched(NPC& ditcher);      //removes a person from the list of Helpers
+    void taggingAlong(NPC* tagger);  //adds a person to the list of Helpers
+    void ditched(NPC* ditcher);      //removes a person from the list of Helpers
     
     void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
-    void pickup(Stuff& item);                     //Alice adds item to the list of stuff
-    void drop(Stuff& item);                       //Alice drops an item
+    void pickup(Stuff* item);                     //Alice adds item to the list of stuff
+    void drop(Stuff* item);                       //Alice drops an item
     void use(Stuff* item);                        //Alice uses an item on herself
     void use(Stuff* item, Place* where);     		//Alice uses an item in a place
     void use(Stuff* item, Thing* what);      		//Alice uses an item on a thing
@@ -145,7 +145,7 @@ public:
     
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
-    void setBodySize(const int s);
+    void setBodySize(const int& s);
     
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;
@@ -238,7 +238,7 @@ class Stuff {
     
 protected:
     
-    Stuff* next;        //"next" pointer in the base class
+    //Stuff* next	        //"next" pointer in the base class		//stopped using chain of command
     bool status;                // if used, status = 0; if not, status = 1
     std::string name;           // name of stuff object
     std::string description;    // description of Stuff
@@ -255,8 +255,8 @@ public:
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
-    virtual void useItem(Person* who, Place* where)=0;
-    virtual void useItem(Thing* what, Person* who)=0;
+    virtual void useItem(Person* who, Place* where)=0;	//what item set is this?
+    virtual void useItem(Thing* what, Person* who)=0;	//what item set is this?
                          
     std::string getName() const;
     
@@ -328,7 +328,7 @@ class OpenStuff : public Stuff
         OpenStuff(std::string name, std::string description, int result, bool status);
         ~OpenStuff();
     
-        void useItem(Thing* what, Person* who);
+        void useItem(Thing* what, Person* who);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
         
         void useItem(Alice*);
         void useItem(Place*);
