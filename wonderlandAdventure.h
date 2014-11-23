@@ -255,8 +255,8 @@ public:
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
-    virtual void useItem(Person* who, Place* where)=0;	//what item set is this?
-    virtual void useItem(Thing* what, Person* who)=0;	//what item set is this?
+    virtual void useItem(const Person* who, Place* where)=0;
+    virtual void useItem(Thing* what)=0;		
                          
     std::string getName() const;
     
@@ -286,8 +286,8 @@ class GrowStuff : public Stuff
         void useItem(Person* who);
         void useItem(NPC* who);
         void useItem(Thing* what);
-        void useItem(Person* who, Place* where);
-        void useItem(Thing* what, Person* who);
+        void useItem(const Person* who, Place* where);
+        void useItem(Thing* what);
 };
 
 class HealthStuff : public Stuff
@@ -302,8 +302,8 @@ class HealthStuff : public Stuff
         void useItem(Place* where);
         void useItem(NPC* who);
         void useItem(Thing* what);
-        void useItem(Person* who, Place* where);
-        void useItem(Thing* what, Person* who);
+        void useItem(const Person* who, Place* where);
+        void useItem(Thing* what);
 };
 
 class FriendStuff : public Stuff
@@ -318,8 +318,8 @@ class FriendStuff : public Stuff
         void useItem(Person* who);
         void useItem(Place* where);
         void useItem(Thing* what);
-        void useItem(Person* who, Place* where);
-        void useItem(Thing* what, Person* who);
+        void useItem(const Person* who, Place* where);
+        void useItem(Thing* what);
 };
 
 class OpenStuff : public Stuff
@@ -328,14 +328,13 @@ class OpenStuff : public Stuff
         OpenStuff(std::string name, std::string description, int result, bool status);
         ~OpenStuff();
     
-        void useItem(Thing* what, Person* who);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
+        void useItem(Thing* what);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
         
-        void useItem(Alice*);
-        void useItem(Place*);
-        void useItem(Person*);
-        void useItem(NPC*);
-        void useItem(Thing*);
-        void useItem(Person* who, Place* where);
+        void useItem(Alice* who);
+        void useItem(Place* where);
+        void useItem(Person* who);
+        void useItem(NPC* who);
+        void useItem(const Person* who, Place* where);
 };
 
 class MoveStuff : public Stuff
@@ -344,14 +343,14 @@ class MoveStuff : public Stuff
         MoveStuff(std::string name, std::string description, int result, bool status);
         ~MoveStuff();
     
-        void useItem(Person* who, Place* where);
+        void useItem(const Person* who, Place* where);
     
-        void useItem(Alice*);
-        void useItem(Place*);
-        void useItem(Person*);
-        void useItem(NPC*);
-        void useItem(Thing*);
-        void useItem(Thing* what, Person* who);
+        void useItem(Alice* who);
+        void useItem(Place* where);
+        void useItem(Person* who);
+        void useItem(NPC* who);
+        void useItem(Thing* what);
+        void useItem(Thing* what);
 };
 
 /*
@@ -384,11 +383,11 @@ public:
 class Door : public Thing {
      
 private:
-	List<Place*> between; // unused?
+	map<string, Place*> between; // unused?
         
 public:
         
-    Door(const bool& stat, const List<Place*>& betwn);             // constructor
+    Door(const bool& stat, const map<string, Place*>& betwn);             // constructor
     ~Door();            // destructor
         
     // open Door to find Chest
@@ -410,11 +409,11 @@ class Chest : public Thing {
     
 private:
     
-    List<Stuff*> inside;		//list of stuff inside the chest
+    multimap<string, Stuff*> inside;		//list of stuff inside the chest
     
 public:
     
-    Chest(const bool stat, const List<Stuff*>& contains);  // constructor
+    Chest(const bool stat, const multimap<string, Stuff*>& contains);  // constructor
     ~Chest();               // destructor
     
     // open Chest to find Sword
