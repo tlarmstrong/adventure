@@ -1,79 +1,61 @@
 // linkedList.h
-
 #include <cstddef>
 #include <iostream>
-
-template <class T>          // struck Node<T>
-struct Node                 // one node in list; "Node" means Node<T>
+template <class T> // struck Node<T>
+struct Node // one node in list; "Node" means Node<T>
 {
     T element;
     Node<T>* next;
     Node<T>* prev;
 };
-
-template <class T>          // class List<T>
-class List                  // a List of Nodes; "List" means List<T>
+template <class T> // class List<T>
+class List // a List of Nodes; "List" means List<T>
 {
-    
 private:
-    
-    Node<T>* head;          // pointer to first Node
-    
+    Node<T>* head; // pointer to first Node
 public:
-    
-    List();                 // constructor
-    ~List();                // destructor
-    
-    void push(const T& value);               // appends element to end of array
-    T pop(const T& value);                   // removes and returns element from array
-    T pop();                                // removes first element
-
-    T peek(const int& num) const;					//peeks at the num'th element in the list
-    
+    List(); // constructor
+    ~List(); // destructor
+    void push(const T& value); // appends element to end of array
+    T pop(const T& value); // removes and returns element from array
+    T pop(); // removes first element
+    T peek(const int& num) const; //peeks at the num'th element in the list
     // copy elements from one list to another
     void copyList(const List<T>& from);
-    
     // copy constructor for assignment operator // this is not the copy constructor, it is the assignment operator.
     List<T>& operator = (const List<T>& other);
-    
-    bool isEmpty() const;                   // returns true if array is empty
-    int getSize() const;                    // returns the number of elements in array
-    bool contains(const T& value) const;     // lets us know if a value is in a list
+    bool isEmpty() const; // returns true if array is empty
+    int getSize() const; // returns the number of elements in array
+    bool contains(const T& value) const; // lets us know if a value is in a list
 };
-
 template <class T>
-List<T>::List()            // no-arg constructor
+List<T>::List() // no-arg constructor
 {
-    head = NULL;            // first link point to NULL
+    head = NULL; // first link point to NULL
 }
-
 template <class T>
 List<T>::~List()
 {
-    if( head == NULL )                  // emtpy list
-        return;                         // nothing to do
-    
+    if( head == NULL ) // emtpy list
+        return; // nothing to do
     //if not empty, break the circular list
     //head->prev->next = NULL;
     Node <T>* walker = head;
-    
     // "walk" through the list and destroy each node
     while((walker != head) && (getSize() != 0))
     {
-        Node <T>* rmove = walker;	//remove was highlighted, so I wasn't sure if it was a keyword or not.
+        Node <T>* rmove = walker; //remove was highlighted, so I wasn't sure if it was a keyword or not.
         walker = walker->next;
         delete rmove;
     }
     head = NULL;
 }
-
 template <class T>
 void List<T>::push(const T& value)
 {
     // allocate new node and set value
     Node<T>* n = new Node<T>;
     n->element = value;
-    
     // if first element, set pointers to self
     if(head == NULL)
     {
@@ -81,7 +63,6 @@ void List<T>::push(const T& value)
         head->prev = head;
         head->next = head;
     }
-    
     // otherwise, set pointers to nodes before and after it
     else
     {
@@ -91,26 +72,22 @@ void List<T>::push(const T& value)
         head->prev = n;
     }
 }
-
 // pop specific value
 template<class T>
 T List<T>::pop(const T& value)
 {
-    T popped;                   // return variable
-    
-    if(contains(value))         // check if list contains the value
+    T popped; // return variable
+    if(contains(value)) // check if list contains the value
     {
         // create a walker node and set to head
         Node <T>* walker = head;
-        
-        // if head's element equals the specified value and list has only one node	//something to think about: What does it mean for a place to be equal to a place? I don't think the computer knows that. It does know what it means for a pointer to be equal to another pointer. I think that if all our lists are lists of pointers we should be fine (they probably should be anyway). Thus we need to be careful to always pass by reference because a copy will have a different address.
+        // if head's element equals the specified value and list has only one node //something to think about: What does it mean for a place to be equal to a place? I don't think the computer knows that. It does know what it means for a pointer to be equal to another pointer. I think that if all our lists are lists of pointers we should be fine (they probably should be anyway). Thus we need to be careful to always pass by reference because a copy will have a different address.
         if(head->element == value && getSize() == 1)
         {
             popped = head->element; // assign value to return variable
-            delete head;            // since it is the only value in the list, delete head
+            delete head; // since it is the only value in the list, delete head
             head = NULL;
         }
-        
         // otherwise, look for the value
         else
         {
@@ -119,18 +96,15 @@ T List<T>::pop(const T& value)
             {
                 if(walker->element == value)
                 {
-                    popped = walker->element;           // if found, assign to return variable
-                    
-                    Node<T>* rmove = walker;           // create a node pointer to remove //was highlighted, not sure if key word
-                    Node<T>* newWalker = walker->next;  // create a node pointer to next
-                    newWalker->prev = walker->prev;     // reposition pointers
+                    popped = walker->element; // if found, assign to return variable
+                    Node<T>* rmove = walker; // create a node pointer to remove //was highlighted, not sure if key word
+                    Node<T>* newWalker = walker->next; // create a node pointer to next
+                    newWalker->prev = walker->prev; // reposition pointers
                     walker->prev->next = newWalker;
                     walker->prev = newWalker;
-                    
                     head = newWalker;
-                    delete rmove;                      // delete rmove node
+                    delete rmove; // delete rmove node
                 }
-                
                 // if not found, keep "walking"
                 walker = walker->next;
             }
@@ -138,44 +112,36 @@ T List<T>::pop(const T& value)
     }
     return popped;
 }
-
 // pop without arguments
 template<class T>
 T List<T>::pop()
 {
-    T popped;                   // return variable
-    
+    T popped; // return variable
     // create a walker node and set to head
     Node <T>* walker = head;
-
     // if list has only one node
     if(getSize() == 1)
     {
         popped = head->element; // assign value to return variable
-        delete head;            // since it is the only value in the list, delete head
+        delete head; // since it is the only value in the list, delete head
         head = NULL;
     }
-    
     // otherwise, return first element and reposition pointers
     else
     {
-        popped = walker->element;           // assign head to return variable
-        
-        Node<T>* rmove = walker;           // create a node pointer to remove
-        Node<T>* newWalker = walker->next;  // create a node pointer to next
-        newWalker->prev = walker->prev;     // reposition pointers
+        popped = walker->element; // assign head to return variable
+        Node<T>* rmove = walker; // create a node pointer to remove
+        Node<T>* newWalker = walker->next; // create a node pointer to next
+        newWalker->prev = walker->prev; // reposition pointers
         walker->prev->next = newWalker;
-        
-        delete rmove;                      // delete remove node
+        delete rmove; // delete remove node
     }
     return popped;
 }
-
 template <class T>
 T List<T>::peek(const int& num) const
 {
     Node<T>* walker = head;
-    
     if(num < getSize())
     {
         for (int i = 0; i < num; i++)
@@ -184,81 +150,67 @@ T List<T>::peek(const int& num) const
         }
         return walker->element;
     }
-    
     return NULL;
 }
-
 // copy elements from one list to another
 template<class T>
-// copy constructor for assignment operator	//not copy constructor, but assignment operator. Be careful, we could assign to a list that already has stuff in it. We need to delete that stuff first
+// copy constructor for assignment operator //not copy constructor, but assignment operator. Be careful, we could assign to a list that already has stuff in it. We need to delete that stuff first
 List<T>& List<T>::operator = (const List<T>& other)
 {
     // check if assigning List to self
     if(this == &other)
         return *this;
-    
-    for (int i = 0; i < getSize(); i++){	//empties list
+    for (int i = 0; i < getSize(); i++){ //empties list
         pop();
     }
-    
     // make deep copy from other list to new list
     for(int i = 0; i < other.getSize(); i++)
     {
         push(other.peek(i));
     }
-    
     return *this;
 }
-
 template <class T>
 bool List<T>::isEmpty() const
 {
     // list is empty if 1st node (head) is null
     return (head == NULL);
 }
-
 template <class T>
 int List<T>::getSize() const
 {
     int count = 0;
-    
     // Handle empty list as special case
     if( head == NULL )
         return count;
-    
     else
     {
         // temporarily break the circular list
         //head->prev->next = NULL;
         count ++;
         Node <T>* walker = head;
-        
         while(walker->next != head && count != 0)
         {
-        // "walk" through list and count nodes
+            // "walk" through list and count nodes
             walker = walker->next;
             count++;
         }
     }
     return count;
 }
-
 template <class T>
 bool List<T>::contains(const T& value) const
 {
     Node <T>* walker = head;
-    
     // search for the value as long as walker does not equal the specified value
     // and walker's next pointer does not point to head pointer
     while(walker->element != value && walker->next != head)
     {
         walker = walker->next;
     }
-    
     // if found, return true
     if(walker->element == value)
         return true;
-    
     // otherwise, return false
     return false;
 }
