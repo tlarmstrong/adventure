@@ -22,22 +22,30 @@ Place::~Place()
 	/* I am going to leave the commented code so that we can talk about it
 	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
-		
-		for (map<string, )
-		
-		
-		delete *((*i).second);
+		for (multimap<string, Stuff*>::iterator j=(i->second)->stuffList.begin(); j!=(i->second)->stuffList.end(); j++)
+		{
+			delete j->second
+		}
+		delete i->second;
 	}
 	
-		for (map<string, Stuff*>::iterator i=stuffHere.begin(); i!=stuffHere.end(); i++)	//deletes all the stuff in a place
+	for (map<string, Stuff*>::iterator i=stuffHere.begin(); i!=stuffHere.end(); i++)	//deletes all the stuff in a place
 	{
-		delete *((*i).second);
+		delete i->second;
 	}
 	
-			for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
+	for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
 	{
-		delete *((*i).second);
+		if(i->first=="chest")
+		{
+			for (multimap<string, Stuff*>::iterator j=(i->second)->inside.begin(); j!=(i->second)->inside.end(); j++)
+			{
+				delete j->second
+			}
+		}
+		delete i->second;
 	}
+	*/
 }
 
 map<string, Person*> Place::whoHere() const     //returns a list of everybody here
@@ -53,41 +61,42 @@ string Place::getPlaceName() const  // returns name of Place
 
 void Place::personEnters(Person* enterer)  // somebody comes into the place
 {
-    peopleHere.push(enterer);
+    peopleHere.insert(pair<string, Person*>(enterer->getName(), enterer));
 }
 
 void Place::personLeaves(Person* leaver)   // removes somebody from a place
 {
-    peopleHere.pop(leaver);
+    
+    peopleHere.erase(peopleHere.find(leaver->getName()));
 }
 
-List<Stuff*> Place::whatsHere() const              // returns the list of stuff here
+multimap<string, Stuff*> Place::whatsHere() const              // returns the list of stuff here
 {
     return stuffHere;
 }
 
 // someone dropped an item, so now it is laying around
-void Place::dropped(Stuff* drop, Person* who)
+void Place::dropped(const Stuff* drop, Person* who)
 {
-    who->getStuffList().pop(drop);
-    stuffHere.push(drop);
+    who->getStuffList().erase(who->getStuffList().find(drop.getName()));
+    stuffHere.insert(pair<string, Stuff*>(drop.getName(), drop));
 }
 
 //somebody picked up an item here
-void Place::pickedUp(Stuff*& pick, Person*& who)
+void Place::pickedUp(Stuff* pick, Person* who)
 {
-    stuffHere.pop(pick);
-    who->recieve(*pick);
+    stuffHere.erase(stuffHere.find(pick->getName()));
+    who->recieve(pick);
 }
 
 void Place::newPlaceToGo(Place* goTo)
 {
-    placeTo.push(goTo);
+    placeTo.insert(pair<string, Place*>(goTo->getName(),goTo));
 }
 
 void Place::blockPlaceToGo(Place* block)
 {
-    placeTo.pop(block);
+    placeTo.erase(placeTo.find(block->getName()));
 }
 
 List<Place*> Place::getNewPlaceToGo() const
@@ -132,29 +141,21 @@ void Person::move(Place* to)
     to->personEnters(this);          // move a person to another place
 }
 
-// get name of Place where Person is
+// get Place where Person is
 Place* Person::whereAreYou()
 {
-    Place* here = nullptr;
-    
-    for(int i = 0; i < Game::places.getSize(); i++)
-    {
-        here = Game::places.peek(i);
-        
-        // whoHere() will return a list of people at place; if people at place == this person, then return the name of Place.
-        if((here->whoHere()).contains(this))
-            return here;
-    }
-    return here;
+    return Game::places.find(this->getName())->second;
 }
 
 //gives an item to someone else
-void Person::give(Stuff& item, Person& other)
+void Person::give(Stuff* item, Person* other)
 {
-    if(stuffList.contains(&item))
+    
+    
+    if(stuffList.find(item->getName())!=stuffList.end())
     {
-        Stuff* popped = stuffList.pop(&item);
-        other.recieve(*popped);
+        stuffList.erase(stuffList.find(item->getName()));
+        other->recieve(item);
     }
     
     else
@@ -162,9 +163,9 @@ void Person::give(Stuff& item, Person& other)
 }
 
 //recieves an item
-void Person::recieve(Stuff& item)
+void Person::recieve(Stuff* item)
 {
-    stuffList.push(&item);
+    stuffList.insert(pair<string, Stuff*>(item->getName(), item));
 }
 
 //person takes damage
@@ -178,7 +179,7 @@ int Person::getHealth() const
     return health;
 }
 
-List<Stuff*> Person::getStuffList() const
+map<string, Stuff*> Person::getStuffList() const
 {
     return stuffList;
 }
