@@ -425,7 +425,7 @@ public:
     void closeThing();
     
     void takeStuff(Stuff* tk);
-    List<Stuff*>& whatsinside();
+    multimap<string, Stuff*>& whatsinside();
     
     // effects of openThing()
     //std::ostream& render(const std::ostream&);
