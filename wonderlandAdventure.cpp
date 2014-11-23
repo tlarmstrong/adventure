@@ -136,7 +136,7 @@ Person::~Person() {}
 //allows each person to move from place to place
 void Person::move(Place* to)
 {
-    Place* from = this->whereAreYou();
+    Place* from = whereAreYou();
     from->personLeaves(this);        // remove person from current location
     to->personEnters(this);          // move a person to another place
 }
@@ -144,7 +144,7 @@ void Person::move(Place* to)
 // get Place where Person is
 Place* Person::whereAreYou()
 {
-    return Game::places.find(this->getName())->second;
+    return Game::places.find(getName())->second;
 }
 
 //gives an item to someone else
@@ -578,7 +578,7 @@ Stuff::~Stuff() {}                // destructor
 
 string Stuff::getName() const
 {
-    return this->name;
+    return name;
 }
 
 // output description of Stuff
@@ -607,10 +607,10 @@ void GrowStuff::useItem(Alice* who)
     
 }
 
-void GrowStuff::useItem(Place* where) {}
-void GrowStuff::useItem(Person* who) {}
-void GrowStuff::useItem(NPC* who) {}
-void GrowStuff::useItem(Thing* what) {}
+void GrowStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getName();}
+void GrowStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
+void GrowStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
+void GrowStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
 void GrowStuff::useItem(Person* who, Place* where) {}
 void GrowStuff::useItem(Thing* what, Person* who) {}
 
@@ -625,10 +625,18 @@ void HealthStuff::useItem(Person* who)
     status = 0;
 }
 
-void HealthStuff::useItem(Alice* who) {}
-void HealthStuff::useItem(Place* where) {}
-void HealthStuff::useItem(NPC* who) {}
-void HealthStuff::useItem(Thing* what) {}
+void HealthStuff::useItem(Alice* who)
+{
+	who->hurt(result);
+	status = 0;
+}
+void HealthStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getName();}
+void HealthStuff::useItem(NPC* who)
+{
+	who->hurt(result);
+	status = 0;
+}
+void HealthStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
 void HealthStuff::useItem(Person* who, Place* where) {}
 void HealthStuff::useItem(Thing* what, Person* who) {}
 
@@ -637,16 +645,17 @@ FriendStuff::FriendStuff(const string name, const string description, const int 
 
 FriendStuff::~FriendStuff() {}
 
+//we should think about how to customize this to be just for bandersnatch. I suspect that will be in main or something... or maybe not, since it will have to be true all the time...
 void FriendStuff::useItem(NPC* who)
 {
     who->setFriendly(result);
     status = 0;
 }
 
-void FriendStuff::useItem(Alice* who) {}
-void FriendStuff::useItem(Person* who) {}
-void FriendStuff::useItem(Place* where) {}
-void FriendStuff::useItem(Thing* what) {}
+void FriendStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
+void FriendStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
+void FriendStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getName();}
+void FriendStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
 void FriendStuff::useItem(Person* who, Place* where) {}
 void FriendStuff::useItem(Thing* what, Person* who) {}
 
@@ -655,44 +664,52 @@ OpenStuff::OpenStuff(const string name, const string description, const int resu
 
 OpenStuff::~OpenStuff() {}
 
-void OpenStuff::useItem(Thing* what, Person* who)
+void OpenStuff::useItem(Thing* what)			//I did not understand where you were using the person pointer, so I took it out.
 {
     what->openThing();
     status = 0;
 }
 
-void OpenStuff::useItem(Alice* who) {}
-void OpenStuff::useItem(NPC* where) {}
-void OpenStuff::useItem(Person* who) {}
-void OpenStuff::useItem(Place* where) {}
-void OpenStuff::useItem(Thing*) {}
-void OpenStuff::useItem(Person* who, Place* where) {}
+void OpenStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
+void OpenStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
+void OpenStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
+void OpenStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getName();}
+void OpenStuff::useItem(Person* who, Place* where) {cout << getName() << "cannot be used like this";}
 
 MoveStuff::MoveStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 MoveStuff::~MoveStuff() {}
 
-void MoveStuff::useItem(Person* who, Place* where)
+//I am not certain what you were trying to do here... I think you were trying to create a teleportation device that takes somoeone home. I switched your code for our map system, but let it do exactly what it had been. In comments I will write how to make a teleportation item. What your code does is move somebody to a place next to the given place if the name of the place to go is home (not the place specified).
+void MoveStuff::useItem(const Person* who, Place* where)
 {
-    List<Place*> go = where->getNewPlaceToGo();
+    map<string, Place*> go = where->getNewPlaceToGo();
         
-    for(int i = 0; i < go.getSize(); i++)
+    for(map<string, Place*>::iterator i=go.begin(); i!=go.end(); i++)
     {
-        if(go.peek(i)->getPlaceName() == "Home")
+        if((i->second)->getPlaceName() == "Home")
         {
-            Place* there = go.peek(i);
+            Place* there = i->second;
             who->move(there);
         }
     }
     status = 0;
+    
+    /*
+    if(where->getPlaceName()=="Home")
+    {
+    	who->move(where);
+    }
+    status=0;
+    */
 }
 
-void MoveStuff::useItem(Thing* what) {}
-void MoveStuff::useItem(Alice* who) {}
-void MoveStuff::useItem(NPC* where) {}
-void MoveStuff::useItem(Person* who) {}
-void MoveStuff::useItem(Place* where) {}
-void MoveStuff::useItem(Thing* what, Person* who) {}
+void MoveStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
+void MoveStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
+void MoveStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
+void MoveStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
+void MoveStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getName();}
+void MoveStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
 
 /*
  ----------------------------------
@@ -709,7 +726,7 @@ Thing::~Thing() {}
  Door classes: Derived from Thing 
  ----------------------------------
  */
-Door::Door(const bool& stat, const List<Place*>& betwn): Thing(stat)
+Door::Door(const bool& stat, const map<string, Place*>& betwn): Thing(stat)
 {
 	between = betwn;
     //std::cout << "constructed Door" << std::endl;
@@ -721,8 +738,8 @@ void Door::openThing()
 {
 	if(status==0)
 	{
-		between.peek(0)->newPlaceToGo(between.peek(1));
-		between.peek(1)->newPlaceToGo(between.peek(0));
+		between.begin()->second->newPlaceToGo(between.begin()+1);
+		(between.begin()+1)->second->newPlaceToGo(between.begin());
 		status=1;
 	}
 		
@@ -732,8 +749,8 @@ void Door::closeThing()
 {
 	if(status==1)
 	{
-		between.peek(0)->blockPlaceToGo(between.peek(1));
-		between.peek(1)->blockPlaceToGo(between.peek(0));
+		between.begin()->second->blockPlaceToGo(between.begin()+1);
+		(between.begin()+1)->second->blockPlaceToGo(between.begin());
 		status=0;
 	}
 }
@@ -745,7 +762,7 @@ void Door::closeThing()
  ----------------------------------
 */
 
-Chest::Chest(const bool stat, const List<Stuff*>& contains):Thing(stat)
+Chest::Chest(const bool stat, const multimap<string, Stuff*>& contains):Thing(stat)
 {
 	inside=contains;
     //std::cout << "constructed Chest" << std::endl;
@@ -765,10 +782,10 @@ void Chest::closeThing()
 
 void Chest::takeStuff(Stuff* tk)
 {
-	inside.pop(tk);
+	inside.erase(inside.find(tk->getName());
 }
 
-List<Stuff*>& Chest::whatsinside()
+multimap<string, Stuff*>& Chest::whatsinside()
 {
 	return inside;
 }
