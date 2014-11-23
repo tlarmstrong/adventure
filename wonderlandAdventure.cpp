@@ -113,7 +113,66 @@ map<string, Place*> Place::getNewPlaceToGo() const
 std::ostream& Place::narrate(std::ostream& out) const
 {
     out << description << endl;
+    render(out);
     return out;
+}
+
+std::ostream& Place::render(std::ostream& out) const
+{
+	if (peopleHere.empty())
+		out << "There is nobody here.";
+	else
+	{
+		out << "You see there are other people here: ";
+		std::map<string, Person*>::iterator i;
+		i=peopleHere.begin();
+		out << i->second->getName();
+		for(;i!=peopleHere.end();i++)
+		{
+			out << ", " <<i->second->getName();
+		}
+	}
+	out << endl;
+	if (!(thingHere.empty()))
+	{
+		out << "You see a ";
+		std::map<string, Thing*>::iterator i;
+		i=thingHere.begin();
+		out << i->second->getName();
+		for(;i!=thingHere.end();i++)
+		{
+			out << ", and a" <<i->second->getName();
+		}
+		out << "."<< endl;
+	}
+	if (!(stuffHere.empty()))
+	{
+		out << "On the ground you see a ";
+		std::map<string, Stuff*>::iterator i;
+		i=stuffHere.begin();
+		out << i->second->getName();
+		for(;i!=stuffHere.end();i++)
+		{
+			out << ", and a" <<i->second->getName();
+		}
+		out << "."<< endl;
+	}
+	if (placeTo.empty())
+	{
+		out << "You can go nowhere from here."
+	}
+	else
+	{
+		out << "From here you can go to: ";
+		std::map<string, Place*>::iterator i;
+		i=placeTo.begin();
+		out << i->second->getPlaceName();
+		for(;i!=stuffHere.end();i++)
+		{
+			out << ", " <<i->second->getPlaceName();
+		}
+		out << "."<< endl;
+	}
 }
 
 /*// what Alice can do in particular place		//until we nail down that we need this and more exactly what we want it to do, I don't want to have this function written
@@ -305,11 +364,12 @@ std::ostream& Alice::render(std::ostream& out) const
     
     out << "She has these items: ";
 
-    if(!stuffList.empty())
+    if(!(stuffList.empty()))
     {
         // No viable conversion from 'const_iterator' (aka '__map_const_iterator<typename __base::const_iterator>') to 'multimap<string, Stuff *>::iterator' (aka '__map_iterator<typename __base::iterator>')
         
-        multimap<string, Stuff*>::iterator i=stuffList.begin();
+        multimap<string, Stuff*>::iterator i;
+        i=stuffList.begin();
         out << (i->second)->getName();
         i++;
         
@@ -337,7 +397,7 @@ std::ostream& Alice::render(std::ostream& out) const
     else
         out << "no friends, yet" << endl;;
     
-    if(!stuffList.empty())
+    if(!badguyList.empty())
     {
         out << "/nHer enemies are: ";
         
@@ -435,7 +495,8 @@ ostream& NPC::render(ostream& out) const
     {
         //No viable conversion from 'const_iterator' (aka '__map_const_iterator<typename __base::const_iterator>') to 'multimap<string, Stuff *>::iterator' (aka '__map_iterator<typename __base::iterator>')
         
-        multimap<string, Stuff*>::iterator i=stuffList.begin();
+        multimap<string, Stuff*>::iterator i;
+        i=stuffList.begin();
         out << (i->second)->getName();
         i++;
         
