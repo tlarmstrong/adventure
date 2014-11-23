@@ -47,8 +47,9 @@ public:
     void personLeaves(Person* leaver);    //removes somebody from a place
     
     multimap<string, Stuff*> whatsHere() const;              //returns the list of stuff here
-    void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
-    void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
+    void dropped(const Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
+    void pickedUp(const Stuff* pick, Person* who);              //somebody picked up an item here
+    void genStuff(const Stuff* gen);				//to generate an item in the game
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
@@ -90,7 +91,7 @@ public:
     Person(const int& hLevel, const multimap<string, Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
-    void move(Place* to);               // Person can move from place to place
+    virtual void move(Place* to);               // Person can move from place to place
     
     Place* whereAreYou(); // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
     
@@ -134,6 +135,8 @@ public:
     
     void taggingAlong(NPC* tagger);  //adds a person to the list of Helpers
     void ditched(NPC* ditcher);      //removes a person from the list of Helpers
+    void move(Place* to);               // Alice can move from place to place with her friends
+
     
     void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
     void pickup(Stuff* item);                     //Alice adds item to the list of stuff
@@ -446,13 +449,13 @@ public:
          
      public:
      
-        static List<Place*> places;    // Game class keeps static list of Places in Wonderland
-        static List<Person*> people;   // Game class keeps static list of People in Wonderland
+        static map<string, Place*> places;    // Game class keeps static list of Places in Wonderland
+        static map<string, Person*> people;   // Game class keeps static list of People in Wonderland
          
         Game();                        // constructor
         ~Game();                       // destructor
-        List<Place*> getPlaceList() const;
-        List<Person*> getPeopleList() const;
+        map<string, Place*> getPlaceList() const;
+        map<string, Person*> getPeopleList() const;
         void delegate(const std::string input);
  };
 
