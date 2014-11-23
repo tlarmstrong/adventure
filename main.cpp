@@ -30,7 +30,7 @@ int main()
         one.delegate(input);
     }
     
-    
+    /* test output of lists
     int numPlace = one.getPlaceList().getSize();
     int numPeople = one.getPeopleList().getSize();
 
@@ -50,5 +50,6 @@ int main()
     {
         one.getPeopleList().peek(i)->render(cout);
     }
+     */
     
 }
