@@ -99,7 +99,7 @@ void Place::blockPlaceToGo(Place* block)
     placeTo.erase(placeTo.find(block->getName()));
 }
 
-List<Place*> Place::getNewPlaceToGo() const
+map<string, Place*> Place::getNewPlaceToGo() const
 {
     return placeTo;
 }
@@ -125,7 +125,7 @@ std::ostream& Place::narrate(std::ostream& out) const
  -----------------------------------------------------------
  */
 
-Person::Person(const int& hLevel, const List<Stuff*>& sList, const string& nm) : health(hLevel), stuffList(sList), name(nm) {}
+Person::Person(const int& hLevel, const multimap<string, Stuff*>& sList, const string& nm) : health(hLevel), stuffList(sList), name(nm) {}
 
 // default constructor for Person Factory to work
 Person::Person() {}
@@ -179,7 +179,7 @@ int Person::getHealth() const
     return health;
 }
 
-map<string, Stuff*> Person::getStuffList() const
+multimap<string, Stuff*> Person::getStuffList() const
 {
     return stuffList;
 }
@@ -197,13 +197,13 @@ string Person::getName() const
  */
 
 // constructor (private)
-Alice::Alice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt) : Person(hLevel, sList, nm), helperList(hList), badguyList(bList), bodySize(bSize), description(dscpt) {}
+Alice::Alice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt) : Person(hLevel, sList, nm), helperList(hList), badguyList(bList), bodySize(bSize), description(dscpt) {}
 
 // destructor
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice* Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, const List<NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt)
+Alice* Alice::makeAlice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt)
 {
     static Alice alice(sList, hList, bList, bSize, hLevel, nm, dscpt);
     
@@ -211,31 +211,31 @@ Alice* Alice::makeAlice(const List<Stuff*>& sList, const List<NPC*>& hList, cons
 }
 
 //adds a person to the list of Helpers
-void Alice::taggingAlong(NPC& tagger)
+void Alice::taggingAlong(NPC* tagger)
 {
-    helperList.push(&tagger);
+    helperList.insert(pair<string, NPC*>(tagger->getName(),tagger));
 }
 
 //removes a person from the list of Helpers
-void Alice::ditched(NPC& ditcher)
+void Alice::ditched(NPC* ditcher)
 {
-    helperList.pop(&ditcher);
+    helperList.erase(helperList.find(ditcher->getName()));
 }
 
 //Alice adds item to the list of stuff
-void Alice::pickup(Stuff& item)
+void Alice::pickup(Stuff* item)
 {
     recieve(item);
 }
 
 //Alice drops an item
-void Alice::drop(Stuff& item)
+void Alice::drop(Stuff* item)
 {
-    stuffList.pop(&item);
+    stuffList.erase(stuffList.find(item->getName()));
 }
 
 //to define the ones after this, I think it will be easier if we first define stuffs. I think we will need to create subclasses for stuff.
-
+//something we need to think about is what happens to stuff after it is used.... As I see it we have a couple options: use a find_if (not certain exists for multimaps but we could certainly just apply the normal algorithm with an iterator)
 //Alice uses an item on herself
 void Alice::use(Stuff* item)
 {
@@ -265,7 +265,7 @@ int Alice::getBodySize() const
     return bodySize;
 }
 
-void Alice::setBodySize(const int s)
+void Alice::setBodySize(const int& s)
 {
     bodySize = s;
 }
@@ -286,24 +286,28 @@ std::ostream& Alice::render(std::ostream& out) const
     
     out << "She has these items: ";
 
-    if(!stuffList.isEmpty())
+    if(!stuffList.empty())
     {
-        out << (stuffList.peek(0))->getName();
+        multimap<string, Stuff*>::iterator i=stuffList.begin();
+        out << (i->second)->getName();
+        i++;
         
-        for(int i = 1; i < stuffList.getSize(); i++)
-            out << ", " << (stuffList.peek(i))->getName();
+        for(; i!=stuffList.end(); i++)
+            out << ", " << (i->second)->getName();
     }
     
     else
         out << "nothing" << endl;
     
-    if(!helperList.isEmpty())
+    if(!helperList.empty())
     {
         out << "/nHer friends are: ";
-        out << (helperList.peek(0))->getName();
+        map<string, NPC*>::iterator i=helperList.begin();
+        out << (i->second)->getName();
+        i++;
         
-        for(int i = 1; i < helperList.getSize(); i++)
-            out << ", " << (helperList.peek(i))->getName();
+        for(; i!=helperList.end(); i++)
+            out << ", " << (i->second)->getName();
     }
     
     else
@@ -312,10 +316,12 @@ std::ostream& Alice::render(std::ostream& out) const
     if(!stuffList.isEmpty())
     {
         out << "/nHer enemies are: ";
-        out << (badguyList.peek(0))->getName();
+        map<string, NPC*>::iterator i=badguyList.begin();
+        out << (i->second)->getName();
+        i++;
         
-        for(int i = 1; i < badguyList.getSize(); i++)
-            out << ", " << (badguyList.peek(i))->getName();
+        for(; i!=badguyList.end(); i++)
+            out << ", " << (i->second)->getName();
     }
     
     else
