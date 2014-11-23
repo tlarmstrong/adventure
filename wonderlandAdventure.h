@@ -457,7 +457,7 @@ public:
         ~Game();                       // destructor
         std::map<std::string, Place*> getPlaceList() const;
         //std::map<std::string, Person*> getPeopleList() const;
-        void delegate(const std::string input);
+        void delegate(const std::string& input);
  };
 
 
