@@ -13,10 +13,10 @@ int main()
     string input;
     
     // start with description of Alice
-    one.getPeopleList().peek(6)->narrate(cout);
+    //one.getPeopleList().peek(6)->narrate(cout);
     
     // description of first place (tree)
-    one.getPlaceList().peek(0)->narrate(cout);
+    //one.getPlaceList().peek(0)->narrate(cout);
     
     // ask what Alice would like to do (follow the White Rabbit)
     cout << "What should Alice do? (hint: follow)" << endl;

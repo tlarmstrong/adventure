@@ -1,5 +1,5 @@
 // wonderlandAdventure.h
-#include "linkedList.h"
+#include <map>
 #include <iostream>
 
 // declare Stuff, NPC, Place, Thing, Person
@@ -29,32 +29,32 @@ protected:
     std::string description;         // unique description of Place
     //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
     std::string name;                // name of Place
-    map<string, Person*> peopleHere;         // everybody in Place
-    multimap<string, Stuff*> stuffHere;           // list of things in a Place
-    multimap<string, Thing*> thingHere;			 // list of things here
-    map<string, Place*> placeTo;			 // list of Place Alice can go from here
+    std::map<std::string, Person*> peopleHere;         // everybody in Place
+    std::multimap<std::string, Stuff*> stuffHere;           // list of things in a Place
+    std::multimap<std::string, Thing*> thingHere;			 // list of things here
+    std::map<std::string, Place*> placeTo;			 // list of Place Alice can go from here
     
 public:
     
-    Place(const std::string& nm, const std::string& dscpt, const multimap<string, Stuff*>& what, const map<string, Person*>& who, const multimap<string,Thing*>& obj, const map<string, Place*>& trav);
+    Place(const std::string& nm, const std::string& dscpt, const std::multimap<std::string, Stuff*>& what, const std::map<std::string, Person*>& who, const std::multimap<std::string,Thing*>& obj, const std::map<std::string, Place*>& trav);
     //Place();                                    // constructor
     ~Place();                                   // destructor
     
-    map<string, Person*> whoHere() const;               //constructed list
+    std::map<std::string, Person*> whoHere() const;               //constructed list
     std::string getPlaceName() const;           // returns name of Place
     
     void personEnters(Person* enterer);   //somebody comes into the place
     void personLeaves(Person* leaver);    //removes somebody from a place
     
-    multimap<string, Stuff*> whatsHere() const;              //returns the list of stuff here
-    void dropped(const Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
-    void pickedUp(const Stuff* pick, Person* who);              //somebody picked up an item here
-    void genStuff(const Stuff* gen);				//to generate an item in the game
+    std::multimap<std::string, Stuff*> whatsHere() const;              //returns the list of stuff here
+    void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
+    void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
+    void genStuff(Stuff* gen);				//to generate an item in the game
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
     
-    map<string, Place*> getNewPlaceToGo() const;
+    std::map<std::string, Place*> getNewPlaceToGo() const;
     
     // output description of Place
     std::ostream& narrate(std::ostream& out) const;
@@ -80,7 +80,7 @@ private:
 protected:
     
     int health;                     //health level of the person
-    multimap<string, Stuff*> stuffList;          // list of stuff each person has  
+    std::multimap<std::string, Stuff*> stuffList;          // list of stuff each person has  
     std::string name;
     Person();
     
@@ -88,7 +88,7 @@ public:
     
     // constructor -- all derived use (initialization list)
 
-    Person(const int& hLevel, const multimap<string, Stuff*>& sList, const std::string& nm);
+    Person(const int& hLevel, const std::multimap<std::string, Stuff*>& sList, const std::string& nm);
     virtual ~Person();                       // destructor
     
     virtual void move(Place* to);               // Person can move from place to place
@@ -101,7 +101,7 @@ public:
     
     int getHealth() const;
     
-    multimap<string, Stuff*> getStuffList() const;
+    std::multimap<std::string, Stuff*> getStuffList() const;
     std::string getName() const;								// gets person's name
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
@@ -118,20 +118,20 @@ class Alice: public Person {
     
 private:
     
-    map<string, NPC*> helperList;    // list of helpers with Alice
-    map<string, NPC*> badguyList;    // list of badguys with Alice
+    std::map<std::string, NPC*> helperList;    // list of helpers with Alice
+    std::map<std::string, NPC*> badguyList;    // list of badguys with Alice
     int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
     std::string description;
     
     // constructor
-    Alice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
+    Alice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string, NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice* makeAlice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string,NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
+    static Alice* makeAlice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string,NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
     
     void taggingAlong(NPC* tagger);  //adds a person to the list of Helpers
     void ditched(NPC* ditcher);      //removes a person from the list of Helpers
@@ -177,7 +177,7 @@ private:
     //    std::string name;             // name of helper / badguy		//I moved this to person
     std::string says;             // what helper / badguy says to Alice
     bool friendly;                // true = friend, false = not friend
-    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const multimap<string, Stuff*>& sList, const int& hlth, const bool& frndly);
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const std::multimap<std::string, Stuff*>& sList, const int& hlth, const bool& frndly);
 
     
 public:
@@ -258,8 +258,7 @@ public:
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
-    virtual void useItem(const Person* who, Place* where)=0;
-    virtual void useItem(Thing* what)=0;		
+    virtual void useItem(Person* who, Place* where)=0;
                          
     std::string getName() const;
     
@@ -289,8 +288,8 @@ class GrowStuff : public Stuff
         void useItem(Person* who);
         void useItem(NPC* who);
         void useItem(Thing* what);
-        void useItem(const Person* who, Place* where);
-        void useItem(Thing* what);
+        void useItem(Person* who, Place* where);
+        void useItem(Thing* what, Person* who);
 };
 
 class HealthStuff : public Stuff
@@ -305,8 +304,8 @@ class HealthStuff : public Stuff
         void useItem(Place* where);
         void useItem(NPC* who);
         void useItem(Thing* what);
-        void useItem(const Person* who, Place* where);
-        void useItem(Thing* what);
+        void useItem(Person* who, Place* where);
+        void useItem(Thing* what, Person* who);
 };
 
 class FriendStuff : public Stuff
@@ -321,8 +320,8 @@ class FriendStuff : public Stuff
         void useItem(Person* who);
         void useItem(Place* where);
         void useItem(Thing* what);
-        void useItem(const Person* who, Place* where);
-        void useItem(Thing* what);
+        void useItem(Person* who, Place* where);
+        void useItem(Thing* what, Person* who);
 };
 
 class OpenStuff : public Stuff
@@ -337,7 +336,7 @@ class OpenStuff : public Stuff
         void useItem(Place* where);
         void useItem(Person* who);
         void useItem(NPC* who);
-        void useItem(const Person* who, Place* where);
+        void useItem(Person* who, Place* where);
 };
 
 class MoveStuff : public Stuff
@@ -346,13 +345,12 @@ class MoveStuff : public Stuff
         MoveStuff(std::string name, std::string description, int result, bool status);
         ~MoveStuff();
     
-        void useItem(const Person* who, Place* where);
+        void useItem(Person* who, Place* where);
     
         void useItem(Alice* who);
         void useItem(Place* where);
         void useItem(Person* who);
         void useItem(NPC* who);
-        void useItem(Thing* what);
         void useItem(Thing* what);
 };
 
@@ -367,12 +365,14 @@ class Thing {
 protected:
         
     bool status;        // status of door: 1 = open, 0 = closed
-        
+    std::string name;
+    
 public:
         
-    Thing(const bool& stat);            // constructor
+    Thing(const bool& stat, const std::string name);            // constructor
     virtual ~Thing();   // destructor
-        
+    
+    std::string getName() const;
     // open thing, depend on Place & Alice's bodySize
     // pure virtual function, each derived will have own
     virtual void openThing()=0;
@@ -386,11 +386,11 @@ public:
 class Door : public Thing {
      
 private:
-	map<string, Place*> between; // unused?
+	std::map<std::string, Place*> between; // unused?
         
 public:
         
-    Door(const bool& stat, const map<string, Place*>& betwn);             // constructor
+    Door(const bool& stat, std::string nm, const std::map<std::string, Place*>& betwn);             // constructor
     ~Door();            // destructor
         
     // open Door to find Chest
@@ -412,11 +412,11 @@ class Chest : public Thing {
     
 private:
     
-    multimap<string, Stuff*> inside;		//list of stuff inside the chest
+    std::multimap<std::string, Stuff*> inside;		//list of stuff inside the chest
     
 public:
     
-    Chest(const bool stat, const multimap<string, Stuff*>& contains);  // constructor
+    Chest(const bool stat, std::string nm, const std::multimap<std::string, Stuff*>& contains);  // constructor
     ~Chest();               // destructor
     
     // open Chest to find Sword
@@ -425,7 +425,7 @@ public:
     void closeThing();
     
     void takeStuff(Stuff* tk);
-    multimap<string, Stuff*>& whatsinside();
+    std::multimap<std::string, Stuff*>& whatsinside();
     
     // effects of openThing()
     //std::ostream& render(const std::ostream&);
@@ -449,13 +449,13 @@ public:
          
      public:
      
-        static map<string, Place*> places;    // Game class keeps static list of Places in Wonderland
-        static map<string, Person*> people;   // Game class keeps static list of People in Wonderland
+        static std::map<std::string, Place*> places;    // Game class keeps static list of Places in Wonderland
+        //static std::map<std::string, Person*> people;   // Game class keeps static list of People in Wonderland
          
         Game();                        // constructor
         ~Game();                       // destructor
-        map<string, Place*> getPlaceList() const;
-        map<string, Person*> getPeopleList() const;
+        std::map<std::string, Place*> getPlaceList() const;
+        //std::map<std::string, Person*> getPeopleList() const;
         void delegate(const std::string input);
  };
 
