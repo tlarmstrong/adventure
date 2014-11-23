@@ -348,7 +348,7 @@ std::ostream& Alice::narrate(std::ostream& out) const
  */
 
 // constructor
-NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const List<Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly) {}
+NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const multimap<string, Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly) {}
 
 // destructor
 NPC::~NPC() {}
@@ -399,17 +399,19 @@ ostream& NPC::render(ostream& out) const
     else
         s = "not a friend";
         
-    out << name << " is " << s << endl;
+    out << getName() << " is " << s << endl;
     out << "Health level is: " << getHealth() << endl;
     
-    out << name << " has these items: ";
+    out << getName() << " has these items: ";
     
-    if(!stuffList.isEmpty())
+    if(!stuffList.empty())
     {
-        out << (stuffList.peek(0))->getName();
+        multimap<string, Stuff*>::iterator i=stuffList.begin();
+        out << (i->second)->getName();
+        i++;
         
-        for(int i = 1; i < stuffList.getSize(); i++)
-            out << ", " << (stuffList.peek(i))->getName();
+        for(; i!=stuffList.end(); i++)
+            out << ", " << (i->second)->getName();
     }
     
     else
@@ -438,7 +440,7 @@ PersonFactory::~PersonFactory() {}
 // dynamically create characters based on input
 Person* PersonFactory::makePerson(std::string who)
 {
-    Person* returnValue;
+    //Person* returnValue;		\\lets just use nullptr so we know that returnValue is not just pointing somewhere random
     
     if (who == "Bandersnatch")
     {
@@ -448,8 +450,8 @@ Person* PersonFactory::makePerson(std::string who)
         
         Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", 1, true);
         
-        List<Stuff*> bList;
-        bList.push(bandersnatchEye);
+        multimap<string, Stuff*> bList;
+        bList.insert(pair<string, Stuff*>(bandersnatchEye->getName(), bandersnatchEye);
         
         int hLevel = 10;
         bool frndly = false;
@@ -464,10 +466,10 @@ Person* PersonFactory::makePerson(std::string who)
         string dscrpt = "I'm a really bad guy";
         string sayThings = "I'm really gonna get you";
         
-        HealthStuff* excalibur = new HealthStuff("Sword", "Watch out! He has a big sword!", -3, true);
+        Stuff* excalibur = new HealthStuff("Sword", "Watch out! He has a big sword!", -3, true);
         
-        List<Stuff*> jList;
-        jList.push(excalibur);
+        multimap<string, Stuff*> jList;
+        jList.insert(pair<string, Stuff*>(excalibur->getName(), excalibur);
         
         int hLevel = 10;
         bool frndly = false;
@@ -482,10 +484,10 @@ Person* PersonFactory::makePerson(std::string who)
         string dscrpt = "I'm an evil queen";
         string sayThings = "I'm gonna get you, my pretty";
         
-        HealthStuff* elixar = new HealthStuff("Potion", "Drink my potion and see what happens", -5, true);
+        Stuff* elixar = new HealthStuff("Potion", "Drink my potion and see what happens", -5, true);
 
-        List<Stuff*> rList;
-        rList.push(elixar);
+        multimap<string, Stuff*> rList;
+        rList.insert(pair<string, Stuff*>(elixar->getName(), elixar);
         
         int hLevel = 10;
         bool frndly = false;
@@ -502,7 +504,7 @@ Person* PersonFactory::makePerson(std::string who)
         
         //Stuff* watch = new Stuff("Watch", "My watch can speed up time", 3, true);
         
-        List<Stuff*> wList;
+        multimap<string, Stuff*> wList;
         //wList.push(watch);
         
         int hLevel = 10;
@@ -518,7 +520,7 @@ Person* PersonFactory::makePerson(std::string who)
         string dscrpt = "I like tea parties";
         string sayThings = "Would you like to come to my party?";
         
-        List<Stuff*> mList;
+        multimap<string, Stuff*> mList;
         int hLevel = 10;
         bool frndly = true;
         
@@ -532,7 +534,7 @@ Person* PersonFactory::makePerson(std::string who)
         string dscrpt = "I like to smile";
         string sayThings = "I'm a mysterious friend";
         
-        List<Stuff*> cList;
+        multimap<string, Stuff*> cList;
         
         int hLevel = 10;
         bool frndly = true;
@@ -544,9 +546,9 @@ Person* PersonFactory::makePerson(std::string who)
     
     else if (who == "Alice")
     {
-        List<Stuff*> aList;
-        List<NPC*> hList;
-        List<NPC*> bList;
+        multimap<string, Stuff*> aList;
+        map<string, NPC*> hList;
+        map<string, NPC*> bList;
         int bSize = 2;
         int hLevel = 10;
         string nm = "Alice";
@@ -557,7 +559,7 @@ Person* PersonFactory::makePerson(std::string who)
         return alice;
     }
     
-    return returnValue;
+    return nullptr;
 }
 
 /*
