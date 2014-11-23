@@ -139,7 +139,7 @@ Person::Person() {}
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::move(Place* to)
+void Person::move(Place* to) const
 {
     Place* from = whereAreYou();
     from->personLeaves(this);        // remove person from current location
@@ -147,7 +147,7 @@ void Person::move(Place* to)
 }
 
 // get Place where Person is
-Place* Person::whereAreYou()
+Place* Person::whereAreYou() const
 {
     return Game::places.find(getName())->second;
 }
@@ -228,7 +228,7 @@ void Alice::ditched(NPC* ditcher)
 }
 
 //now alice's friends can come with her
-void Alice::move(Place* to)
+void Alice::move(Place* to) const
 {
 	Place* from = whereAreYou();
 	from->personLeaves(this);        // remove person from current location
@@ -640,8 +640,7 @@ void GrowStuff::useItem(Place* where) {cout << getName() << "cannot be used on" 
 void GrowStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 void GrowStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
 void GrowStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
-void GrowStuff::useItem(Person* who, Place* where) {}
-void GrowStuff::useItem(Thing* what, Person* who) {}
+void GrowStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
 
 // HealthStuff
 HealthStuff::HealthStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -666,8 +665,7 @@ void HealthStuff::useItem(NPC* who)
 	status = 0;
 }
 void HealthStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
-void HealthStuff::useItem(Person* who, Place* where) {}
-void HealthStuff::useItem(Thing* what, Person* who) {}
+void HealthStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
 
 // FriendStuff
 FriendStuff::FriendStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -685,8 +683,7 @@ void FriendStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" 
 void FriendStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 void FriendStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
 void FriendStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
-void FriendStuff::useItem(Person* who, Place* where) {}
-void FriendStuff::useItem(Thing* what, Person* who) {}
+void FriendStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
 
 // OpenStuff
 OpenStuff::OpenStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -703,14 +700,14 @@ void OpenStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" <<
 void OpenStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
 void OpenStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 void OpenStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
-void OpenStuff::useItem(Person* who, Place* where) {cout << getName() << "cannot be used like this";}
+void OpenStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used like this";}
 
 MoveStuff::MoveStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 MoveStuff::~MoveStuff() {}
 
 // move Alice home
-void MoveStuff::useItem(Person* who, Place* where)
+void MoveStuff::useItem(const Person* who, Place* where)
 {
     map<string, Place*> go = where->getNewPlaceToGo();
         
