@@ -53,7 +53,6 @@ map<string, Person*> Place::whoHere() const     //returns a list of everybody he
     return peopleHere;
 }
 
-// thought we may need these to get the name of Place (private) and list of Place(s) (private) by calling a public function?
 string Place::getPlaceName() const  // returns name of Place
 {
     return name;
@@ -131,7 +130,7 @@ std::ostream& Place::render(std::ostream& out) const
 		out << "You see there are other people here: ";
         
         // Error: No viable overloaded '='
-        // Changes iterator to const_iterator and worked
+        // Fix: Change iterator to const_iterator
         
 		std::map<string, Person*>::const_iterator i;
 		i=peopleHere.begin();
@@ -147,7 +146,7 @@ std::ostream& Place::render(std::ostream& out) const
 		out << "You see a ";
         
         // Error: No viable overloaded '='
-        // Changes iterator to const_iterator and worked
+        // Fix: Change iterator to const_iterator
         
 		std::map<string, Thing*>::const_iterator i;
 		i=thingHere.begin();
@@ -163,7 +162,7 @@ std::ostream& Place::render(std::ostream& out) const
 		out << "On the ground you see a ";
         
         // Error: No viable overloaded '='
-        // Changes iterator to const_iterator and worked
+        // Fix: Change iterator to const_iterator
         
 		std::map<string, Stuff*>::const_iterator i;
 		i=stuffHere.begin();
@@ -183,7 +182,7 @@ std::ostream& Place::render(std::ostream& out) const
 		out << "From here you can go to: ";
         
         // Error: No viable overloaded '='
-        // Changes iterator to const_iterator and worked
+        // Fix: Change iterator to const_iterator
         
 		std::map<string, Place*>::const_iterator i;
 		i=placeTo.begin();
@@ -223,7 +222,7 @@ Person::~Person() {}
 
 // Error:Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Person *'
 
-// removed const and worked
+// Fix: removed const
 
 void Person::move(Place* to) /*const*/
 {
@@ -315,16 +314,17 @@ void Alice::ditched(NPC* ditcher)
 
 // Error: Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Alice *'
 
-// Make personLeaves() and personEnters() polymorphic?
+// Fix: found Alice in Place's whoHere() and sent this as argument instead of "this"
 
 void Alice::move(Place* to) const
 {
 	Place* from = whereAreYou();
-	from->personLeaves(this);        // remove person from current location
-    to->personEnters(this);          // move a person to another place
+    
+	from->personLeaves(from->whoHere().find("Alice")->second);        // remove person from current location
+    to->personEnters(from->whoHere().find("Alice")->second);          // move a person to another place
     
         // Error: No viable overloaded '='
-        // Changes iterator to const_iterator and worked
+        // Fix: Change iterator to const_iterator and worked
     
     	for(map<string, NPC*>::const_iterator i=helperList.begin(); i!=helperList.end(); i++)
     	{
@@ -382,7 +382,7 @@ void Alice::setBodySize(const int& s)
     bodySize = s;
 }
 
-// output what she has, who she's met, bodySize, and health	//I just renamed it to out instead of cout since cout is a thing already
+// output what she has, who she's met, bodySize, and health
 std::ostream& Alice::render(std::ostream& out) const
 {
     string s;
@@ -401,7 +401,7 @@ std::ostream& Alice::render(std::ostream& out) const
     if(!(stuffList.empty()))
     {
         // Error: No viable overloaded '='
-        // Changes iterator to const_iterator and worked
+        // Fix: Change iterator to const_iterator and worked
         
         multimap<string, Stuff*>::const_iterator i;
         i=stuffList.begin();
@@ -524,6 +524,9 @@ ostream& NPC::render(ostream& out) const
     
     if(!stuffList.empty())
     {
+        // Error: No viable overloaded '='
+        // Fix: Change iterator to const_iterator
+        
         multimap<string, Stuff*>::const_iterator i;
         i=stuffList.begin();
         out << (i->second)->getName();
@@ -559,8 +562,6 @@ PersonFactory::~PersonFactory() {}
 // dynamically create characters based on input
 Person* PersonFactory::makePerson(std::string who)
 {
-    //Person* returnValue;		\\lets just use nullptr so we know that returnValue is not just pointing somewhere random
-    
     if (who == "Bandersnatch")
     {
         string nm = "Bandersnatch";
@@ -814,7 +815,7 @@ void MoveStuff::useItem(/*const*/ Person* who, Place* where)
     
     // Error: Member function 'move' not viable: 'this' argument has type 'const Person', but function is not marked const
     
-    // Removed const and worked
+    // Fix: Removed const and worked
     
     if(where->getPlaceName()=="Home")
     {
@@ -1059,7 +1060,7 @@ void Game::makePeople()
     
 }
 
-// make list of stuff for each place, call Stuff constructor to make stuff, push into place's stuff list //this is good :) I hadn't planned it like this i dont think but I really like this. It works pretty darn well.
+// make stuff for people and places
 void Game::makeStuff()
 {
     // (1) Tree
@@ -1073,7 +1074,12 @@ void Game::makeStuff()
     Stuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);
     places.find("Woods")->second->genStuff(key);
     
-    // (4) TeaParty	//how does she get to normal size? Do you want me to make these just iterators so cake makes her one size bigger and tea makes her one size smaller
+    // (4) TeaParty
+    
+    //how does she get to normal size? hmmm...magic :). Could we just return her back to normal size after she gets the sword?
+    
+    //Do you want me to make these just iterators so cake makes her one size bigger and tea makes her one size smaller // that works!
+    
     Stuff* cake = new GrowStuff("Cake", "The cake will make Alice big!", 3, 1);
     Stuff* tea = new GrowStuff("Tea", "Drinking the tea will make Alice small.", 1, 1);
     places.find("TeaParty")->second->genStuff(cake);
