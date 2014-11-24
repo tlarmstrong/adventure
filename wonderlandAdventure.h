@@ -109,6 +109,16 @@ public:
     
     std::multimap<std::string, Stuff*> getStuffList() const;
     std::string getName() const;								// gets person's name
+    
+    // pure virtual functions added to make useItem work for Alice* as Person*
+    virtual void choose(Chest* chst, Stuff* item)=0;
+    virtual void pickup(Stuff* item)=0;
+    virtual void drop(Stuff* item)=0;
+    virtual void use(Stuff* item)=0;
+    virtual void use(Stuff* item, Place* where)=0;
+    virtual void use(Stuff* item, Thing* what)=0;
+    virtual void use(Stuff* item, Person* who)=0;
+    
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
 };
@@ -210,6 +220,15 @@ public:
     bool isfriendly() const;
     
     std::ostream& render(std::ostream& out) const;
+    
+    // added to make useItem work for Alice* as Person*
+    void choose(Chest* chst, Stuff* item);
+    void pickup(Stuff* item);
+    void drop(Stuff* item);
+    void use(Stuff* item);
+    void use(Stuff* item, Place* where);
+    void use(Stuff* item, Thing* what);
+    void use(Stuff* item, Person* who);
 };
 
 /*
@@ -459,6 +478,8 @@ public:
         ~Game();                       // destructor
         std::map<std::string, Place*> getPlaceList() const;
         //std::map<std::string, Person*> getPeopleList() const;
+     
+        Place* findHere() const;
         void delegate(const std::string& input);
  };
 

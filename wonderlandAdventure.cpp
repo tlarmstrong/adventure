@@ -344,6 +344,12 @@ void Alice::drop(Stuff* item)
     stuffList.erase(stuffList.find(item->getName()));
 }
 
+//Alice chooses an item from a chest
+void Alice::choose(Chest* chst, Stuff* item)
+{
+    // not sure what this function needs to do
+}
+
 //something we need to think about is what happens to stuff after it is used.... As I see it we have a couple options: use a find_if (not certain exists for multimaps but we could certainly just apply the normal algorithm with an iterator)
 
 // lets just delete it?
@@ -542,6 +548,15 @@ ostream& NPC::render(ostream& out) const
     out << endl;
     return out;
 }
+
+// added to make useItem work for Alice* as Person*
+void NPC::choose(Chest* chst, Stuff* item) {}
+void NPC::pickup(Stuff* item) {}
+void NPC::drop(Stuff* item) {}
+void NPC::use(Stuff* item) {}
+void NPC::use(Stuff* item, Place* where) {}
+void NPC::use(Stuff* item, Thing* what) {}
+void NPC::use(Stuff* item, Person* who) {}
 
 /*
  --------------------------------------------------
@@ -863,11 +878,13 @@ void Door::openThing()
 	if(status==0)
 	{
         //Invalid operands to binary expression ('iterator' (aka '__map_iterator<typename __base::iterator>') and 'int')
-		between.begin()->second->newPlaceToGo(between.begin()+1);
-		(between.begin()+1)->second->newPlaceToGo(between.begin());
+        
+        // added ->second and parenthesis
+        
+        between.begin()->second->blockPlaceToGo(((between.begin())++)->second);
+        ((between.begin())++)->second->blockPlaceToGo(between.begin()->second);
 		status=1;
 	}
-		
 }
 
 void Door::closeThing()
@@ -875,8 +892,11 @@ void Door::closeThing()
 	if(status==1)
 	{
         //Invalid operands to binary expression ('iterator' (aka '__map_iterator<typename __base::iterator>') and 'int')
-		between.begin()->second->blockPlaceToGo(between.begin()+1);
-		(between.begin()+1)->second->blockPlaceToGo(between.begin());
+        
+        // added ->second and parenthesis
+        
+		between.begin()->second->blockPlaceToGo(((between.begin())++)->second);
+		((between.begin())++)->second->blockPlaceToGo(between.begin()->second);
 		status=0;
 	}
 }
@@ -1103,6 +1123,21 @@ void Game::makeStuff()
     // Home has nothing in list
 }
 
+// added to give us ability to find place in main
+Place* Game::findHere() const
+{
+    Place* here=nullptr;
+    
+    for(map<string, Place*>::const_iterator i = places.begin(); i!=places.end(); i++)
+    {
+        if((((i->second)->whoHere()).find("Alice")) != ((i->second)->whoHere()).end())
+        {
+            here = (i->second);
+        }
+    }
+    return here;
+}
+
 //before I change this I want to talk about the plan...
 void Game::delegate(const std::string& input)
 {
@@ -1110,22 +1145,41 @@ void Game::delegate(const std::string& input)
 	string subput="start";
     
     // Error: Use of undeclared identifier 'alice'
+    // Fix: Find her by iterating through list of places and calling whoHere()
     
-	Place* here=alice.whereareyou();
+//    Place* here=nullptr;
+//    
+//    for(map<string, Place*>::const_iterator i = places.begin(); i!=places.end(); i++)
+//    {
+//        if((((i->second)->whoHere()).find("Alice")) != ((i->second)->whoHere()).end())
+//        {
+//            here = (i->second);
+//        }
+//    }
+    
+    Place* here = findHere();
+	
 	if(input=="aboutme")
 	{
         // Error: Use of undeclared identifier 'alice'
-		alice.render;
+        // Fix: Find her using "here's" whoHere()
+		here->whoHere().find("Alice")->second->render(cout);
 	}
 	
 	if(input=="go")
 	{
 		cout << "Where would you like to go? ";
 		cin >> subput;
-		if(here->getNewPlaceToGo().find(subput)!=here->getNewPlaceToGo().end())
+		if(here->getNewPlaceToGo().find(subput)!= here->getNewPlaceToGo().end())
 		{
             // Error: Use of undeclared identifier 'alice'
-			alice.move(here->getNewPlaceToGo().find(subput));
+            // Fix: found Alice via here's whoHere()
+            
+            // Error: No viable conversion from 'iterator' (aka '__map_iterator<typename __base::iterator>') to 'Place *' for move args
+            
+            // added -> to find(subput)
+            
+			(here->whoHere().find("Alice")->second)->move(here->getNewPlaceToGo().find(subput)->second);
 		}
 		else
 		{
@@ -1140,7 +1194,9 @@ void Game::delegate(const std::string& input)
 		if(here->whatsHere().find(subput)!=here->whatsHere().end())
 		{
             // Error: Use of undeclared identifier 'alice'
-			here->pickedUp(here->whatsHere().find(subput), alice)
+            // Fix: found her using here's whoHere()
+            
+            here->pickedUp(here->whatsHere().find(subput)->second, here->whoHere().find("Alice")->second);
 		}
 		else
 		{
@@ -1152,13 +1208,13 @@ void Game::delegate(const std::string& input)
 	{
 		cout << "What would you like to drop? ";
 		cin >> subput;
-		if(alice.getStuffList().find(subput)!=alice.getStuffList.end())
+		if(here->whoHere().find("Alice")->second->getStuffList().find(subput) != here->whoHere().find("Alice")->second->getStuffList().end())
 		{
-			alice.drop(alice.getStuffList().find(subput));
+            here->dropped(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second, here->whoHere().find("Alice")->second);
 		}
 		else
 		{
-			cout << "You do not have that item to drop."
+			cout << "You do not have that item to drop.";
 		}
 	}
 	
@@ -1166,32 +1222,38 @@ void Game::delegate(const std::string& input)
 	{
 		cout << "What would you like to use? ";
 		cin >> subput;
-		if(alice.getStuffList().find(subput)!=alice.getStuffList.end())
+		if(here->whoHere().find("Alice")->second->getStuffList().find(subput)!= here->whoHere().find("Alice")->second->getStuffList().end())
 		{
-			cout << "What/Who/Where would you like to use that (to use on alice: Alice)? "
+			cout << "What/Who/Where would you like to use that (to use on alice: Alice)? ";
+            
 			string subput2;
 			cin >> subput2;
 			bool used=false;
-			Stuff* item=alice.getStuffList().find(subput);
+            
+			Stuff* item = here->whoHere().find("Alice")->second->getStuffList().find(subput)->second;
+            
 			if(subput2=="Alice")
 			{
-				alice.useItem(item);
+                // Error: No member named 'useItem' in 'Person'
+                // Fix: add useItem() as virtual function in Person
+                
+				here->whoHere().find("Alice")->second->use(item);
 				used=true;
 			}
-			for(multimap<string, Thing*>::iterator i=here.getThingsHere().begin();i!=here.getThingsHere().end();i++)
+			for(multimap<string, Thing*>::iterator i=here->getThingsHere().begin();i!=here->getThingsHere().end();i++)
 			{
 				if(i->second->getName()==subput2)
 				{
-					alice.useItem(item, i->second);
+					here->whoHere().find("Alice")->second->use(item, i->second);
 					used=true;
 					break;
 				}
 			}
-			for(multimap<string, Person*>::iterator i=here.whoHere().begin();i!=here.whoHere().end();i++)
+			for(multimap<string, Person*>::iterator i=here->whoHere().begin();i!=here->whoHere().end();i++)
 			{
 				if(i->second->getName()==subput2)
 				{
-					alice.useItem(item, i->second)
+                    here->whoHere().find("Alice")->second->use(item, i->second);
 					used=true;
 					break;
 				}
