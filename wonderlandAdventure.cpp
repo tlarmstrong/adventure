@@ -109,6 +109,11 @@ map<string, Place*> Place::getNewPlaceToGo() const
     return placeTo;
 }
 
+std::multimap<std::string, Thing*> getThingsHere() const
+{
+	return thingHere;
+}
+
 // output description of Place
 std::ostream& Place::narrate(std::ostream& out) const
 {
@@ -1066,9 +1071,99 @@ void Game::makeStuff()
 }
 
 //before I change this I want to talk about the plan...
-void Game::delegate(const string input)
+void Game::delegate(const std::string& input)
 {
-    // removed old code
+	//"Keywords: aboutme, go, pickup, drop, use, approach"
+	string subput="start";
+	Place* here=alice.whereareyou();
+	if(input=="aboutme")
+	{
+		alice.render;
+	}
+	
+	if(input=="go")
+	{
+		cout << "Where would you like to go? "
+		cin >> subput;
+		if(here->getNewPlaceToGo().find(subput)!=here->getNewPlaceToGo().end())
+		{
+			alice.move(here->getNewPlaceToGo().find(subput));
+		}
+		else
+		{
+			cout << "You cannot go there from here.";
+		}
+	}
+	
+	if(input=="pickup")
+	{
+		cout << "What would you like to pick up? ";
+		cin >> subput;
+		if(here->whatsHere.find(subput)!=here->whatsHere.end())
+		{
+			here.pickedUp(here->whatsHere.find(subput), alice)
+		}
+		else
+		{
+			cout << "That item is not here.";
+		}
+	}
+	
+	if (input=="drop")
+	{
+		cout << "What would you like to drop? ";
+		cin >> subput;
+		if(alice.getStuffList().find(subput)!=alice.getStuffList.end())
+		{
+			alice.drop(alice.getStuffList().find(subput));
+		}
+		else
+		{
+			cout << "You do not have that item to drop."
+		}
+	}
+	
+	if(input=="use")
+	{
+		cout << "What would you like to use? ";
+		cin >> subput;
+		if(alice.getStuffList().find(subput)!=alice.getStuffList.end())
+		{
+			cout << "What/Who/Where would you like to use that (to use on alice: Alice)? "
+			string subput2;
+			cin >> subput2;
+			bool used=false;
+			Stuff* item=alice.getStuffList().find(subput);
+			if(subput2=="Alice")
+			{
+				alice.useItem(item);
+				used=true;
+			}
+			for(multimap<string, Thing*>::iterator i=here.getThingsHere().begin();i!=here.getThingsHere().end();i++)
+			{
+				if(i->second->getName()==subput2)
+				{
+					alice.useItem(item, i->second);
+					used=true;
+					break;
+				}
+			}
+			for(multimap<string, Person*>::iterator i=here.whoHere().begin();i!=here.whoHere().end();i++)
+			{
+				if(i->second->getName()==subput2)
+				{
+					alice.useItem(item, i->second)
+					used=true;
+					break;
+				}
+			}
+			if(!used)
+				cout <<"Couldn't use item.";
+
+			
+		}
+		
+	}
 }
 
 // needed to make static lists work
