@@ -48,7 +48,8 @@ Place::~Place()
 	*/
 }
 
-map<string, Person*> Place::whoHere() const     //returns a list of everybody here
+// pass all return maps/multimaps by value
+map<string, Person*>& Place::whoHere()     //returns a list of everybody here
 {
     return peopleHere;
 }
@@ -606,6 +607,8 @@ Person* PersonFactory::makePerson(std::string who)
         multimap<string, Stuff*> jList;
         jList.insert(pair<string, Stuff*>(excalibur->getName(), excalibur));
         
+        // instead of making list and sending to constructor, make object and insert into his list directly
+        
         int hLevel = 10;
         bool frndly = false;
         
@@ -1112,7 +1115,8 @@ void Game::makeStuff()
     // (6) Battlefield
     Stuff* jabberBlood = new MoveStuff("JabberBlood", "Drinking the Jabberwocky's purple blood will take Alice home", 1, 1);
     
-    for(map<string, Place*>::iterator i = places.begin(); i!=places.end(); i++)
+   // find jabberwocky and use receive function
+   for(map<string, Place*>::iterator i = places.begin(); i!=places.end(); i++)
     {
         // added Place:: to whoHere (whoHere undefined otherwise)
         if(((((i->second)->Place::whoHere()).find("Jabberwocky")))!=((i->second)->Place::whoHere()).end())
@@ -1126,7 +1130,7 @@ void Game::makeStuff()
 // added to give us ability to find place in main
 Place* Game::findHere() const
 {
-    Place* here=nullptr;
+    Place* here=NULL;
     
     for(map<string, Place*>::const_iterator i = places.begin(); i!=places.end(); i++)
     {

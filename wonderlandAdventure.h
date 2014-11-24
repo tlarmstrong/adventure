@@ -40,7 +40,7 @@ public:
     //Place();                                    // constructor
     ~Place();                                   // destructor
     
-    std::map<std::string, Person*> whoHere() const;               //constructed list
+    std::map<std::string, Person*>& whoHere();               //constructed list
     std::string getPlaceName() const;           // returns name of Place
     
     void personEnters(Person* enterer);   //somebody comes into the place
