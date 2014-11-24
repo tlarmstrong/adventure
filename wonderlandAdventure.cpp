@@ -109,7 +109,7 @@ map<string, Place*> Place::getNewPlaceToGo() const
     return placeTo;
 }
 
-std::multimap<std::string, Thing*> getThingsHere() const
+multimap<string, Thing*> Place::getThingsHere() const
 {
 	return thingHere;
 }
@@ -129,7 +129,11 @@ std::ostream& Place::render(std::ostream& out) const
 	else
 	{
 		out << "You see there are other people here: ";
-		std::map<string, Person*>::iterator i;
+        
+        // Error: No viable overloaded '='
+        // Changes iterator to const_iterator and worked
+        
+		std::map<string, Person*>::const_iterator i;
 		i=peopleHere.begin();
 		out << i->second->getName();
 		for(;i!=peopleHere.end();i++)
@@ -141,7 +145,11 @@ std::ostream& Place::render(std::ostream& out) const
 	if (!(thingHere.empty()))
 	{
 		out << "You see a ";
-		std::map<string, Thing*>::iterator i;
+        
+        // Error: No viable overloaded '='
+        // Changes iterator to const_iterator and worked
+        
+		std::map<string, Thing*>::const_iterator i;
 		i=thingHere.begin();
 		out << i->second->getName();
 		for(;i!=thingHere.end();i++)
@@ -153,7 +161,11 @@ std::ostream& Place::render(std::ostream& out) const
 	if (!(stuffHere.empty()))
 	{
 		out << "On the ground you see a ";
-		std::map<string, Stuff*>::iterator i;
+        
+        // Error: No viable overloaded '='
+        // Changes iterator to const_iterator and worked
+        
+		std::map<string, Stuff*>::const_iterator i;
 		i=stuffHere.begin();
 		out << i->second->getName();
 		for(;i!=stuffHere.end();i++)
@@ -164,20 +176,25 @@ std::ostream& Place::render(std::ostream& out) const
 	}
 	if (placeTo.empty())
 	{
-		out << "You can go nowhere from here."
+		out << "You can go nowhere from here.";
 	}
 	else
 	{
 		out << "From here you can go to: ";
-		std::map<string, Place*>::iterator i;
+        
+        // Error: No viable overloaded '='
+        // Changes iterator to const_iterator and worked
+        
+		std::map<string, Place*>::const_iterator i;
 		i=placeTo.begin();
 		out << i->second->getPlaceName();
-		for(;i!=stuffHere.end();i++)
+		for(;i!=placeTo.end();i++)
 		{
 			out << ", " <<i->second->getPlaceName();
 		}
 		out << "."<< endl;
 	}
+    return out;
 }
 
 /*// what Alice can do in particular place		//until we nail down that we need this and more exactly what we want it to do, I don't want to have this function written
@@ -203,7 +220,12 @@ Person::Person() {}
 Person::~Person() {}
 
 //allows each person to move from place to place
-void Person::move(Place* to) const
+
+// Error:Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Person *'
+
+// removed const and worked
+
+void Person::move(Place* to) /*const*/
 {
     Place* from = whereAreYou();
     from->personLeaves(this);        // remove person from current location
@@ -219,8 +241,6 @@ Place* Person::whereAreYou() const
 //gives an item to someone else
 void Person::give(Stuff* item, Person* other)
 {
-    
-    
     if(stuffList.find(item->getName())!=stuffList.end())
     {
         stuffList.erase(stuffList.find(item->getName()));
@@ -292,12 +312,21 @@ void Alice::ditched(NPC* ditcher)
 }
 
 //now alice's friends can come with her
+
+// Error: Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Alice *'
+
+// Make personLeaves() and personEnters() polymorphic?
+
 void Alice::move(Place* to) const
 {
 	Place* from = whereAreYou();
 	from->personLeaves(this);        // remove person from current location
-    	to->personEnters(this);          // move a person to another place
-    	for(map<string, NPC*>::iterator i=helperList.begin(); i!=helperList.end(); i++)
+    to->personEnters(this);          // move a person to another place
+    
+        // Error: No viable overloaded '='
+        // Changes iterator to const_iterator and worked
+    
+    	for(map<string, NPC*>::const_iterator i=helperList.begin(); i!=helperList.end(); i++)
     	{
     		(i->second)->move(to);
     	}
@@ -371,9 +400,10 @@ std::ostream& Alice::render(std::ostream& out) const
 
     if(!(stuffList.empty()))
     {
-        // No viable conversion from 'const_iterator' (aka '__map_const_iterator<typename __base::const_iterator>') to 'multimap<string, Stuff *>::iterator' (aka '__map_iterator<typename __base::iterator>')
+        // Error: No viable overloaded '='
+        // Changes iterator to const_iterator and worked
         
-        multimap<string, Stuff*>::iterator i;
+        multimap<string, Stuff*>::const_iterator i;
         i=stuffList.begin();
         out << (i->second)->getName();
         i++;
@@ -389,9 +419,7 @@ std::ostream& Alice::render(std::ostream& out) const
     {
         out << "/nHer friends are: ";
         
-        // No viable conversion from 'const_iterator' (aka '__map_const_iterator<typename __base::const_iterator>') to 'multimap<string, Stuff *>::iterator' (aka '__map_iterator<typename __base::iterator>')
-        
-        map<string, NPC*>::iterator i=helperList.begin();
+        map<string, NPC*>::const_iterator i=helperList.begin();
         out << (i->second)->getName();
         i++;
         
@@ -405,10 +433,8 @@ std::ostream& Alice::render(std::ostream& out) const
     if(!badguyList.empty())
     {
         out << "/nHer enemies are: ";
-        
-        // No viable conversion from 'const_iterator' (aka '__map_const_iterator<typename __base::const_iterator>') to 'multimap<string, Stuff *>::iterator' (aka '__map_iterator<typename __base::iterator>')
-        
-        map<string, NPC*>::iterator i=badguyList.begin();
+
+        map<string, NPC*>::const_iterator i=badguyList.begin();
         out << (i->second)->getName();
         i++;
         
@@ -498,9 +524,7 @@ ostream& NPC::render(ostream& out) const
     
     if(!stuffList.empty())
     {
-        //No viable conversion from 'const_iterator' (aka '__map_const_iterator<typename __base::const_iterator>') to 'multimap<string, Stuff *>::iterator' (aka '__map_iterator<typename __base::iterator>')
-        
-        multimap<string, Stuff*>::iterator i;
+        multimap<string, Stuff*>::const_iterator i;
         i=stuffList.begin();
         out << (i->second)->getName();
         i++;
@@ -677,7 +701,7 @@ string Stuff::getName() const
 }
 
 // output description of Stuff
-std::ostream& Stuff::narrate(std::ostream&) const
+std::ostream& Stuff::narrate(std::ostream& cout) const
 {
     return cout << description << endl;
 }
@@ -706,7 +730,7 @@ void GrowStuff::useItem(Place* where) {cout << getName() << "cannot be used on" 
 void GrowStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 void GrowStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
 void GrowStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
-void GrowStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
+void GrowStuff::useItem(/*const*/ Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
 
 // HealthStuff
 HealthStuff::HealthStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -731,7 +755,7 @@ void HealthStuff::useItem(NPC* who)
 	status = 0;
 }
 void HealthStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
-void HealthStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
+void HealthStuff::useItem(/*const*/ Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
 
 // FriendStuff
 FriendStuff::FriendStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -749,7 +773,7 @@ void FriendStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" 
 void FriendStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 void FriendStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
 void FriendStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
-void FriendStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
+void FriendStuff::useItem(/*const*/ Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
 
 // OpenStuff
 OpenStuff::OpenStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
@@ -766,16 +790,17 @@ void OpenStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" <<
 void OpenStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
 void OpenStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 void OpenStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
-void OpenStuff::useItem(const Person* who, Place* where) {cout << getName() << "cannot be used like this";}
+void OpenStuff::useItem(/*const*/ Person* who, Place* where) {cout << getName() << "cannot be used like this";}
 
 MoveStuff::MoveStuff(const string name, const string description, const int result, const bool status) : Stuff(name, description, result, status) {}
 
 MoveStuff::~MoveStuff() {}
 
 // move Alice home
-void MoveStuff::useItem(const Person* who, Place* where)
+void MoveStuff::useItem(/*const*/ Person* who, Place* where)
 {
-    map<string, Place*> go = where->getNewPlaceToGo();
+    /* old? can we delete?
+     map<string, Place*> go = where->getNewPlaceToGo();
         
     for(map<string, Place*>::iterator i=go.begin(); i!=go.end(); i++)
     {
@@ -785,15 +810,17 @@ void MoveStuff::useItem(const Person* who, Place* where)
             who->move(there);
         }
     }
-    status = 0;
+    status = 0;*/
     
-    /*
+    // Error: Member function 'move' not viable: 'this' argument has type 'const Person', but function is not marked const
+    
+    // Removed const and worked
+    
     if(where->getPlaceName()=="Home")
     {
     	who->move(where);
     }
     status=0;
-    */
 }
 
 void MoveStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
@@ -1075,18 +1102,23 @@ void Game::delegate(const std::string& input)
 {
 	//"Keywords: aboutme, go, pickup, drop, use, approach"
 	string subput="start";
+    
+    // Error: Use of undeclared identifier 'alice'
+    
 	Place* here=alice.whereareyou();
 	if(input=="aboutme")
 	{
+        // Error: Use of undeclared identifier 'alice'
 		alice.render;
 	}
 	
 	if(input=="go")
 	{
-		cout << "Where would you like to go? "
+		cout << "Where would you like to go? ";
 		cin >> subput;
 		if(here->getNewPlaceToGo().find(subput)!=here->getNewPlaceToGo().end())
 		{
+            // Error: Use of undeclared identifier 'alice'
 			alice.move(here->getNewPlaceToGo().find(subput));
 		}
 		else
@@ -1099,9 +1131,10 @@ void Game::delegate(const std::string& input)
 	{
 		cout << "What would you like to pick up? ";
 		cin >> subput;
-		if(here->whatsHere.find(subput)!=here->whatsHere.end())
+		if(here->whatsHere().find(subput)!=here->whatsHere().end())
 		{
-			here.pickedUp(here->whatsHere.find(subput), alice)
+            // Error: Use of undeclared identifier 'alice'
+			here->pickedUp(here->whatsHere().find(subput), alice)
 		}
 		else
 		{
