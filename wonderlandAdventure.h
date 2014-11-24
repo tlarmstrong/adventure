@@ -54,6 +54,8 @@ public:
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
     
+    std::multimap<std::string, Thing*> getThingsHere() const;	//gets things here
+    
     std::map<std::string, Place*> getNewPlaceToGo() const;
     
     // output description of Place
