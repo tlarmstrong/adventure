@@ -1556,10 +1556,7 @@ void Game::delegate(const std::string& input)
             
 			if(subput2=="Alice")
 			{
-                // Error: No member named 'useItem' in 'Person'
-                // Fix: add useItem() as virtual function in Person
-                
-				here->whoHere().find("Alice")->second->use(item);
+                here->whoHere().find("Alice")->second->use(item);
 				used=true;
 			}
 			for(multimap<string, Thing*>::iterator i=here->getThingsHere().begin();i!=here->getThingsHere().end();i++)
