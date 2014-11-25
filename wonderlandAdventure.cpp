@@ -323,7 +323,11 @@ void Alice::taggingAlong(NPC* tagger)
 //removes a person from the list of Helpers
 void Alice::ditched(NPC* ditcher)
 {
-    helperList.erase(helperList.find(ditcher->getName()));
+    if(this->helperList.find(ditcher)!=this->helperList.end())
+    {
+    	helperList.erase(helperList.find(ditcher->getName()));
+    }
+
 }
 
 //now alice's friends can come with her
@@ -951,6 +955,10 @@ void Chest::closeThing()
 {
 	status=0;
 }
+bool Chest::getStatus()
+{
+	return status;
+}
 
 void Chest::takeStuff(Stuff* tk)
 {
@@ -1319,7 +1327,7 @@ void Game::delegate(const std::string& input)
 		for(map<string, Thing*>::iterator i=here->openHere().begin();i!=here->openHere().end(); i++)
 		{
 
-			if(i->first=="subput")
+			if(i->first==subput)
 			{
 				//NEED TO WRITE
 				if(i->second->thingtype=="door")
@@ -1340,20 +1348,111 @@ void Game::delegate(const std::string& input)
 					}
 					if (subput=="open")
 					{
-						
+						dr->openThing();
+					}
+					if (subput=="close")
+					{
+						dr->closeThing();
 					}
 				}
 				if(i->second->thingtype=="chest")
 				{
 					Chest* chst=i->second;
+					if(i->getStatus())
+					{
+						i->narrate(cout);
+					}
+					cout<<"What would you like to do?\n Keywords: use, open, close, take\n"
+					cin>>subput
+					if (subput=="use")
+					{
+						cout << "Use what item\n";
+						cin>>subput;
+						if (here->whoHere().find("Alice")->second->getStuffList().find(subput)!=here->whoHere().find("Alice")->second->getStuffList().end())
+						{
+							here->whoHere().find("Alice")->second->useItem(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second,chst);
+						
+							//Austin is here in writing... sleep will write better
+						}
+					}
+					if (subput=="open")
+					{
+						chst->openThing();
+					}
+					if (subput=="close")
+					{
+						chst->closeThing();
+					}
+					if (subput=="take")
+					{
+						if(i->getStatus())
+						{
+							cout << "What would you like to take\n"
+							cin>>subput
+							if(chst->whatsinside().find(subput)!=chst->whatsinside().end())
+							{
+								here->whoHere().find("Alice")->second->choose(chst,chst->whatsinside().find(subput)->second)
+							}
+							else
+							{
+								cout << "That is not in here"
+							}
+						}
+						if(i->getStatus())
+						{
+							cout << "You must open the chest first";
+						}
+					}
 				}
 			}
 		}
 		for(map<string, Person*>::iterator i=here->whoHere().begin();i!=here->whoHere().end(); i++)
 		{
-			if(i->first=="subput")
+			if(i->first==subput)
 			{
-				//NEED TO WRITE
+				NPC* pers=i->second;
+				pers->narrate(cout);
+				cout << "What would you like to do:\n Keywords:talk, askfollow, askleave, attack";
+				cin >>subput;
+				if (subput=="talk")
+				{
+					pers->talk()
+				}
+				if (subput=="askfollow")
+				{
+					if(pers->isFriendly())
+					{
+						cout << "Sure\n";
+						here->whoHere.find("Alice")->second->taggingAlong(pers);
+					}
+					else
+					{
+						cout << "No, I have you\n";
+					}
+				}
+				if(subput=="askleave")
+				{
+					if(pers->isFriendly())
+					{
+						cout << "Sure\n";
+						here->whoHere.find("Alice")->second->ditching(pers);
+					}
+					else
+					{
+						cout << "Huh?\n";
+					}
+				}
+				if (subput=="attack")
+				{
+					if(here->whoHere.find("Alice")->second->getStuffList().find("sword")!=here->whoHere.find("Alice")->second->getStuffList().end())
+					{
+						here->whoHere.find("Alice")->second->useItem(here->whoHere.find("Alice")->second->getStuffList().find("sword"),pers);
+					}
+					else
+					{
+						cout << "You flail your arms wildly about them. They applaud your dance."
+					}
+				}
 			}
 		}
 	}
