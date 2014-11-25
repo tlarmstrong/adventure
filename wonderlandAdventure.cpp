@@ -22,10 +22,6 @@ Place::~Place()
 	//I am going to leave the commented code so that we can talk about it
 	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
-		for (multimap<string, Stuff*>::iterator j=(i->second)->getStuffList().begin(); j!=(i->second)->getStuffList().end(); j++)
-		{
-            delete j->second;
-		}
 		delete i->second;
 	}
 	
@@ -36,13 +32,6 @@ Place::~Place()
 	
 	for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
 	{
-		if(i->second->thingtype=="chest")
-		{
-			for (multimap<string, Stuff*>::iterator j=(i->second)->whatsinside().begin(); j!=(i->second)->whatsinside().end(); j++)
-			{
-                delete j->second;
-			}
-		}
 		delete i->second;
 	}
 	
@@ -223,13 +212,42 @@ Person::Person(const int& hLevel, const multimap<string, Stuff*>& sList, const s
 Person::Person() {}
 
 // destructor
-Person::~Person() {}
+Person::~Person()
+{
+	for (multimap<string, Stuff*>::iterator j=stuffList().begin(); j!=stuffList().end(); j++)
+	{
+        	delete j->second;
+	}
+}
 
 //allows each person to move from place to place
 
 // Error:Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Person *'
 
 // Fix: removed const
+
+void Person::dies()
+{
+	multimap<string, Stuff*>::iterator i;
+	i=stuffList.begin();
+	for(;!stuffList.empty();i++)
+	{
+		this->whereAreYou()->dropped(i->second, this);
+	}
+	this->whereAreYou()->personLeaves(this);
+	delete this;
+}
+
+bool Person::isDead()
+{
+	if (health<=0)
+	{
+		return true;
+		this dies;
+	}
+	else
+		return false;
+}
 
 void Person::move(Place* to) /*const*/
 {
@@ -957,7 +975,13 @@ Chest::Chest(const bool stat, string nm, const multimap<string, Stuff*>& contain
     //std::cout << "constructed Chest" << std::endl;
 }
 
-Chest::~Chest() {}
+Chest::~Chest()
+{
+	for (multimap<string, Stuff*>::iterator j=inside().begin(); j!=inside().end(); j++)
+	{
+		delete j->second;
+	}
+}
 
 void Chest::openThing()
 {
