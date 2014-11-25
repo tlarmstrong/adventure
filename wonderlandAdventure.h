@@ -47,6 +47,7 @@ public:
     void personLeaves(Person* leaver);    //removes somebody from a place
     
     std::multimap<std::string, Stuff*>& whatsHere();              //returns the list of stuff here
+    std::multimap<std::string, Thing*>& openHere();
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     void genStuff(Stuff* gen);				//to generate an item in the game
@@ -391,7 +392,7 @@ protected:
     
 public:
         
-    string thingtype;	//so i can differentiate between doors and chests easier
+    std::string thingtype;	//so i can differentiate between doors and chests easier
     
     Thing(const bool& stat, const std::string name);            // constructor
     virtual ~Thing();   // destructor
@@ -401,7 +402,8 @@ public:
     // pure virtual function, each derived will have own
     virtual void openThing()=0;
     virtual void closeThing()=0;
-        
+    
+    virtual std::multimap<std::string, Stuff*>& whatsinside()=0;
     // output of what Alice has opened (will pass to derived)
     virtual std::ostream& render(const std::ostream&)=0;
 };
@@ -411,6 +413,7 @@ class Door : public Thing {
      
 private:
 	std::map<std::string, Place*> between; // unused?
+    std::multimap<std::string, Stuff*> nothing;
         
 public:
         
@@ -426,7 +429,8 @@ public:
     // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
     void openThing();
     void closeThing();      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
-        
+    
+    std::multimap<std::string, Stuff*>& whatsinside();
     // effects of openThing()
     //std::ostream& render(const std::ostream&);
 };

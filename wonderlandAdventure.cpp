@@ -22,9 +22,9 @@ Place::~Place()
 	//I am going to leave the commented code so that we can talk about it
 	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
-		for (multimap<string, Stuff*>::iterator j=(i->second)->stuffList.begin(); j!=(i->second)->stuffList.end(); j++)
+		for (multimap<string, Stuff*>::iterator j=(i->second)->getStuffList().begin(); j!=(i->second)->getStuffList().end(); j++)
 		{
-			delete j->second
+            delete j->second;
 		}
 		delete i->second;
 	}
@@ -38,9 +38,9 @@ Place::~Place()
 	{
 		if(i->second->thingtype=="chest")
 		{
-			for (multimap<string, Stuff*>::iterator j=(i->second)->inside.begin(); j!=(i->second)->inside.end(); j++)
+			for (multimap<string, Stuff*>::iterator j=(i->second)->whatsinside().begin(); j!=(i->second)->whatsinside().end(); j++)
 			{
-				delete j->second
+                delete j->second;
 			}
 		}
 		delete i->second;
@@ -66,13 +66,17 @@ void Place::personEnters(Person* enterer)  // somebody comes into the place
 
 void Place::personLeaves(Person* leaver)   // removes somebody from a place
 {
-    
     peopleHere.erase(peopleHere.find(leaver->getName()));
 }
 
-multimap<string, Stuff*> Place::whatsHere() const              // returns the list of stuff here
+multimap<string, Stuff*>& Place::whatsHere()              // returns the list of stuff here
 {
     return stuffHere;
+}
+
+std::multimap<std::string, Thing*>& Place::openHere()
+{
+    return thingHere;
 }
 
 // someone dropped an item, so now it is laying around
@@ -104,12 +108,12 @@ void Place::blockPlaceToGo(Place* block)
     placeTo.erase(placeTo.find(block->getPlaceName()));
 }
 
-map<string, Place*> Place::getNewPlaceToGo() const
+map<string, Place*>& Place::getNewPlaceToGo()
 {
     return placeTo;
 }
 
-multimap<string, Thing*> Place::getThingsHere() const
+multimap<string, Thing*>& Place::getThingsHere()
 {
 	return thingHere;
 }
@@ -124,11 +128,9 @@ std::ostream& Place::narrate(std::ostream& out) const
 
 std::ostream& Place::render(std::ostream& out) const
 {
-	if (peopleHere.empty())
-		out << "There is nobody here.";
-	else
+	if (!(peopleHere.empty()))
 	{
-		out << "You see there are other people here: ";
+        out << "You see there are other people here: ";
         
         // Error: No viable overloaded '='
         // Fix: Change iterator to const_iterator
@@ -136,12 +138,13 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Person*>::const_iterator i;
 		i=peopleHere.begin();
 		out << i->second->getName();
-		for(;i!=peopleHere.end();i++)
+		for(;++i!=peopleHere.end();i++)
 		{
 			out << ", " <<i->second->getName();
 		}
+        out << endl;
 	}
-	out << endl;
+	
 	if (!(thingHere.empty()))
 	{
 		out << "You see a ";
@@ -152,12 +155,13 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Thing*>::const_iterator i;
 		i=thingHere.begin();
 		out << i->second->getName();
-		for(;i!=thingHere.end();i++)
+		for(;++i!=thingHere.end();i++)
 		{
 			out << ", and a" <<i->second->getName();
 		}
 		out << "."<< endl;
 	}
+    
 	if (!(stuffHere.empty()))
 	{
 		out << "On the ground you see a ";
@@ -168,17 +172,14 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Stuff*>::const_iterator i;
 		i=stuffHere.begin();
 		out << i->second->getName();
-		for(;i!=stuffHere.end();i++)
+		for(;++i!=stuffHere.end();i++)
 		{
 			out << ", and a" <<i->second->getName();
 		}
 		out << "."<< endl;
 	}
-	if (placeTo.empty())
-	{
-		out << "You can go nowhere from here.";
-	}
-	else
+    
+	if (!(placeTo.empty()))
 	{
 		out << "From here you can go to: ";
         
@@ -188,12 +189,14 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Place*>::const_iterator i;
 		i=placeTo.begin();
 		out << i->second->getPlaceName();
+        i++;
 		for(;i!=placeTo.end();i++)
 		{
 			out << ", " <<i->second->getPlaceName();
 		}
 		out << "."<< endl;
 	}
+    out << endl;
     return out;
 }
 
@@ -228,6 +231,7 @@ Person::~Person() {}
 void Person::move(Place* to) /*const*/
 {
     Place* from = whereAreYou();
+    //cout << from->getPlaceName() << endl;
     from->personLeaves(this);        // remove person from current location
     to->personEnters(this);          // move a person to another place
 }
@@ -235,7 +239,18 @@ void Person::move(Place* to) /*const*/
 // get Place where Person is
 Place* Person::whereAreYou() const
 {
-    return Game::places.find(getName())->second;
+    //return Game::places.find(getName())->second;
+    Place* here=NULL;
+    
+    for(map<string, Place*>::const_iterator i = Game::places.begin(); i!= Game::places.end(); i++)
+    {
+        if((((i->second)->whoHere()).find(getName())) != ((i->second)->whoHere()).end())
+        {
+            here = (i->second);
+        }
+    }
+    //cout << getName() << " is at the " << here->getPlaceName() << endl;
+    return here;
 }
 
 //gives an item to someone else
@@ -268,7 +283,7 @@ int Person::getHealth() const
     return health;
 }
 
-multimap<string, Stuff*> Person::getStuffList() const
+multimap<string, Stuff*>& Person::getStuffList()
 {
     return stuffList;
 }
@@ -335,8 +350,8 @@ void Alice::move(Place* to) const
 
 void Alice::choose(Chest* chst, Stuff* item)
 {
-	chst.takeStuff(chst);
-	receive(item);
+	chst->takeStuff(item);
+	recieve(item);
 }
 
 //Alice adds item to the list of stuff
@@ -349,12 +364,6 @@ void Alice::pickup(Stuff* item)
 void Alice::drop(Stuff* item)
 {
     stuffList.erase(stuffList.find(item->getName()));
-}
-
-//Alice chooses an item from a chest
-void Alice::choose(Chest* chst, Stuff* item)
-{
-    // not sure what this function needs to do
 }
 
 //something we need to think about is what happens to stuff after it is used.... As I see it we have a couple options: use a find_if (not certain exists for multimaps but we could certainly just apply the normal algorithm with an iterator)
@@ -405,8 +414,9 @@ std::ostream& Alice::render(std::ostream& out) const
         s = "BIG";
     if(getBodySize() == 1)
         s = "small";
-        
-    out << "Alice is " << s << endl;
+    
+    out << "Alice is at the " << whereAreYou()->getPlaceName() << endl;
+    out << "She is " << s << endl;
     out << "Her health level is " << getHealth() << endl;
     
     out << "She has these items: ";
@@ -877,7 +887,7 @@ string Thing::getName() const
 Door::Door(const bool& stat, string nm, const map<string, Place*>& betwn): Thing(stat, nm)
 {
 	between = betwn;
-	thingtype=="door";
+	thingtype="door";
     //std::cout << "constructed Door" << std::endl;
 }
 
@@ -911,6 +921,11 @@ void Door::closeThing()
 	}
 }
 
+multimap<string, Stuff*>& Door::whatsinside()
+{
+    return nothing;
+}
+
 
 /*
  ----------------------------------
@@ -921,7 +936,7 @@ void Door::closeThing()
 Chest::Chest(const bool stat, string nm, const multimap<string, Stuff*>& contains):Thing(stat, nm)
 {
 	inside=contains;
-	thingtype=="chest";
+	thingtype="chest";
     //std::cout << "constructed Chest" << std::endl;
 }
 
@@ -962,7 +977,7 @@ Game::Game()
 
 Game::~Game() {}
 
-map<string, Place*> Game::getPlaceList() const
+map<string, Place*>& Game::getPlaceList()
 {
     return places;
 }
@@ -1052,6 +1067,29 @@ void Game::makePlaces()
     
     Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...", hStuff, hPeople, hThing, trav);
     places.insert(pair<string, Place*>(home->getPlaceName(), home));
+    
+    // places to go from Tree
+    places.find("Tree")->second->newPlaceToGo(places.find("Garden")->second);
+    
+    // places to go from Garden
+    places.find("Garden")->second->newPlaceToGo(places.find("Woods")->second);
+    places.find("Garden")->second->newPlaceToGo(places.find("Tree")->second);
+    
+    // places to go from Woods
+    places.find("Woods")->second->newPlaceToGo(places.find("Garden")->second);
+    places.find("Woods")->second->newPlaceToGo(places.find("TeaParty")->second);
+    
+    // places to go from TeaParty
+    places.find("TeaParty")->second->newPlaceToGo(places.find("Woods")->second);
+    places.find("TeaParty")->second->newPlaceToGo(places.find("Castle")->second);
+    
+    // places to go from Castle
+    places.find("Castle")->second->newPlaceToGo(places.find("TeaParty")->second);
+    places.find("Castle")->second->newPlaceToGo(places.find("Battlefield")->second);
+    
+    // places to go from Battlefield
+    places.find("Battlefield")->second->newPlaceToGo(places.find("Castle")->second);
+    places.find("Battlefield")->second->newPlaceToGo(places.find("Home")->second);
 }
 
 void Game::makePeople()
@@ -1156,42 +1194,37 @@ void Game::delegate(const std::string& input)
 	//"Keywords: aboutme, go, pickup, drop, use, approach"
 	string subput="start";
     
-    // Error: Use of undeclared identifier 'alice'
-    // Fix: Find her by iterating through list of places and calling whoHere()
-    
-//    Place* here=nullptr;
-//    
-//    for(map<string, Place*>::const_iterator i = places.begin(); i!=places.end(); i++)
-//    {
-//        if((((i->second)->whoHere()).find("Alice")) != ((i->second)->whoHere()).end())
-//        {
-//            here = (i->second);
-//        }
-//    }
-    
     Place* here = findHere();
+    //cout << here->getPlaceName() << endl;
 	
 	if(input=="aboutme")
 	{
         // Error: Use of undeclared identifier 'alice'
         // Fix: Find her using "here's" whoHere()
 		here->whoHere().find("Alice")->second->render(cout);
+        //here->render(cout);
 	}
 	
 	if(input=="go")
 	{
-		cout << "Where would you like to go? ";
+        here->narrate(cout);
+        
+		cout << "Where would you like to go? " << endl;
+        
+        map<string, Place*>::const_iterator i=here->getNewPlaceToGo().begin();
+        cout << "[choices: " << (i->second)->getPlaceName();
+        i++;
+        
+        for(; i!=here->getNewPlaceToGo().end(); i++)
+            cout << ", " << (i->second)->getPlaceName();
+        
+        cout << "]" << endl;
+        
 		cin >> subput;
 		if(here->getNewPlaceToGo().find(subput)!= here->getNewPlaceToGo().end())
 		{
-            // Error: Use of undeclared identifier 'alice'
-            // Fix: found Alice via here's whoHere()
-            
-            // Error: No viable conversion from 'iterator' (aka '__map_iterator<typename __base::iterator>') to 'Place *' for move args
-            
-            // added -> to find(subput)
-            
 			(here->whoHere().find("Alice")->second)->move(here->getNewPlaceToGo().find(subput)->second);
+            //here->render(cout);
 		}
 		else
 		{
@@ -1277,13 +1310,13 @@ void Game::delegate(const std::string& input)
 		}
 		
 	}
-	
+	/*
 	if(input=="approach")
 	{
 		cout << "What/Who would you like to approach?";
 		string subput;
 		cin>>subput;
-		for(map<string, Thing*>::iterator i=here->thingHere().begin();i!=here->thingHere().end(); i++)
+		for(map<string, Thing*>::iterator i=here->openHere().begin();i!=here->openHere().end(); i++)
 		{
 
 			if(i->first=="subput")
@@ -1292,15 +1325,15 @@ void Game::delegate(const std::string& input)
 				if(i->second->thingtype=="door")
 				{
 					Door* dr=i->second;
-					cout<<"What would you like to do?\n Keywords: use, open, close\n"
-					cin>>subput
+					cout<<"What would you like to do?\n Keywords: use, open, close\n";
+					cin>>subput;
 					if (subput=="use")
 					{
 						cout << "Use what item\n";
 						cin>>subput;
 						if (here->whoHere().find("Alice")->second->getStuffList().find(subput)!=here->whoHere().find("Alice")->second->getStuffList().end())
 						{
-							here->whoHere().find("Alice")->second->useItem(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second,dr);
+							here->whoHere().find("Alice")->second->use(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second,dr);
 						
 							//Austin is here in writing... sleep will write better
 						}
@@ -1324,6 +1357,7 @@ void Game::delegate(const std::string& input)
 			}
 		}
 	}
+     */
 }
 
 // needed to make static lists work
