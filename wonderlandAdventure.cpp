@@ -661,8 +661,8 @@ Person* PersonFactory::makePerson(std::string who)
     
     else if (who == "WhiteRabbit")
     {
-        string nm = "White Rabbit";
-        string dscrpt = "I'm a white rabbit";
+        string nm = "WhiteRabbit";
+        string dscrpt = "I'm a whiterabbit";
         string sayThings = "I'm a friend";
         
         //Stuff* watch = new Stuff("Watch", "My watch can speed up time", 3, true);
@@ -1009,7 +1009,7 @@ void Game::makePlaces()
     multimap<string,Thing*> tThing;
     map<string, Place*> ttrav;
     
-    Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a white rabbit run by.", tStuff, tPeople, tThing, ttrav);
+    Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a whiterabbit run by.", tStuff, tPeople, tThing, ttrav);
     places.insert(pair<string, Place*>(tree->getPlaceName(), tree));
     
 //    Place* walker1 = nullptr;
@@ -1030,7 +1030,7 @@ void Game::makePlaces()
     multimap<string,Thing*> gThing;
     map<string, Place*> gtrav;
     
-    Place* garden = new Place("Garden", "Alice follows the White Rabbit to a beautiful garden full of white roses. Should she pick one?", gStuff, gPeople, gThing, gtrav);
+    Place* garden = new Place("Garden", "Alice follows the WhiteRabbit to a beautiful garden full of white roses. Should she pick one?", gStuff, gPeople, gThing, gtrav);
     places.insert(pair<string, Place*>(garden->getPlaceName(), garden));
     
     // Woods
