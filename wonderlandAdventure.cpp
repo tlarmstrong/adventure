@@ -891,6 +891,11 @@ string Thing::getName() const
     return name;
 }
 
+bool Thing::getStatus() const
+{
+	return status;
+}
+
  /*
  ----------------------------------
  Door classes: Derived from Thing 
@@ -976,6 +981,24 @@ void Chest::takeStuff(Stuff* tk)
 multimap<string, Stuff*>& Chest::whatsinside()
 {
 	return inside;
+}
+
+std::ostream& Chest::narrate(std::ostream& out) const
+{
+	out << "Inside you see:";
+	if(this->whatsinside().empty())
+		out << "nothing";
+	else
+	{
+		multimap<string, Stuff*>::const_iterator i;
+		i=this->whatsinside().begin();
+		out << i->second->getName();
+		i++
+		for(;i!=this->whatsinside().end();i++)
+			out<< ", " <<i->second->getName();
+		
+	}
+	return out;
 }
 
 /*
@@ -1339,7 +1362,7 @@ void Game::delegate(const std::string& input)
 				//NEED TO WRITE
 				if(i->second->thingtype=="door")
 				{
-					Door* dr=i->second;
+					Door* dr=here->getThingsHere().find(subput);
 					cout<<"What would you like to do?\n Keywords: use, open, close\n";
 					cin>>subput;
 					if (subput=="use")
@@ -1364,7 +1387,7 @@ void Game::delegate(const std::string& input)
 				}
 				if(i->second->thingtype=="chest")
 				{
-					Chest* chst=i->second;
+					Chest* chst=here->getThingsHere().find(subput);
 					if(i->getStatus())
 					{
 						i->narrate(cout);
