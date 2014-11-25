@@ -1326,7 +1326,6 @@ void Game::delegate(const std::string& input)
 		}
 		
 	}
-	/*
 	if(input=="approach")
 	{
 		cout << "What/Who would you like to approach?";
@@ -1464,7 +1463,7 @@ void Game::delegate(const std::string& input)
 			}
 		}
 	}
-     */
+     
 }
 
 // needed to make static lists work
