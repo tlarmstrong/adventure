@@ -333,6 +333,12 @@ void Alice::move(Place* to) const
     	}
 }
 
+void Alice::choose(Chest* chst, Stuff* item)
+{
+	chst.takeStuff(chst);
+	receive(item);
+}
+
 //Alice adds item to the list of stuff
 void Alice::pickup(Stuff* item)
 {
@@ -1259,7 +1265,7 @@ void Game::delegate(const std::string& input)
 			{
 				if(i->second->getName()==subput2)
 				{
-                    here->whoHere().find("Alice")->second->use(item, i->second);
+                    			here->whoHere().find("Alice")->second->use(item, i->second);
 					used=true;
 					break;
 				}
@@ -1270,6 +1276,53 @@ void Game::delegate(const std::string& input)
 			
 		}
 		
+	}
+	
+	if(input=="approach")
+	{
+		cout << "What/Who would you like to approach?";
+		string subput;
+		cin>>subput;
+		for(map<string, Thing*>::iterator i=here->thingHere().begin();i!=here->thingHere().end(); i++)
+		{
+
+			if(i->first=="subput")
+			{
+				//NEED TO WRITE
+				if(i->second->thingtype=="door")
+				{
+					Door* dr=i->second;
+					cout<<"What would you like to do?\n Keywords: use, open, close\n"
+					cin>>subput
+					if (subput=="use")
+					{
+						cout << "Use what item\n";
+						cin>>subput;
+						if (here->whoHere().find("Alice")->second->getStuffList().find(subput)!=here->whoHere().find("Alice")->second->getStuffList().end())
+						{
+							here->whoHere().find("Alice")->second->useItem(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second,dr);
+						
+							//Austin is here in writing... sleep will write better
+						}
+					}
+					if (subput=="open")
+					{
+						
+					}
+				}
+				if(i->second->thingtype=="chest")
+				{
+					Chest* chst=i->second;
+				}
+			}
+		}
+		for(map<string, Person*>::iterator i=here->whoHere().begin();i!=here->whoHere().end(); i++)
+		{
+			if(i->first=="subput")
+			{
+				//NEED TO WRITE
+			}
+		}
 	}
 }
 
