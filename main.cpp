@@ -18,7 +18,7 @@ int main()
     while(!finished && input!="quit")
     {
             one.findHere()->narrate(cout);
-        cout << "What do you want to do?" << endl << "Keywords: aboutme, go, pickup, drop, use, approach" << endl;
+        cout << "What do you want to do?" << endl << "Keywords: aboutme, go, pickup, drop, use, approach, attack" << endl;
         
         //we need to write approach for alice so she can approach a person, or a thing
         
