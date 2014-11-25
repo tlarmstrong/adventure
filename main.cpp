@@ -11,13 +11,13 @@ int main()
 
     // input string
     string input="start";
-    
     one.findHere()->whoHere().find("Alice")->second->render(cout);
-    one.findHere()->narrate(cout);
+
     
     static bool finished=false;
     while(!finished && input!="quit")
     {
+            one.findHere()->narrate(cout);
         cout << "What do you want to do?" << endl << "Keywords: aboutme, go, pickup, drop, use, approach" << endl;
         
         //we need to write approach for alice so she can approach a person, or a thing
