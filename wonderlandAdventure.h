@@ -391,6 +391,8 @@ protected:
     
 public:
         
+    string thingtype;	//so i can differentiate between doors and chests easier
+    
     Thing(const bool& stat, const std::string name);            // constructor
     virtual ~Thing();   // destructor
     
