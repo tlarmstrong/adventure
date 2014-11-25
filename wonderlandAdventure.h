@@ -51,6 +51,7 @@ public:
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     void genStuff(Stuff* gen);				//to generate an item in the game
+    void genThing(Thing* gen);				//generate a thing
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
