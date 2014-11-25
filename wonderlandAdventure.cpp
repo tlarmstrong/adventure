@@ -19,7 +19,6 @@ Place::Place(const std::string& nm, const std::string& dscpt, const multimap<str
  
 Place::~Place()
 {
-	//I am going to leave the commented code so that we can talk about it
 	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
 		delete i->second;
@@ -85,7 +84,7 @@ void Place::pickedUp(Stuff* pick, Person* who)
 void Place::genStuff(Stuff* gen)
 {
 	stuffHere.insert(pair<string, Stuff*>(gen->getName(), gen));
-} // getting an error "no matching constructor for initialization of 'pair<string,Stuff*>'...removed const from Stuff* and it worked
+}
 
 void Place::newPlaceToGo(Place* goTo)
 {
@@ -206,7 +205,15 @@ std::ostream& Place::render(std::ostream& out) const
  -----------------------------------------------------------
  */
 
-Person::Person(const int& hLevel, const multimap<string, Stuff*>& sList, const string& nm, bool a) : health(hLevel), stuffList(sList), name(nm), isAttack(a) {}
+// ***********************
+
+// took all stuff lists out of constructor (person, alice, npc)
+
+// each person still has multiple lists, but we will insert "stuff" in each list in the PersonFactory instead of filling them in the PF, passing them to the constuctor, and then copying them over
+
+// ***********************
+
+Person::Person(const int& hLevel, const string& nm, bool attk) : health(hLevel), name(nm), isAttack(attk) {}
 
 // default constructor for Person Factory to work
 Person::Person() {}
@@ -221,11 +228,6 @@ Person::~Person()
 }
 
 //allows each person to move from place to place
-
-// Error:Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Person *'
-
-// Fix: removed const
-
 void Person::dies()
 {
 	multimap<string, Stuff*>::iterator i;
@@ -252,15 +254,17 @@ bool Person::isDead()
 void Person::move(Place* to) /*const*/
 {
     Place* from = whereAreYou();
-    //cout << from->getPlaceName() << endl;
-    from->personLeaves(this);        // remove person from current location
-    to->personEnters(this);          // move a person to another place
+
+    // remove person from current location
+    from->personLeaves(this);
+    
+    // move a person to another place
+    to->personEnters(this);
 }
 
 // get Place where Person is
 Place* Person::whereAreYou() const
 {
-    //return Game::places.find(getName())->second;
     Place* here=NULL;
     
     for(map<string, Place*>::const_iterator i = Game::places.begin(); i!= Game::places.end(); i++)
@@ -270,7 +274,6 @@ Place* Person::whereAreYou() const
             here = (i->second);
         }
     }
-    //cout << getName() << " is at the " << here->getPlaceName() << endl;
     return here;
 }
 
@@ -291,7 +294,7 @@ void Person::give(Stuff* item, Person* other)
 void Person::recieve(Stuff* item)
 {
     stuffList.insert(pair<string, Stuff*>(item->getName(), item));
-} // getting an error "no matching constructor for initialization of 'pair<string,Stuff*>'...removed const from Stuff* and it worked
+}
 
 //person takes damage
 void Person::hurt(const int& damage)
@@ -320,53 +323,6 @@ string Person::getName() const
     return name;
 }
 
-void Person::choose(Chest* chst, Stuff* item)
-{
-    chst->takeStuff(item);
-    recieve(item);
-}
-
-//Alice adds item to the list of stuff
-void Person::pickup(Stuff* item)
-{
-    recieve(item);
-}
-
-//Alice drops an item
-void Person::drop(Stuff* item)
-{
-    stuffList.erase(stuffList.find(item->getName()));
-}
-
-//something we need to think about is what happens to stuff after it is used.... As I see it we have a couple options: use a find_if (not certain exists for multimaps but we could certainly just apply the normal algorithm with an iterator)
-
-// lets just delete it?
-
-//Alice uses an item on herself
-void Person::use(Stuff* item)
-{
-    item->useItem(this);		//the item will have a useItem function
-}
-
-//Alice uses an item in a place
-void Person::use(Stuff* item, Place* where)
-{
-    item->useItem(where);
-}
-
-//Alice uses an item on a thing
-void Person::use(Stuff* item, Thing* what)
-{
-    item->useItem(what);
-}
-
-//Alice uses an item on a person
-void Person::use(Stuff* item, Person* who)
-{
-    item->useItem(who);
-}
-
-
 /*
  ----------------------------------
  Alice Class: Derived from Person
@@ -374,15 +330,15 @@ void Person::use(Stuff* item, Person* who)
  */
 
 // constructor (private)
-Alice::Alice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt, bool a) : Person(hLevel, sList, nm, a), helperList(hList), badguyList(bList), bodySize(bSize), description(dscpt) {}
+Alice::Alice(const int& bSize, const int& hLevel, const string& nm, const string& dscpt, bool attk) : Person(hLevel, nm, attk), description(dscpt) {}
 
 // destructor
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice* Alice::makeAlice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt, bool a)
+Alice* Alice::makeAlice(const int& bSize, const int& hLevel, const string& nm, const string& dscpt, bool attk)
 {
-    static Alice alice(sList, hList, bList, bSize, hLevel, nm, dscpt, a);
+    static Alice alice(bSize, hLevel, nm, dscpt, attk);
     
     return &alice;
 }
@@ -404,28 +360,19 @@ void Alice::ditched(NPC* ditcher)
 }
 
 //now alice's friends can come with her
-
-// Error: Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Alice *'
-
-// Fix: found Alice in Place's whoHere() and sent this as argument instead of "this"
-
 void Alice::move(Place* to) const
 {
 	Place* from = whereAreYou();
     
-	from->personLeaves(from->whoHere().find("Alice")->second);        // remove person from current location
-    to->personEnters(from->whoHere().find("Alice")->second);          // move a person to another place
-    
-        // Error: No viable overloaded '='
-        // Fix: Change iterator to const_iterator and worked
-    
+	from->personLeaves(this);        // remove person from current location
+    to->personEnters(this);          // move a person to another place
+
     	for(map<string, NPC*>::const_iterator i=helperList.begin(); i!=helperList.end(); i++)
     	{
     		(i->second)->move(to);
     	}
 }
 
-/*
 void Alice::choose(Chest* chst, Stuff* item)
 {
 	chst->takeStuff(item);
@@ -444,14 +391,11 @@ void Alice::drop(Stuff* item)
     stuffList.erase(stuffList.find(item->getName()));
 }
 
-//something we need to think about is what happens to stuff after it is used.... As I see it we have a couple options: use a find_if (not certain exists for multimaps but we could certainly just apply the normal algorithm with an iterator)
-
-// lets just delete it?
-
+// delete stuff after used?
 //Alice uses an item on herself
 void Alice::use(Stuff* item)
 {
-    item->useItem(this);		//the item will have a useItem function
+    item->useItem(this);
 }
 
 //Alice uses an item in a place
@@ -470,7 +414,7 @@ void Alice::use(Stuff* item, Thing* what)
 void Alice::use(Stuff* item, Person* who)
 {
     item->useItem(who);
-}*/
+}
 
 int Alice::getBodySize() const
 {
@@ -480,19 +424,6 @@ int Alice::getBodySize() const
 void Alice::setBodySize(const int& s)
 {
     bodySize = s;
-}
-
-bool Alice::isfriendly() const
-{
-    return true;
-}
-
-void Alice::setFriendly(const bool& x){}
-void Alice::setnarrate(const std::string& nar){}
-void Alice::settalk(const std::string& nar){}
-std::ostream& Alice::talk(std::ostream& out) const
-{
-    return out << " ";
 }
 
 // output what she has, who she's met, bodySize, and health
@@ -512,22 +443,75 @@ std::ostream& Alice::render(std::ostream& out) const
     
     out << "She has these items: ";
 
-    if(!(stuffList.empty()))
+    if(!hStuff.empty())
     {
-        // Error: No viable overloaded '='
-        // Fix: Change iterator to const_iterator and worked
-        
-        multimap<string, Stuff*>::const_iterator i;
-        i=stuffList.begin();
+        multimap<string, HealthStuff*>::const_iterator i;
+        i=hStuff.begin();
         out << (i->second)->getName();
         i++;
         
-        for(; i!=stuffList.end(); i++)
+        for(; i!=hStuff.end(); i++)
             out << ", " << (i->second)->getName();
     }
     
     else
-        out << "nothing" << endl;
+        out << "nothing";
+    
+    if(!gStuff.empty())
+    {
+        multimap<string, GrowStuff*>::const_iterator i;
+        i=gStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=gStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!fStuff.empty())
+    {
+        multimap<string, FriendStuff*>::const_iterator i;
+        i=fStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=fStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!oStuff.empty())
+    {
+        multimap<string, OpenStuff*>::const_iterator i;
+        i=oStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=oStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!mStuff.empty())
+    {
+        multimap<string, MoveStuff*>::const_iterator i;
+        i=mStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=mStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
     
     if(!helperList.empty())
     {
@@ -580,13 +564,10 @@ std::ostream& Alice::narrate(std::ostream& out) const
  */
 
 // constructor
-NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const multimap<string, Stuff*>& sList, const int& hlth, const bool& frndly, bool a): Person (hlth, sList, nm, a), description(dscrpt), says(sayThings), friendly(frndly) {}
+NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const int& hlth, const bool& frndly, bool a): Person (hlth, nm, a), description(dscrpt), says(sayThings), friendly(frndly) {}
 
 // destructor
 NPC::~NPC() {}
-
-void NPC::taggingAlong(NPC* tagger){}
-void NPC::ditched(NPC* ditcher){}
 
 // public function to set friendly status of NPC
 void NPC::setFriendly(const bool& x)
@@ -639,17 +620,70 @@ ostream& NPC::render(ostream& out) const
     
     out << getName() << " has these items: ";
     
-    if(!stuffList.empty())
+    if(!hStuff.empty())
     {
-        // Error: No viable overloaded '='
-        // Fix: Change iterator to const_iterator
-        
-        multimap<string, Stuff*>::const_iterator i;
-        i=stuffList.begin();
+        multimap<string, HealthStuff*>::const_iterator i;
+        i=hStuff.begin();
         out << (i->second)->getName();
         i++;
         
-        for(; i!=stuffList.end(); i++)
+        for(; i!=hStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!gStuff.empty())
+    {
+        multimap<string, GrowStuff*>::const_iterator i;
+        i=gStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=gStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!fStuff.empty())
+    {
+        multimap<string, FriendStuff*>::const_iterator i;
+        i=fStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=fStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!oStuff.empty())
+    {
+        multimap<string, OpenStuff*>::const_iterator i;
+        i=oStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=oStuff.end(); i++)
+            out << ", " << (i->second)->getName();
+    }
+    
+    else
+        out << "nothing";
+    
+    if(!mStuff.empty())
+    {
+        multimap<string, MoveStuff*>::const_iterator i;
+        i=mStuff.begin();
+        out << (i->second)->getName();
+        i++;
+        
+        for(; i!=mStuff.end(); i++)
             out << ", " << (i->second)->getName();
     }
     
@@ -659,15 +693,6 @@ ostream& NPC::render(ostream& out) const
     out << endl;
     return out;
 }
-
-// added to make useItem work for Alice* as Person*
-/*void NPC::choose(Chest* chst, Stuff* item) {}
-void NPC::pickup(Stuff* item) {}
-void NPC::drop(Stuff* item) {}
-void NPC::use(Stuff* item) {}
-void NPC::use(Stuff* item, Place* where) {}
-void NPC::use(Stuff* item, Thing* what) {}
-void NPC::use(Stuff* item, Person* who) {}*/
 
 /*
  --------------------------------------------------
@@ -694,19 +719,25 @@ Person* PersonFactory::makePerson(std::string who)
         string dscrpt = "I'm a bad guy";
         string sayThings = "I'm gonna get you";
         
-        Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", 1, true);
-        
-        Stuff* knife = new HealthStuff("Sword", "Watch out! He has a big sword!", -3, true);
-        
-        multimap<string, Stuff*> bList;
-        bList.insert(pair<string, Stuff*>(bandersnatchEye->getName(), bandersnatchEye));
-        bList.insert(pair<string, Stuff*>(knife->getName(), knife));
-        
         int hLevel = 10;
         bool frndly = false;
-        bool a = false;
+        bool attk = false;
         
-        Person* bandersnatch = new NPC(nm, dscrpt, sayThings, bList, hLevel, frndly, a);
+        NPC* bandersnatch = new NPC(nm, dscrpt, sayThings, hLevel, frndly, attk);
+        
+        FriendStuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", 1, true);
+        
+        HealthStuff* knife = new HealthStuff("Sword", "Watch out! He has a big sword!", 3, true);
+        
+        // *******************
+        
+        // inserting stuff instead of passing to constructor, making NPC object and inserting into his list directly
+        
+        // *******************
+        
+        bandersnatch->fStuff.insert(pair<string, FriendStuff*>(bandersnatchEye->getName(), bandersnatchEye));
+        bandersnatch->hStuff.insert(pair<string, HealthStuff*>(knife->getName(), knife));
+        
         return bandersnatch;
     }
     
@@ -715,19 +746,20 @@ Person* PersonFactory::makePerson(std::string who)
         string nm = "Jabberwocky";
         string dscrpt = "I'm a really bad guy";
         string sayThings = "I'm really gonna get you";
-        
-        Stuff* excalibur = new HealthStuff("Sword", "Watch out! He has a big sword!", -3, true);
-        
-        multimap<string, Stuff*> jList;
-        jList.insert(pair<string, Stuff*>(excalibur->getName(), excalibur));
-        
-        // instead of making list and sending to constructor, make object and insert into his list directly
-        
         int hLevel = 10;
         bool frndly = false;
-        bool a = false;
+        bool attk = false;
         
-        Person* jabberwocky = new NPC(nm, dscrpt, sayThings, jList, hLevel, frndly, a);
+        NPC* jabberwocky = new NPC(nm, dscrpt, sayThings, hLevel, frndly, attk);
+        
+        HealthStuff* excalibur = new HealthStuff("Sword", "Watch out! He has a big sword!", 5, true);
+        
+        MoveStuff* jabberBlood = new MoveStuff("jabberBlood", "It's magic...it can take you home", 1, true);
+        
+        jabberwocky->hStuff.insert(pair<string, HealthStuff*>(excalibur->getName(), excalibur));
+        
+        jabberwocky->mStuff.insert(pair<string, MoveStuff*>(jabberBlood->getName(), jabberBlood));
+        
         return jabberwocky;
     }
     
@@ -736,17 +768,16 @@ Person* PersonFactory::makePerson(std::string who)
         string nm = "RedQueen";
         string dscrpt = "I'm an evil queen";
         string sayThings = "I'm gonna get you, my pretty";
-        
-        Stuff* elixar = new HealthStuff("Potion", "Drink my potion and see what happens", -5, true);
-
-        multimap<string, Stuff*> rList;
-        rList.insert(pair<string, Stuff*>(elixar->getName(), elixar));
-        
         int hLevel = 10;
         bool frndly = false;
-        bool a = false;
+        bool attk = false;
         
-        Person* rqueen=new NPC(nm, dscrpt, sayThings, rList, hLevel, frndly, a);
+        NPC* rqueen=new NPC(nm, dscrpt, sayThings, hLevel, frndly, attk);
+        
+        HealthStuff* elixar = new HealthStuff("Potion", "Drink my potion and see what happens", 5, true);
+        
+        rqueen->hStuff.insert(pair<string, HealthStuff*>(elixar->getName(), elixar));
+
         return rqueen;
     }
     
@@ -755,17 +786,14 @@ Person* PersonFactory::makePerson(std::string who)
         string nm = "WhiteRabbit";
         string dscrpt = "I'm a whiterabbit";
         string sayThings = "I'm a friend";
-        
-        //Stuff* watch = new Stuff("Watch", "My watch can speed up time", 3, true);
-        
-        multimap<string, Stuff*> wList;
-        //wList.push(watch);
-        
         int hLevel = 10;
         bool frndly = true;
-        bool a = false;
+        bool attk = false;
         
-        Person* whiteRabbit = new NPC(nm, dscrpt, sayThings, wList, hLevel, frndly, a);
+        NPC* whiteRabbit = new NPC(nm, dscrpt, sayThings, hLevel, frndly, attk);
+        
+        // has nothing in lists
+        
         return whiteRabbit;
     }
     
@@ -774,13 +802,13 @@ Person* PersonFactory::makePerson(std::string who)
         string nm = "MadHatter";
         string dscrpt = "I like tea parties";
         string sayThings = "Would you like to come to my party?";
-        
-        multimap<string, Stuff*> mList;
         int hLevel = 10;
         bool frndly = true;
-        bool a = false;
+        bool attk = false;
         
-        Person* madHatter = new NPC(nm, dscrpt, sayThings, mList, hLevel, frndly, a);
+        // has nothing in lists
+        
+        NPC* madHatter = new NPC(nm, dscrpt, sayThings, hLevel, frndly, attk);
         return madHatter;
     }
     
@@ -789,30 +817,28 @@ Person* PersonFactory::makePerson(std::string who)
         string nm = "Cheshire Cat";
         string dscrpt = "I like to smile";
         string sayThings = "I'm a mysterious friend";
-        
-        multimap<string, Stuff*> cList;
-        
         int hLevel = 10;
         bool frndly = true;
-        bool a = false;
+        bool attk = false;
         
-        Person* cheshireCat = new NPC(nm, dscrpt, sayThings, cList, hLevel, frndly, a);
+        NPC* cheshireCat = new NPC(nm, dscrpt, sayThings, hLevel, frndly, attk);
+        
+        // has nothing in lists
         
         return cheshireCat;
     }
     
     else if (who == "Alice")
     {
-        multimap<string, Stuff*> aList;
-        map<string, NPC*> hList;
-        map<string, NPC*> bList;
         int bSize = 2;
         int hLevel = 30;
         string nm = "Alice";
         string dscpt = "Hi! I'm Alice";
-        bool a = false;
+        bool attk = false;
         
-        Person* alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm, dscpt, a);
+        Person* alice = Alice::makeAlice( bSize, hLevel, nm, dscpt, attk);
+        
+        // starts with nothing in lists
         
         return alice;
     }
@@ -945,23 +971,6 @@ MoveStuff::~MoveStuff() {}
 // move Alice home
 void MoveStuff::useItem(/*const*/ Person* who, Place* where)
 {
-    /* old? can we delete?
-     map<string, Place*> go = where->getNewPlaceToGo();
-        
-    for(map<string, Place*>::iterator i=go.begin(); i!=go.end(); i++)
-    {
-        if((i->second)->getPlaceName() == "Home")
-        {
-            Place* there = i->second;
-            who->move(there);
-        }
-    }
-    status = 0;*/
-    
-    // Error: Member function 'move' not viable: 'this' argument has type 'const Person', but function is not marked const
-    
-    // Fix: Removed const and worked
-    
     if(where->getPlaceName()=="Home")
     {
     	who->move(where);
@@ -1310,15 +1319,22 @@ void Game::makePeople()
 // make stuff for people and places
 void Game::makeStuff()
 {
+    // **********************
+    
+    // Switched stuff over to make specific types of stuff
+    // not sure of the genStuff function
+    
+    // **********************
+    
     // (1) Tree
     // Tree has nothing in list
     
     // (2) Garden
-    Stuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
+    HealthStuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
     places.find("Garden")->second->genStuff(whiteRose);
     
     // (3) Woods
-    Stuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);
+    OpenStuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);
     places.find("Woods")->second->genStuff(key);
     
     // (4) TeaParty
@@ -1327,38 +1343,27 @@ void Game::makeStuff()
     
     //Do you want me to make these just iterators so cake makes her one size bigger and tea makes her one size smaller // that works!
     
-    Stuff* cake = new GrowStuff("Cake", "The cake will make Alice big!", 3, 1);
-    Stuff* tea = new GrowStuff("Tea", "Drinking the tea will make Alice small.", 1, 1);
+    GrowStuff* cake = new GrowStuff("Cake", "The cake will make Alice big!", 3, 1);
+    GrowStuff* tea = new GrowStuff("Tea", "Drinking the tea will make Alice small.", 1, 1);
     places.find("TeaParty")->second->genStuff(cake);
     places.find("TeaParty")->second->genStuff(tea);
     
     // (5) Castle
-    Stuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 1);
+    HealthStuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 1);
     places.find("Castle")->second->genStuff(sword);
     
-    // ****************************************************
-    
-    Stuff* knife = new HealthStuff("Knife", "Watch out! He has a knife", -3, 1);
-    
-    // ****************************************************
-    
     // (6) Battlefield
-    Stuff* jabberBlood = new MoveStuff("JabberBlood", "Drinking the Jabberwocky's purple blood will take Alice home", 1, 1);
     
-   // find jabberwocky and use receive function
+   /* MOVED TO PERSON FACTORY TO INSERT jabberBlood INTO HIS mStuff BEFORE RETURNING HIM
+    
+    MoveStuff* jabberBlood = new MoveStuff("JabberBlood", "Drinking the Jabberwocky's purple blood will take Alice home", 1, 1);
+    
    for(map<string, Place*>::iterator i = places.begin(); i!=places.end(); i++)
     {
-        // added Place:: to whoHere (whoHere undefined otherwise)
-        // ****************************************************
-        
-        if(((((i->second)->Place::whoHere()).find("Bandersnatch")))!=((i->second)->Place::whoHere()).end())
-            ((((i->second)->Place::whoHere()).find("Bandersnatch"))->second)->recieve(knife);
-        
-        // ****************************************************
-        
         if(((((i->second)->Place::whoHere()).find("Jabberwocky")))!=((i->second)->Place::whoHere()).end())
             ((((i->second)->Place::whoHere()).find("Jabberwocky"))->second)->recieve(jabberBlood);
     }
+    */
     
     // (7) Home
     // Home has nothing in list

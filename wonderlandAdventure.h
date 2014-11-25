@@ -4,6 +4,11 @@
 
 // declare Stuff, NPC, Place, Thing, Person
 class Stuff;
+class FriendStuff;
+class HealthStuff;
+class GrowStuff;
+class MoveStuff;
+class OpenStuff;
 class Place;
 class Person;
 class PersonFactory;
@@ -89,57 +94,57 @@ protected:
     int health;                     //health level of the person
     std::multimap<std::string, Stuff*> stuffList;          // list of stuff each person has  
     std::string name;
+    bool isAttack;
     Person();
     bool dead;
+    
+    // stuff lists for NPCs and Alice
+    std::map<std::string, HealthStuff*> hStuff;
+    std::map<std::string, GrowStuff*> gStuff;
+    std::map<std::string, FriendStuff*> fStuff;
+    std::map<std::string, OpenStuff*> oStuff;
+    std::map<std::string, MoveStuff*> mStuff;
     
 public:
     
     // constructor -- all derived use (initialization list)
 
-    Person(const int& hLevel, const std::multimap<std::string, Stuff*>& sList, const std::string& nm, bool a);
+    Person(const int& hLevel, const std::string& nm, bool attk);
     virtual ~Person();                       // destructor
     
-    virtual void move(Place* to) /*const*/;               // Person can move from place to place
+    // Person can move from place to place
+    virtual void move(Place* to) /*const*/;
     
-    Place* whereAreYou() const; // get (and display) name of place	//I would rather return a place pointer that then could output the name of the place. this way if we need to act on the place, we can. Also it needs the list of places to look through, unless we make the list of places static... that might actually be a good idea...
+    // get (and display) name of place
+    Place* whereAreYou() const;
     
-    void give(Stuff* item, Person* other);     // gives an item to someone else
-    void recieve(Stuff* item);                 // recieves an item
-    void hurt(const int& damage);					 // person takes damage
+    // gives an item to someone else
+    // CHANGE: NPC* (used to be Person*)
+    void give(Stuff* item, NPC* other);
     
-    bool isAttack;
+    // recieves an item
+    // Does this still work with a Stuff* or do we need to have a recieve function for each type of Stuff?
+    void recieve(Stuff* item);
+    void give(Stuff* item, Person* other);
+    
+    // person takes damage
+    void hurt(const int& damage);
+    
     void attack();
     
     int getHealth() const;
     
+    // gets Stuff list
     std::multimap<std::string, Stuff*>& getStuffList();
-    std::string getName() const;	// gets person's name
+    
+    // gets person's name
+    std::string getName() const;
     
     void dies();
     bool isDead();
     
-    void choose(Chest* chst, Stuff* item);
-    void pickup(Stuff* item);
-    void drop(Stuff* item);
-    void use(Stuff* item);
-    void use(Stuff* item, Place* where);
-    void use(Stuff* item, Thing* what);
-    void use(Stuff* item, Person* who);
-    
-    // pure virtual functions added to make useItem work for Alice* as Person*
-    virtual void taggingAlong(NPC* tagger)=0;
-    virtual void ditched(NPC* ditcher)=0;
-    
-    virtual void setFriendly(const bool& x)=0;
-    virtual void setnarrate(const std::string& nar)=0;
-    virtual void settalk(const std::string& nar)=0;
-    
-    virtual bool isfriendly() const=0;
-    
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
-    // What NPCs say to Alice
-    virtual std::ostream& talk(std::ostream& out) const=0;
 };
 
 /*
@@ -153,47 +158,64 @@ class Alice: public Person {
     
 private:
     
-    std::map<std::string, NPC*> helperList;    // list of helpers with Alice
-    std::map<std::string, NPC*> badguyList;    // list of badguys with Alice
-    int bodySize;            // getSize of Alice (small(1), normal(2), big(3))
+    // list of helpers with Alice
+    std::map<std::string, NPC*> helperList;
+    
+    // list of badguys with Alice
+    std::map<std::string, NPC*> badguyList;
+    
+    // getSize of Alice (small(1), normal(2), big(3))
+    int bodySize;
+    
     std::string description;
     
     // constructor
-    Alice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string, NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
+    Alice(const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool attk);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice* makeAlice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string,NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
+    static Alice* makeAlice(const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
     
-    void taggingAlong(NPC* tagger);  //adds a person to the list of Helpers
-    void ditched(NPC* ditcher);      //removes a person from the list of Helpers
-    void move(Place* to) const;               // Alice can move from place to place with her friends
+    //adds a person to the list of Helpers
+    void taggingAlong(NPC* tagger);
+    
+    //removes a person from the list of Helpers
+    void ditched(NPC* ditcher);
+    
+    // Alice can move from place to place with her friends
+    void move(Place* to) const;
 
+    //Alice chooses an item from a chest
+    void choose(Chest* chst, Stuff* item);
     
-    //void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
-    //void pickup(Stuff* item);                     //Alice adds item to the list of stuff
-    //void drop(Stuff* item);                       //Alice drops an item
-    //void use(Stuff* item);                        //Alice uses an item on herself
-    //void use(Stuff* item, Place* where);     		//Alice uses an item in a place
-    //void use(Stuff* item, Thing* what);      		//Alice uses an item on a thing
-    //void use(Stuff* item, Person* who);      		//Alice uses an item on a person
+    //Alice adds item to the list of stuff
+    void pickup(Stuff* item);
     
-    void setFriendly(const bool& x);
-    void setnarrate(const std::string& nar);
-    void settalk(const std::string& nar);
-    std::ostream& talk(std::ostream& out) const;
+    //Alice drops an item
+    void drop(Stuff* item);
     
-    int getBodySize() const;                   // Get size of Alice//her size is an int
+    //Alice uses an item on herself
+    void use(Stuff* item);
+    
+    //Alice uses an item in a place
+    void use(Stuff* item, Place* where);
+    
+    //Alice uses an item on a thing
+    void use(Stuff* item, Thing* what);
+    
+    //Alice uses an item on a person
+    void use(Stuff* item, Person* who);
+    
+    // Get size of Alice//her size is an int
+    int getBodySize() const;
     
     void setBodySize(const int& s);
-    bool isfriendly() const;
     
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;
-    
     std::ostream& narrate(std::ostream& out) const;
 };
 
@@ -214,22 +236,29 @@ class NPC: public Person {
     
 private:
     
-    std::string description;      // unique description of helper / badguy
-    //    std::string name;             // name of helper / badguy		//I moved this to person
-    std::string says;             // what helper / badguy says to Alice
-    bool friendly;                // true = friend, false = not friend
-    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const std::multimap<std::string, Stuff*>& sList, const int& hlth, const bool& frndly, bool a);
+    // unique description of helper / badguy
+    std::string description;
+    
+    // what helper / badguy says to Alice
+    std::string says;
+    
+    // true = friend, false = not friend
+    bool friendly;
+    
+    // constructor
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const int& hlth, const bool& frndly, bool attk);
 
     
 public:
     
-    // constructor
-    ~NPC();               // destructor
+    // destructor
+    ~NPC();
     
     // set friendly status
     void setFriendly(const bool& x);
     
-    // set NPC's narration					//adding these two for character progression
+    //adding these two for character progression
+    // set NPC's narration
     void setnarrate(const std::string& nar);
     
     // set what NPC says to Alice
@@ -246,18 +275,14 @@ public:
     
     std::ostream& render(std::ostream& out) const;
     
-    
-    /*void choose(Chest* chst, Stuff* item);
+    // still needed for NPCs?
+    void choose(Chest* chst, Stuff* item);
     void pickup(Stuff* item);
     void drop(Stuff* item);
     void use(Stuff* item);
     void use(Stuff* item, Place* where);
     void use(Stuff* item, Thing* what);
-    void use(Stuff* item, Person* who);*/
-    
-    // added to make useItem work for Alice* as Person*
-    void taggingAlong(NPC* tagger);
-    void ditched(NPC* ditcher);
+    void use(Stuff* item, Person* who);
 };
 
 /*
@@ -271,11 +296,13 @@ class PersonFactory: public Person
     
 private:
     
-    PersonFactory();		//makes a factory // constructor should be private (I moved it)? I think having it in private will work, we just won't ever make one. The reason why I think it will work is because our function is static. Thus I think we can call it without instantiating factory.
+    // constructor
+    PersonFactory();
     
 public:
     
-    ~PersonFactory();		//destroys a factory
+    //destroys a factory
+    ~PersonFactory();
     
     //make a test tube baby
     static Person* makePerson (const std::string who);
@@ -295,19 +322,27 @@ class Stuff {
     
 protected:
     
-    //Stuff* next	        //"next" pointer in the base class		//stopped using chain of command
-    bool status;                // if used, status = 0; if not, status = 1
-    std::string name;           // name of stuff object
-    std::string description;    // description of Stuff
-    int result;                 // decrease to BGs health / change Alice's health, getSize
+    // if used, status = 0; if not, status = 1
+    bool status;
+    
+    // name of stuff object
+    std::string name;
+    
+    // description of Stuff
+    std::string description;
+    
+    // decrease to BGs health / change Alice's health, getSize
+    int result;
     
 public:
     
     // constructor
     Stuff(const std::string name, const std::string description, const int result,const bool status);
-    virtual ~Stuff();       // destructor
     
-    //int result;                 // decrease to BGs health / change Alice's health, getSize
+    // destructor
+    virtual ~Stuff();
+    
+    // need to make derived classes work?
     virtual void useItem(Alice*)=0;
     virtual void useItem(Place*)=0;
     virtual void useItem(Person*)=0;
