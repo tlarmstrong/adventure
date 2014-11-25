@@ -51,6 +51,7 @@ public:
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     void genStuff(Stuff* gen);				//to generate an item in the game
+    void genThing(Thing* gen);				//generate a thing
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
@@ -83,13 +84,13 @@ private:
     Person(const Person& other);            //copy constructor
     void operator = (const Person& other);  //assignment operator
     
-    
 protected:
     
     int health;                     //health level of the person
     std::multimap<std::string, Stuff*> stuffList;          // list of stuff each person has  
     std::string name;
     Person();
+    bool dead;
     
 public:
     
@@ -112,7 +113,10 @@ public:
     int getHealth() const;
     
     std::multimap<std::string, Stuff*>& getStuffList();
-    std::string getName() const;								// gets person's name
+    std::string getName() const;	// gets person's name
+    
+    void dies();
+    bool isDead();
     
     void choose(Chest* chst, Stuff* item);
     void pickup(Stuff* item);
@@ -433,6 +437,7 @@ public:
     // pure virtual function, each derived will have own
     virtual void openThing()=0;
     virtual void closeThing()=0;
+    bool getStatus();
     
     virtual std::multimap<std::string, Stuff*>& whatsinside()=0;
     // output of what Alice has opened (will pass to derived)
@@ -483,8 +488,8 @@ public:
     void openThing();
     void closeThing();
     
-    bool getStuatus();
-    
+    bool getStatus();
+    std::ostream& Chest::narrate(std::ostream& out) const
     void takeStuff(Stuff* tk);			//take stuff from the chest
     std::multimap<std::string, Stuff*>& whatsinside();	//show whats inside
     

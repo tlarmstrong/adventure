@@ -22,10 +22,6 @@ Place::~Place()
 	//I am going to leave the commented code so that we can talk about it
 	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
-		for (multimap<string, Stuff*>::iterator j=(i->second)->getStuffList().begin(); j!=(i->second)->getStuffList().end(); j++)
-		{
-            delete j->second;
-		}
 		delete i->second;
 	}
 	
@@ -36,13 +32,6 @@ Place::~Place()
 	
 	for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
 	{
-		if(i->second->thingtype=="chest")
-		{
-			for (multimap<string, Stuff*>::iterator j=(i->second)->whatsinside().begin(); j!=(i->second)->whatsinside().end(); j++)
-			{
-                delete j->second;
-			}
-		}
 		delete i->second;
 	}
 	
@@ -223,13 +212,42 @@ Person::Person(const int& hLevel, const multimap<string, Stuff*>& sList, const s
 Person::Person() {}
 
 // destructor
-Person::~Person() {}
+Person::~Person()
+{
+	for (multimap<string, Stuff*>::iterator j=stuffList().begin(); j!=stuffList().end(); j++)
+	{
+        	delete j->second;
+	}
+}
 
 //allows each person to move from place to place
 
 // Error:Cannot initialize a parameter of type 'Person *' with an rvalue of type 'const Person *'
 
 // Fix: removed const
+
+void Person::dies()
+{
+	multimap<string, Stuff*>::iterator i;
+	i=stuffList.begin();
+	for(;!stuffList.empty();i++)
+	{
+		this->whereAreYou()->dropped(i->second, this);
+	}
+	this->whereAreYou()->personLeaves(this);
+	delete this;
+}
+
+bool Person::isDead()
+{
+	if (health<=0)
+	{
+		return true;
+		this dies;
+	}
+	else
+		return false;
+}
 
 void Person::move(Place* to) /*const*/
 {
@@ -972,6 +990,11 @@ string Thing::getName() const
     return name;
 }
 
+bool Thing::getStatus() const
+{
+	return status;
+}
+
  /*
  ----------------------------------
  Door classes: Derived from Thing 
@@ -1002,6 +1025,16 @@ void Door::openThing()
 
 void Door::closeThing()
 {
+	map<string, Place*>::const_iterator i;
+	i=places.begin()
+	for(; i!=places.end();i++)
+	{
+		if(i->second->whoHere().find("Alice")!=i->second->whoHere().end())
+		{
+			i->second->whoHere().find("Alice")->second
+			Alice* ali=
+		}
+	}
 	if(status==1)
 	{
         //Invalid operands to binary expression ('iterator' (aka '__map_iterator<typename __base::iterator>') and 'int')
@@ -1033,7 +1066,13 @@ Chest::Chest(const bool stat, string nm, const multimap<string, Stuff*>& contain
     //std::cout << "constructed Chest" << std::endl;
 }
 
-Chest::~Chest() {}
+Chest::~Chest()
+{
+	for (multimap<string, Stuff*>::iterator j=inside().begin(); j!=inside().end(); j++)
+	{
+		delete j->second;
+	}
+}
 
 void Chest::openThing()
 {
@@ -1057,6 +1096,24 @@ void Chest::takeStuff(Stuff* tk)
 multimap<string, Stuff*>& Chest::whatsinside()
 {
 	return inside;
+}
+
+std::ostream& Chest::narrate(std::ostream& out) const
+{
+	out << "Inside you see:";
+	if(this->whatsinside().empty())
+		out << "nothing";
+	else
+	{
+		multimap<string, Stuff*>::const_iterator i;
+		i=this->whatsinside().begin();
+		out << i->second->getName();
+		i++
+		for(;i!=this->whatsinside().end();i++)
+			out<< ", " <<i->second->getName();
+		
+	}
+	return out;
 }
 
 /*
@@ -1135,13 +1192,36 @@ void Game::makePlaces()
     Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.", pStuff, pPeople, pThing, ptrav);
     places.insert(pair<string, Place*>(teaParty->getPlaceName(), teaParty));
     
-    //Castle
+    //CastleP1
     map<string, Person*> cPeople;
     multimap<string, Stuff*> cStuff;
     multimap<string,Thing*> cThing;
     map<string, Place*> ctrav;
     
-    Place* castle = new Place("Castle", "Alice is taken to the Red Queen's Castle.", cStuff, cPeople, cThing, ctrav);
+    Place* castle = new Place("CastleP1", "Alice is taken to the Red Queen's Castle.", cStuff, cPeople, cThing, ctrav);
+    places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
+    
+    //CastleP2
+    map<string, Person*> c2People;
+    multimap<string, Stuff*> c2Stuff;
+    multimap<string,Thing*> c2Thing;
+    map<string, Place*> c2trav;
+    
+    Place* castle2 = new Place("CastleP2", "Escape the Castle.", c2Stuff, c2People, c2Thing, c2trav);
+    
+    map<string, Place*> doorway;
+    doorway.insert(pair<string, Place*>(castle2->getName(),castle2));
+    doorway.insert(pair<string, Place*>(castle->getName(),castle));
+    Thing* cd=new Door(0, "DoorInCastle", doorway);
+    castle->genThing(cd);
+    castle2->genThing(cd);
+    
+    multimap<std::string, Stuff*> sinchst;
+    Stuff* aswrd=new HealthStuff("SwordToKillJabberwocky", "You can use this to kill the Jabberwocky", 5, 1);
+    sinchst.insert(pair<string, Stuff*>(aswrd->getName(),aswrd));
+    Thing* dchst=new Chest(0, "ChestInCastle", sinchst);
+    castle->genThing(dchst);
+    
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
     // Battlefield
@@ -1181,8 +1261,8 @@ void Game::makePlaces()
     places.find("TeaParty")->second->newPlaceToGo(places.find("Castle")->second);
     
     // places to go from Castle
-    places.find("Castle")->second->newPlaceToGo(places.find("TeaParty")->second);
-    places.find("Castle")->second->newPlaceToGo(places.find("Battlefield")->second);
+    places.find("CastleP1")->second->newPlaceToGo(places.find("TeaParty")->second);
+    places.find("CastleP1")->second->newPlaceToGo(places.find("Battlefield")->second);
     
     // places to go from Battlefield
     places.find("Battlefield")->second->newPlaceToGo(places.find("Castle")->second);
@@ -1435,7 +1515,7 @@ void Game::delegate(const std::string& input)
 				//NEED TO WRITE
 				if(i->second->thingtype=="door")
 				{
-					Door* dr=i->second;
+					Door* dr=here->getThingsHere().find(subput);
 					cout<<"What would you like to do?\n Keywords: use, open, close\n";
 					cin>>subput;
 					if (subput=="use")
@@ -1460,7 +1540,7 @@ void Game::delegate(const std::string& input)
 				}
 				if(i->second->thingtype=="chest")
 				{
-					Chest* chst=i->second;
+					Chest* chst=here->getThingsHere().find(subput);
 					if(i->getStatus())
 					{
 						i->narrate(cout);
