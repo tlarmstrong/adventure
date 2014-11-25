@@ -83,13 +83,13 @@ private:
     Person(const Person& other);            //copy constructor
     void operator = (const Person& other);  //assignment operator
     
-    
 protected:
     
     int health;                     //health level of the person
     std::multimap<std::string, Stuff*> stuffList;          // list of stuff each person has  
     std::string name;
     Person();
+    bool dead;
     
 public:
     
@@ -109,7 +109,10 @@ public:
     int getHealth() const;
     
     std::multimap<std::string, Stuff*>& getStuffList();
-    std::string getName() const;								// gets person's name
+    std::string getName() const;	// gets person's name
+    
+    void dies();
+    bool isDead();
     
     // pure virtual functions added to make useItem work for Alice* as Person*
     virtual void choose(Chest* chst, Stuff* item)=0;
