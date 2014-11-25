@@ -214,7 +214,7 @@ Person::Person() {}
 // destructor
 Person::~Person()
 {
-	for (multimap<string, Stuff*>::iterator j=stuffList().begin(); j!=stuffList().end(); j++)
+	for (multimap<string, Stuff*>::iterator j=stuffList.begin(); j!=stuffList.end(); j++)
 	{
         	delete j->second;
 	}
@@ -242,8 +242,8 @@ bool Person::isDead()
 {
 	if (health<=0)
 	{
+        this->dies();
 		return true;
-		this dies;
 	}
 	else
 		return false;
@@ -1000,7 +1000,7 @@ bool Thing::getStatus() const
  Door classes: Derived from Thing 
  ----------------------------------
  */
-Door::Door(const bool& stat, string nm, const map<string, Place*>& betwn): Thing(stat, nm)
+Door::Door(const bool& stat, const string nm, const map<string, Place*>& betwn): Thing(stat, nm)
 {
 	between = betwn;
 	thingtype="door";
@@ -1026,11 +1026,12 @@ void Door::openThing()
 void Door::closeThing()
 {
 	map<string, Place*>::const_iterator i;
-	i=places.begin()
-	for(; i!=places.end();i++)
+    i=Game::places.begin();
+    for(; i!=Game::places.end();i++)
 	{
 		if(i->second->whoHere().find("Alice")!=i->second->whoHere().end())
 		{
+            // ************* Not sure what doing **************
 			i->second->whoHere().find("Alice")->second
 			Alice* ali=
 		}
@@ -1059,7 +1060,7 @@ multimap<string, Stuff*>& Door::whatsinside()
  ----------------------------------
 */
 
-Chest::Chest(const bool stat, string nm, const multimap<string, Stuff*>& contains):Thing(stat, nm)
+Chest::Chest(const bool stat, const string nm, const multimap<string, Stuff*>& contains):Thing(stat, nm)
 {
 	inside=contains;
 	thingtype="chest";
@@ -1068,7 +1069,7 @@ Chest::Chest(const bool stat, string nm, const multimap<string, Stuff*>& contain
 
 Chest::~Chest()
 {
-	for (multimap<string, Stuff*>::iterator j=inside().begin(); j!=inside().end(); j++)
+	for (multimap<string, Stuff*>::iterator j=inside.begin(); j!=inside.end(); j++)
 	{
 		delete j->second;
 	}
@@ -1083,7 +1084,7 @@ void Chest::closeThing()
 {
 	status=0;
 }
-bool Chest::getStuatus()
+bool Chest::getStatus()
 {
 	return status;
 }
@@ -1098,7 +1099,7 @@ multimap<string, Stuff*>& Chest::whatsinside()
 	return inside;
 }
 
-std::ostream& Chest::narrate(std::ostream& out) const
+std::ostream& Chest::narrate(std::ostream& out)
 {
 	out << "Inside you see:";
 	if(this->whatsinside().empty())
@@ -1108,7 +1109,7 @@ std::ostream& Chest::narrate(std::ostream& out) const
 		multimap<string, Stuff*>::const_iterator i;
 		i=this->whatsinside().begin();
 		out << i->second->getName();
-		i++
+        i++;
 		for(;i!=this->whatsinside().end();i++)
 			out<< ", " <<i->second->getName();
 		
@@ -1210,8 +1211,8 @@ void Game::makePlaces()
     Place* castle2 = new Place("CastleP2", "Escape the Castle.", c2Stuff, c2People, c2Thing, c2trav);
     
     map<string, Place*> doorway;
-    doorway.insert(pair<string, Place*>(castle2->getName(),castle2));
-    doorway.insert(pair<string, Place*>(castle->getName(),castle));
+    doorway.insert(pair<string, Place*>(castle2->getPlaceName(),castle2));
+    doorway.insert(pair<string, Place*>(castle->getPlaceName(),castle));
     Thing* cd=new Door(0, "DoorInCastle", doorway);
     castle->genThing(cd);
     castle2->genThing(cd);
@@ -1501,7 +1502,6 @@ void Game::delegate(const std::string& input)
 		
 	}
     
-    /*
 	if(input=="approach")
 	{
 		cout << "What/Who would you like to approach?";
@@ -1641,7 +1641,7 @@ void Game::delegate(const std::string& input)
 			}
 		}
 	}
-    */
+}
 }
 
 // needed to make static lists work
