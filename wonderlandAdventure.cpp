@@ -19,7 +19,7 @@ Place::Place(const std::string& nm, const std::string& dscpt, const multimap<str
  
 Place::~Place()
 {
-	/* I am going to leave the commented code so that we can talk about it
+	//I am going to leave the commented code so that we can talk about it
 	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
 		for (multimap<string, Stuff*>::iterator j=(i->second)->stuffList.begin(); j!=(i->second)->stuffList.end(); j++)
@@ -36,7 +36,7 @@ Place::~Place()
 	
 	for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
 	{
-		if(i->first=="chest")
+		if(i->second->thingtype=="chest")
 		{
 			for (multimap<string, Stuff*>::iterator j=(i->second)->inside.begin(); j!=(i->second)->inside.end(); j++)
 			{
@@ -45,7 +45,7 @@ Place::~Place()
 		}
 		delete i->second;
 	}
-	*/
+	
 }
 
 // pass all return maps/multimaps by value
@@ -871,6 +871,7 @@ string Thing::getName() const
 Door::Door(const bool& stat, string nm, const map<string, Place*>& betwn): Thing(stat, nm)
 {
 	between = betwn;
+	thingtype=="door";
     //std::cout << "constructed Door" << std::endl;
 }
 
@@ -914,6 +915,7 @@ void Door::closeThing()
 Chest::Chest(const bool stat, string nm, const multimap<string, Stuff*>& contains):Thing(stat, nm)
 {
 	inside=contains;
+	thingtype=="chest";
     //std::cout << "constructed Chest" << std::endl;
 }
 
