@@ -217,7 +217,7 @@ std::ostream& Place::render(std::ostream& out) const
  -----------------------------------------------------------
  */
 
-Person::Person(const int& hLevel, const multimap<string, Stuff*>& sList, const string& nm) : health(hLevel), stuffList(sList), name(nm) {}
+Person::Person(const int& hLevel, const multimap<string, Stuff*>& sList, const string& nm, bool a) : health(hLevel), stuffList(sList), name(nm), isAttack(a) {}
 
 // default constructor for Person Factory to work
 Person::Person() {}
@@ -278,7 +278,12 @@ void Person::recieve(Stuff* item)
 //person takes damage
 void Person::hurt(const int& damage)
 {
-    health -= damage;
+    health += damage;
+}
+
+void Person::attack()
+{
+    isAttack = true;
 }
 
 int Person::getHealth() const
@@ -297,6 +302,53 @@ string Person::getName() const
     return name;
 }
 
+void Person::choose(Chest* chst, Stuff* item)
+{
+    chst->takeStuff(item);
+    recieve(item);
+}
+
+//Alice adds item to the list of stuff
+void Person::pickup(Stuff* item)
+{
+    recieve(item);
+}
+
+//Alice drops an item
+void Person::drop(Stuff* item)
+{
+    stuffList.erase(stuffList.find(item->getName()));
+}
+
+//something we need to think about is what happens to stuff after it is used.... As I see it we have a couple options: use a find_if (not certain exists for multimaps but we could certainly just apply the normal algorithm with an iterator)
+
+// lets just delete it?
+
+//Alice uses an item on herself
+void Person::use(Stuff* item)
+{
+    item->useItem(this);		//the item will have a useItem function
+}
+
+//Alice uses an item in a place
+void Person::use(Stuff* item, Place* where)
+{
+    item->useItem(where);
+}
+
+//Alice uses an item on a thing
+void Person::use(Stuff* item, Thing* what)
+{
+    item->useItem(what);
+}
+
+//Alice uses an item on a person
+void Person::use(Stuff* item, Person* who)
+{
+    item->useItem(who);
+}
+
+
 /*
  ----------------------------------
  Alice Class: Derived from Person
@@ -304,15 +356,15 @@ string Person::getName() const
  */
 
 // constructor (private)
-Alice::Alice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt) : Person(hLevel, sList, nm), helperList(hList), badguyList(bList), bodySize(bSize), description(dscpt) {}
+Alice::Alice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt, bool a) : Person(hLevel, sList, nm, a), helperList(hList), badguyList(bList), bodySize(bSize), description(dscpt) {}
 
 // destructor
 Alice::~Alice() {}
 
 // Alice is a Singleton
-Alice* Alice::makeAlice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt)
+Alice* Alice::makeAlice(const multimap<string, Stuff*>& sList, const map<string, NPC*>& hList, const map<string, NPC*>& bList, const int& bSize, const int& hLevel, const string& nm, const string& dscpt, bool a)
 {
-    static Alice alice(sList, hList, bList, bSize, hLevel, nm, dscpt);
+    static Alice alice(sList, hList, bList, bSize, hLevel, nm, dscpt, a);
     
     return &alice;
 }
@@ -355,6 +407,7 @@ void Alice::move(Place* to) const
     	}
 }
 
+/*
 void Alice::choose(Chest* chst, Stuff* item)
 {
 	chst->takeStuff(item);
@@ -399,7 +452,7 @@ void Alice::use(Stuff* item, Thing* what)
 void Alice::use(Stuff* item, Person* who)
 {
     item->useItem(who);
-}
+}*/
 
 int Alice::getBodySize() const
 {
@@ -414,6 +467,14 @@ void Alice::setBodySize(const int& s)
 bool Alice::isfriendly() const
 {
     return true;
+}
+
+void Alice::setFriendly(const bool& x){}
+void Alice::setnarrate(const std::string& nar){}
+void Alice::settalk(const std::string& nar){}
+std::ostream& Alice::talk(std::ostream& out) const
+{
+    return out << " ";
 }
 
 // output what she has, who she's met, bodySize, and health
@@ -501,10 +562,13 @@ std::ostream& Alice::narrate(std::ostream& out) const
  */
 
 // constructor
-NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const multimap<string, Stuff*>& sList, const int& hlth, const bool& frndly): Person (hlth, sList, nm), description(dscrpt), says(sayThings), friendly(frndly) {}
+NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sayThings, const multimap<string, Stuff*>& sList, const int& hlth, const bool& frndly, bool a): Person (hlth, sList, nm, a), description(dscrpt), says(sayThings), friendly(frndly) {}
 
 // destructor
 NPC::~NPC() {}
+
+void NPC::taggingAlong(NPC* tagger){}
+void NPC::ditched(NPC* ditcher){}
 
 // public function to set friendly status of NPC
 void NPC::setFriendly(const bool& x)
@@ -579,13 +643,13 @@ ostream& NPC::render(ostream& out) const
 }
 
 // added to make useItem work for Alice* as Person*
-void NPC::choose(Chest* chst, Stuff* item) {}
+/*void NPC::choose(Chest* chst, Stuff* item) {}
 void NPC::pickup(Stuff* item) {}
 void NPC::drop(Stuff* item) {}
 void NPC::use(Stuff* item) {}
 void NPC::use(Stuff* item, Place* where) {}
 void NPC::use(Stuff* item, Thing* what) {}
-void NPC::use(Stuff* item, Person* who) {}
+void NPC::use(Stuff* item, Person* who) {}*/
 
 /*
  --------------------------------------------------
@@ -614,13 +678,17 @@ Person* PersonFactory::makePerson(std::string who)
         
         Stuff* bandersnatchEye = new FriendStuff("BandersnatchEye", "If Alice gives Bandersnatch his missing eye, he will become her friend", 1, true);
         
+        Stuff* knife = new HealthStuff("Sword", "Watch out! He has a big sword!", -3, true);
+        
         multimap<string, Stuff*> bList;
         bList.insert(pair<string, Stuff*>(bandersnatchEye->getName(), bandersnatchEye));
+        bList.insert(pair<string, Stuff*>(knife->getName(), knife));
         
         int hLevel = 10;
         bool frndly = false;
+        bool a = false;
         
-        Person* bandersnatch = new NPC(nm, dscrpt, sayThings, bList, hLevel, frndly);
+        Person* bandersnatch = new NPC(nm, dscrpt, sayThings, bList, hLevel, frndly, a);
         return bandersnatch;
     }
     
@@ -639,8 +707,9 @@ Person* PersonFactory::makePerson(std::string who)
         
         int hLevel = 10;
         bool frndly = false;
+        bool a = false;
         
-        Person* jabberwocky = new NPC(nm, dscrpt, sayThings, jList, hLevel, frndly);
+        Person* jabberwocky = new NPC(nm, dscrpt, sayThings, jList, hLevel, frndly, a);
         return jabberwocky;
     }
     
@@ -657,8 +726,9 @@ Person* PersonFactory::makePerson(std::string who)
         
         int hLevel = 10;
         bool frndly = false;
+        bool a = false;
         
-        Person* rqueen=new NPC(nm, dscrpt, sayThings, rList, hLevel, frndly);
+        Person* rqueen=new NPC(nm, dscrpt, sayThings, rList, hLevel, frndly, a);
         return rqueen;
     }
     
@@ -675,8 +745,9 @@ Person* PersonFactory::makePerson(std::string who)
         
         int hLevel = 10;
         bool frndly = true;
+        bool a = false;
         
-        Person* whiteRabbit = new NPC(nm, dscrpt, sayThings, wList, hLevel, frndly);
+        Person* whiteRabbit = new NPC(nm, dscrpt, sayThings, wList, hLevel, frndly, a);
         return whiteRabbit;
     }
     
@@ -689,8 +760,9 @@ Person* PersonFactory::makePerson(std::string who)
         multimap<string, Stuff*> mList;
         int hLevel = 10;
         bool frndly = true;
+        bool a = false;
         
-        Person* madHatter = new NPC(nm, dscrpt, sayThings, mList, hLevel, frndly);
+        Person* madHatter = new NPC(nm, dscrpt, sayThings, mList, hLevel, frndly, a);
         return madHatter;
     }
     
@@ -704,8 +776,9 @@ Person* PersonFactory::makePerson(std::string who)
         
         int hLevel = 10;
         bool frndly = true;
+        bool a = false;
         
-        Person* cheshireCat = new NPC(nm, dscrpt, sayThings, cList, hLevel, frndly);
+        Person* cheshireCat = new NPC(nm, dscrpt, sayThings, cList, hLevel, frndly, a);
         
         return cheshireCat;
     }
@@ -716,11 +789,12 @@ Person* PersonFactory::makePerson(std::string who)
         map<string, NPC*> hList;
         map<string, NPC*> bList;
         int bSize = 2;
-        int hLevel = 10;
+        int hLevel = 30;
         string nm = "Alice";
-        string dscpt = "I'm a little girl.";
+        string dscpt = "Hi! I'm Alice";
+        bool a = false;
         
-        Person* alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm, dscpt);
+        Person* alice = Alice::makeAlice(aList, hList, bList, bSize, hLevel, nm, dscpt, a);
         
         return alice;
     }
@@ -741,6 +815,13 @@ Person* PersonFactory::makePerson(std::string who)
 Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts) {}
 
 Stuff::~Stuff() {}                // destructor
+
+// ************************************************************
+int Stuff::getResult()
+{
+    return result;
+}
+// ************************************************************
 
 string Stuff::getName() const
 {
@@ -1174,6 +1255,12 @@ void Game::makeStuff()
     Stuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 1);
     places.find("Castle")->second->genStuff(sword);
     
+    // ****************************************************
+    
+    Stuff* knife = new HealthStuff("Knife", "Watch out! He has a knife", -3, 1);
+    
+    // ****************************************************
+    
     // (6) Battlefield
     Stuff* jabberBlood = new MoveStuff("JabberBlood", "Drinking the Jabberwocky's purple blood will take Alice home", 1, 1);
     
@@ -1181,6 +1268,13 @@ void Game::makeStuff()
    for(map<string, Place*>::iterator i = places.begin(); i!=places.end(); i++)
     {
         // added Place:: to whoHere (whoHere undefined otherwise)
+        // ****************************************************
+        
+        if(((((i->second)->Place::whoHere()).find("Bandersnatch")))!=((i->second)->Place::whoHere()).end())
+            ((((i->second)->Place::whoHere()).find("Bandersnatch"))->second)->recieve(knife);
+        
+        // ****************************************************
+        
         if(((((i->second)->Place::whoHere()).find("Jabberwocky")))!=((i->second)->Place::whoHere()).end())
             ((((i->second)->Place::whoHere()).find("Jabberwocky"))->second)->recieve(jabberBlood);
     }
@@ -1326,6 +1420,8 @@ void Game::delegate(const std::string& input)
 		}
 		
 	}
+    
+    /*
 	if(input=="approach")
 	{
 		cout << "What/Who would you like to approach?";
@@ -1369,15 +1465,15 @@ void Game::delegate(const std::string& input)
 					{
 						i->narrate(cout);
 					}
-					cout<<"What would you like to do?\n Keywords: use, open, close, take\n"
-					cin>>subput
+					cout<<"What would you like to do?\n Keywords: use, open, close, take\n";
+					cin>>subput;
 					if (subput=="use")
 					{
 						cout << "Use what item\n";
 						cin>>subput;
 						if (here->whoHere().find("Alice")->second->getStuffList().find(subput)!=here->whoHere().find("Alice")->second->getStuffList().end())
 						{
-							here->whoHere().find("Alice")->second->useItem(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second,chst);
+							here->whoHere().find("Alice")->second->use(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second,chst);
 						
 							//Austin is here in writing... sleep will write better
 						}
@@ -1394,15 +1490,15 @@ void Game::delegate(const std::string& input)
 					{
 						if(i->getStatus())
 						{
-							cout << "What would you like to take\n"
-							cin>>subput
+							cout << "What would you like to take\n";
+							cin>>subput;
 							if(chst->whatsinside().find(subput)!=chst->whatsinside().end())
 							{
 								here->whoHere().find("Alice")->second->choose(chst,chst->whatsinside().find(subput)->second)
 							}
 							else
 							{
-								cout << "That is not in here"
+								cout << "That is not in here";
 							}
 						}
 						if(i->getStatus())
@@ -1423,14 +1519,15 @@ void Game::delegate(const std::string& input)
 				cin >>subput;
 				if (subput=="talk")
 				{
-					pers->talk()
+                    pers->talk(cout
+                               );
 				}
 				if (subput=="askfollow")
 				{
-					if(pers->isFriendly())
+					if(pers->isfriendly())
 					{
 						cout << "Sure\n";
-						here->whoHere.find("Alice")->second->taggingAlong(pers);
+						here->whoHere().find("Alice")->second->taggingAlong(pers);
 					}
 					else
 					{
@@ -1439,10 +1536,11 @@ void Game::delegate(const std::string& input)
 				}
 				if(subput=="askleave")
 				{
-					if(pers->isFriendly())
+					if(pers->isfriendly())
 					{
 						cout << "Sure\n";
-						here->whoHere.find("Alice")->second->ditching(pers);
+						here->whoHere().find("Alice")->second->ditched
+                        (pers);
 					}
 					else
 					{
@@ -1451,19 +1549,19 @@ void Game::delegate(const std::string& input)
 				}
 				if (subput=="attack")
 				{
-					if(here->whoHere.find("Alice")->second->getStuffList().find("sword")!=here->whoHere.find("Alice")->second->getStuffList().end())
+					if(here->whoHere().find("Alice")->second->getStuffList().find("sword")!=here->whoHere().find("Alice")->second->getStuffList().end())
 					{
-						here->whoHere.find("Alice")->second->useItem(here->whoHere.find("Alice")->second->getStuffList().find("sword"),pers);
+						here->whoHere().find("Alice")->second->use(here->whoHere().find("Alice")->second->getStuffList().find("sword"),pers);
 					}
 					else
 					{
-						cout << "You flail your arms wildly about them. They applaud your dance."
+						cout << "You flail your arms wildly about them. They applaud your dance.";
 					}
 				}
 			}
 		}
 	}
-     
+    */
 }
 
 // needed to make static lists work

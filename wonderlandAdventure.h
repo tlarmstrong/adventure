@@ -95,7 +95,7 @@ public:
     
     // constructor -- all derived use (initialization list)
 
-    Person(const int& hLevel, const std::multimap<std::string, Stuff*>& sList, const std::string& nm);
+    Person(const int& hLevel, const std::multimap<std::string, Stuff*>& sList, const std::string& nm, bool a);
     virtual ~Person();                       // destructor
     
     virtual void move(Place* to) /*const*/;               // Person can move from place to place
@@ -106,24 +106,36 @@ public:
     void recieve(Stuff* item);                 // recieves an item
     void hurt(const int& damage);					 // person takes damage
     
+    bool isAttack;
+    void attack();
+    
     int getHealth() const;
     
     std::multimap<std::string, Stuff*>& getStuffList();
     std::string getName() const;								// gets person's name
     
+    void choose(Chest* chst, Stuff* item);
+    void pickup(Stuff* item);
+    void drop(Stuff* item);
+    void use(Stuff* item);
+    void use(Stuff* item, Place* where);
+    void use(Stuff* item, Thing* what);
+    void use(Stuff* item, Person* who);
+    
     // pure virtual functions added to make useItem work for Alice* as Person*
-    virtual void choose(Chest* chst, Stuff* item)=0;
-    virtual void pickup(Stuff* item)=0;
-    virtual void drop(Stuff* item)=0;
-    virtual void use(Stuff* item)=0;
-    virtual void use(Stuff* item, Place* where)=0;
-    virtual void use(Stuff* item, Thing* what)=0;
-    virtual void use(Stuff* item, Person* who)=0;
+    virtual void taggingAlong(NPC* tagger)=0;
+    virtual void ditched(NPC* ditcher)=0;
+    
+    virtual void setFriendly(const bool& x)=0;
+    virtual void setnarrate(const std::string& nar)=0;
+    virtual void settalk(const std::string& nar)=0;
     
     virtual bool isfriendly() const=0;
     
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
+    // What NPCs say to Alice
+    virtual std::ostream& talk(std::ostream& out) const=0;
 };
 
 /*
@@ -143,27 +155,32 @@ private:
     std::string description;
     
     // constructor
-    Alice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string, NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
+    Alice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string, NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
     
 public:
     
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice* makeAlice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string,NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt);
+    static Alice* makeAlice(const std::multimap<std::string, Stuff*>& sList, const std::map<std::string, NPC*>& hList, const std::map<std::string,NPC*>& bList, const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
     
     void taggingAlong(NPC* tagger);  //adds a person to the list of Helpers
     void ditched(NPC* ditcher);      //removes a person from the list of Helpers
     void move(Place* to) const;               // Alice can move from place to place with her friends
 
     
-    void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
-    void pickup(Stuff* item);                     //Alice adds item to the list of stuff
-    void drop(Stuff* item);                       //Alice drops an item
-    void use(Stuff* item);                        //Alice uses an item on herself
-    void use(Stuff* item, Place* where);     		//Alice uses an item in a place
-    void use(Stuff* item, Thing* what);      		//Alice uses an item on a thing
-    void use(Stuff* item, Person* who);      		//Alice uses an item on a person
+    //void choose(Chest* chst, Stuff* item);			//Alice chooses an item from a chest
+    //void pickup(Stuff* item);                     //Alice adds item to the list of stuff
+    //void drop(Stuff* item);                       //Alice drops an item
+    //void use(Stuff* item);                        //Alice uses an item on herself
+    //void use(Stuff* item, Place* where);     		//Alice uses an item in a place
+    //void use(Stuff* item, Thing* what);      		//Alice uses an item on a thing
+    //void use(Stuff* item, Person* who);      		//Alice uses an item on a person
+    
+    void setFriendly(const bool& x);
+    void setnarrate(const std::string& nar);
+    void settalk(const std::string& nar);
+    std::ostream& talk(std::ostream& out) const;
     
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
@@ -197,7 +214,7 @@ private:
     //    std::string name;             // name of helper / badguy		//I moved this to person
     std::string says;             // what helper / badguy says to Alice
     bool friendly;                // true = friend, false = not friend
-    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const std::multimap<std::string, Stuff*>& sList, const int& hlth, const bool& frndly);
+    NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const std::multimap<std::string, Stuff*>& sList, const int& hlth, const bool& frndly, bool a);
 
     
 public:
@@ -225,14 +242,18 @@ public:
     
     std::ostream& render(std::ostream& out) const;
     
-    // added to make useItem work for Alice* as Person*
-    void choose(Chest* chst, Stuff* item);
+    
+    /*void choose(Chest* chst, Stuff* item);
     void pickup(Stuff* item);
     void drop(Stuff* item);
     void use(Stuff* item);
     void use(Stuff* item, Place* where);
     void use(Stuff* item, Thing* what);
-    void use(Stuff* item, Person* who);
+    void use(Stuff* item, Person* who);*/
+    
+    // added to make useItem work for Alice* as Person*
+    void taggingAlong(NPC* tagger);
+    void ditched(NPC* ditcher);
 };
 
 /*
@@ -282,13 +303,20 @@ public:
     Stuff(const std::string name, const std::string description, const int result,const bool status);
     virtual ~Stuff();       // destructor
     
+    //int result;                 // decrease to BGs health / change Alice's health, getSize
     virtual void useItem(Alice*)=0;
     virtual void useItem(Place*)=0;
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
     virtual void useItem(/*const*/ Person* who, Place* where)=0;
-                         
+    
+    //**************************************************
+    
+    int getResult();
+    
+    //*************************************************
+    
     std::string getName() const;
     
     // output description of Stuff
@@ -308,7 +336,7 @@ class GrowStuff : public Stuff
 {
     
     public:
-        GrowStuff(std::string name, std::string description, int result, bool status);
+        GrowStuff(const std::string name, const std::string description, const int result,const bool status);
         ~GrowStuff();
 
         void useItem(Alice* who);
@@ -323,7 +351,7 @@ class GrowStuff : public Stuff
 class HealthStuff : public Stuff
 {
     public:
-        HealthStuff(std::string name, std::string description, int result, bool status);
+        HealthStuff(const std::string name, const std::string description, const int result,const bool status);
         ~HealthStuff();
     
         void useItem(Person* who);
@@ -338,7 +366,7 @@ class HealthStuff : public Stuff
 class FriendStuff : public Stuff
 {
     public:
-        FriendStuff(std::string name, std::string description, int result, bool status);
+        FriendStuff(const std::string name, const std::string description, const int result,const bool status);
         ~FriendStuff();
     
         void useItem(NPC* who);
@@ -353,7 +381,7 @@ class FriendStuff : public Stuff
 class OpenStuff : public Stuff
 {
     public:
-        OpenStuff(std::string name, std::string description, int result, bool status);
+        OpenStuff(const std::string name, const std::string description, const int result,const bool status);
         ~OpenStuff();
     
         void useItem(Thing* what);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
@@ -368,7 +396,7 @@ class OpenStuff : public Stuff
 class MoveStuff : public Stuff
 {
     public:
-        MoveStuff(std::string name, std::string description, int result, bool status);
+        MoveStuff(const std::string name, const std::string description, const int result,const bool status);
         ~MoveStuff();
     
         void useItem(/*const*/ Person* who, Place* where);

@@ -27,6 +27,13 @@ int main()
             if((i->second)->getName() == "Bandersnatch" && (i->second)->isfriendly() == false)
             {
                 cout << "Bandersnatch attack!" << endl;
+                //(i->second)->attack();
+                
+                // ********************************************
+                one.findHere()->whoHere().find("Alice")->second->hurt((i->second)->getStuffList().find("knife")->second->getResult());
+                //**********************************************
+                
+                cout << "Bandersnatch got you with his knife! Health Level: " << one.findHere()->whoHere().find("Alice")->second->getHealth();
             }
             
             if((i->second)->getName() == "Jabberwocky")
