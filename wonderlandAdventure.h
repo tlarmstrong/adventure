@@ -448,8 +448,10 @@ public:
     void openThing();
     void closeThing();
     
-    void takeStuff(Stuff* tk);
-    std::multimap<std::string, Stuff*>& whatsinside();
+    bool getStuatus();
+    
+    void takeStuff(Stuff* tk);			//take stuff from the chest
+    std::multimap<std::string, Stuff*>& whatsinside();	//show whats inside
     
     // effects of openThing()
     //std::ostream& render(const std::ostream&);
