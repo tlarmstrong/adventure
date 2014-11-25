@@ -120,6 +120,8 @@ public:
     virtual void use(Stuff* item, Thing* what)=0;
     virtual void use(Stuff* item, Person* who)=0;
     
+    virtual bool isfriendly() const=0;
+    
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
 };
@@ -166,6 +168,7 @@ public:
     int getBodySize() const;                   // Get size of Alice//her size is an int
     
     void setBodySize(const int& s);
+    bool isfriendly() const;
     
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;

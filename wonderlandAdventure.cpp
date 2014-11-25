@@ -122,7 +122,7 @@ multimap<string, Thing*>& Place::getThingsHere()
 std::ostream& Place::narrate(std::ostream& out) const
 {
     out << description << endl;
-    render(out);
+    //render(out);
     return out;
 }
 
@@ -323,7 +323,7 @@ void Alice::taggingAlong(NPC* tagger)
 //removes a person from the list of Helpers
 void Alice::ditched(NPC* ditcher)
 {
-    if(this->helperList.find(ditcher)!=this->helperList.end())
+    if(this->helperList.find(ditcher->getName())!=this->helperList.end())
     {
     	helperList.erase(helperList.find(ditcher->getName()));
     }
@@ -406,6 +406,11 @@ int Alice::getBodySize() const
 void Alice::setBodySize(const int& s)
 {
     bodySize = s;
+}
+
+bool Alice::isfriendly() const
+{
+    return true;
 }
 
 // output what she has, who she's met, bodySize, and health
@@ -955,7 +960,7 @@ void Chest::closeThing()
 {
 	status=0;
 }
-bool Chest::getStatus()
+bool Chest::getStuatus()
 {
 	return status;
 }
