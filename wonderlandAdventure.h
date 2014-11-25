@@ -405,6 +405,7 @@ public:
     // pure virtual function, each derived will have own
     virtual void openThing()=0;
     virtual void closeThing()=0;
+    bool getStatus();
     
     virtual std::multimap<std::string, Stuff*>& whatsinside()=0;
     // output of what Alice has opened (will pass to derived)
@@ -455,8 +456,8 @@ public:
     void openThing();
     void closeThing();
     
-    bool getStuatus();
-    
+    bool getStatus();
+    std::ostream& Chest::narrate(std::ostream& out) const
     void takeStuff(Stuff* tk);			//take stuff from the chest
     std::multimap<std::string, Stuff*>& whatsinside();	//show whats inside
     
