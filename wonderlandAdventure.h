@@ -46,7 +46,7 @@ public:
     void personEnters(Person* enterer);   //somebody comes into the place
     void personLeaves(Person* leaver);    //removes somebody from a place
     
-    std::multimap<std::string, Stuff*> whatsHere() const;              //returns the list of stuff here
+    std::multimap<std::string, Stuff*>& whatsHere();              //returns the list of stuff here
     void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
     void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
     void genStuff(Stuff* gen);				//to generate an item in the game
@@ -54,9 +54,9 @@ public:
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
     
-    std::multimap<std::string, Thing*> getThingsHere() const;	//gets things here
+    std::multimap<std::string, Thing*>& getThingsHere();	//gets things here
     
-    std::map<std::string, Place*> getNewPlaceToGo() const;
+    std::map<std::string, Place*>& getNewPlaceToGo();
     
     // output description of Place
     std::ostream& narrate(std::ostream& out) const;
@@ -107,7 +107,7 @@ public:
     
     int getHealth() const;
     
-    std::multimap<std::string, Stuff*> getStuffList() const;
+    std::multimap<std::string, Stuff*>& getStuffList();
     std::string getName() const;								// gets person's name
     
     // pure virtual functions added to make useItem work for Alice* as Person*
@@ -476,7 +476,7 @@ public:
          
         Game();                        // constructor
         ~Game();                       // destructor
-        std::map<std::string, Place*> getPlaceList() const;
+        std::map<std::string, Place*>& getPlaceList();
         //std::map<std::string, Person*> getPeopleList() const;
      
         Place* findHere() const;
