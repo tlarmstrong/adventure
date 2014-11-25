@@ -219,25 +219,86 @@ Person::Person(const int& hLevel, const string& nm, bool attk) : health(hLevel),
 Person::Person() {}
 
 // destructor
+
+// *********************
+
+// changed destructor to accommodate different lists, hope it works
+
+// *********************
+
 Person::~Person()
 {
-	for (multimap<string, Stuff*>::iterator j=stuffList.begin(); j!=stuffList.end(); j++)
+	for (multimap<string, HealthStuff*>::iterator h=hStuff.begin(); h!=hStuff.end(); h++)
 	{
-        	delete j->second;
+        	delete h->second;
 	}
+    
+    for (multimap<string, GrowStuff*>::iterator g=gStuff.begin(); g!=gStuff.end(); g++)
+    {
+        delete g->second;
+    }
+    
+    for (multimap<string, FriendStuff*>::iterator f=fStuff.begin(); f!=fStuff.end(); f++)
+    {
+        delete f->second;
+    }
+    
+    for (multimap<string, OpenStuff*>::iterator o=oStuff.begin(); o!=oStuff.end(); o++)
+    {
+        delete o->second;
+    }
+    
+    for (multimap<string, MoveStuff*>::iterator m=mStuff.begin(); m!=mStuff.end(); m++)
+    {
+        delete m->second;
+    }
 }
 
-//allows each person to move from place to place
+// *********************
+
+// changed dies() to accommodate different lists, hope it works
+
+// *********************
+
 void Person::dies()
 {
-	multimap<string, Stuff*>::iterator i;
-	i=stuffList.begin();
-	for(;!stuffList.empty();i++)
+	multimap<string, HealthStuff*>::iterator h;
+	h=hStuff.begin();
+	for(;!hStuff.empty();h++)
 	{
-		this->whereAreYou()->dropped(i->second, this);
+		this->whereAreYou()->dropped(h->second, this);
 	}
-	this->whereAreYou()->personLeaves(this);
-	delete this;
+    
+    multimap<string, GrowStuff*>::iterator g;
+    g=gStuff.begin();
+    for(;!gStuff.empty();g++)
+    {
+        this->whereAreYou()->dropped(g->second, this);
+    }
+    
+    multimap<string, FriendStuff*>::iterator f;
+    f=fStuff.begin();
+    for(;!fStuff.empty();f++)
+    {
+        this->whereAreYou()->dropped(f->second, this);
+    }
+    
+    multimap<string, OpenStuff*>::iterator o;
+    o=oStuff.begin();
+    for(;!oStuff.empty();o++)
+    {
+        this->whereAreYou()->dropped(o->second, this);
+    }
+    
+    multimap<string, MoveStuff*>::iterator m;
+    m=mStuff.begin();
+    for(;!mStuff.empty();m++)
+    {
+        this->whereAreYou()->dropped(m->second, this);
+    }
+    
+    this->whereAreYou()->personLeaves(this);
+    delete this;
 }
 
 bool Person::isDead()
@@ -277,6 +338,12 @@ Place* Person::whereAreYou() const
     return here;
 }
 
+// ***********************
+
+// still use stuffList and Person*, should we make these polymorphic for different types of stuff and NPCs?
+
+// ***********************
+
 //gives an item to someone else
 void Person::give(Stuff* item, Person* other)
 {
@@ -296,6 +363,12 @@ void Person::recieve(Stuff* item)
     stuffList.insert(pair<string, Stuff*>(item->getName(), item));
 }
 
+// **************************
+
+// end of possible polymorphic functions
+
+// **************************
+
 //person takes damage
 void Person::hurt(const int& damage)
 {
@@ -311,6 +384,13 @@ int Person::getHealth() const
 {
     return health;
 }
+
+// ************************
+
+// hmmmm....how to do getStuffList() with all the different lists?
+// polymorphic, too? or get each list from one function and return a string (or simple string array) of names?
+
+// ************************
 
 multimap<string, Stuff*>& Person::getStuffList()
 {
@@ -373,6 +453,12 @@ void Alice::move(Place* to) const
     	}
 }
 
+// **********************
+
+// make these polymorphic to accommodate different types of stuff?
+
+// **********************
+
 void Alice::choose(Chest* chst, Stuff* item)
 {
 	chst->takeStuff(item);
@@ -415,6 +501,12 @@ void Alice::use(Stuff* item, Person* who)
 {
     item->useItem(who);
 }
+
+// ***********************
+
+// end of possible polymorphic functions
+
+// ***********************
 
 int Alice::getBodySize() const
 {
@@ -731,7 +823,7 @@ Person* PersonFactory::makePerson(std::string who)
         
         // *******************
         
-        // inserting stuff instead of passing to constructor, making NPC object and inserting into his list directly
+        // inserting stuff here instead of inserting into dummy list and passing to constructor to copy (constructors for person, alice, and npc no longer take lists
         
         // *******************
         
@@ -757,6 +849,12 @@ Person* PersonFactory::makePerson(std::string who)
         MoveStuff* jabberBlood = new MoveStuff("jabberBlood", "It's magic...it can take you home", 1, true);
         
         jabberwocky->hStuff.insert(pair<string, HealthStuff*>(excalibur->getName(), excalibur));
+        
+        // ********************
+        
+        // moved jabberBlood here from makePlaces() in Game
+        
+        // ********************
         
         jabberwocky->mStuff.insert(pair<string, MoveStuff*>(jabberBlood->getName(), jabberBlood));
         
@@ -861,6 +959,8 @@ Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, co
 Stuff::~Stuff() {}                // destructor
 
 // ************************************************************
+// Added earlier
+
 int Stuff::getResult()
 {
     return result;
@@ -897,6 +997,12 @@ void GrowStuff::useItem(Alice* who)
     status = 0;
     
 }
+
+// *************************
+
+// Since we are now using specific stuff-type lists, can we get rid of the extra functions?
+
+// *************************
 
 void GrowStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
 void GrowStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
@@ -1040,18 +1146,13 @@ void Door::closeThing()
 	{
 		if(i->second->whoHere().find("Alice")!=i->second->whoHere().end())
 		{
-            // ************* Not sure what doing **************
 			i->second->whoHere().find("Alice")->second
 			Alice* ali=
 		}
 	}
 	if(status==1)
 	{
-        //Invalid operands to binary expression ('iterator' (aka '__map_iterator<typename __base::iterator>') and 'int')
-        
-        // added ->second and parenthesis
-        
-		between.begin()->second->blockPlaceToGo(((between.begin())++)->second);
+        between.begin()->second->blockPlaceToGo(((between.begin())++)->second);
 		((between.begin())++)->second->blockPlaceToGo(between.begin()->second);
 		status=0;
 	}
@@ -1146,15 +1247,9 @@ map<string, Place*>& Game::getPlaceList()
     return places;
 }
 
-//map<string, Person*> Game::getPeopleList() const
-//{
-//    return people;
-//}
-
 void Game::makePlaces()
 {
     // Tree
-    // changing all List<> to map<>
     map<string, Person*> tPeople;
     multimap<string, Stuff*> tStuff;
     multimap<string,Thing*> tThing;
@@ -1162,18 +1257,6 @@ void Game::makePlaces()
     
     Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a whiterabbit run by.", tStuff, tPeople, tThing, ttrav);
     places.insert(pair<string, Place*>(tree->getPlaceName(), tree));
-    
-//    Place* walker1 = nullptr;
-//    Place* walker2 = nullptr;
-//    for (int i=1; i<places.getSize(); i++){
-//        if(places.peek(i)->getPlaceName()=="battlefield"){
-//            walker1 = places.peek(i);
-//        }
-//        if(places.peek(i)->getPlaceName()=="tree"){
-//            walker2=places.peek(i);
-//        }
-//    }
-//    walker1->newPlaceToGo(walker2);
     
     // Garden
     map<string, Person*> gPeople;
@@ -1241,8 +1324,6 @@ void Game::makePlaces()
     map<string, Place*> trav;
     
     Place* battlefield = new Place("Battlefield", "Alice is all suited up and ready to fight.", bStuff, bPeople, bThing, trav);
-    
-    // places.peek(battlefield)->newPlaceToGo(places.peek(tree));
     
     places.insert(pair<string, Place*>(battlefield->getPlaceName(), battlefield));
     
@@ -1322,7 +1403,7 @@ void Game::makeStuff()
     // **********************
     
     // Switched stuff over to make specific types of stuff
-    // not sure of the genStuff function
+    // not sure of the genStuff function?
     
     // **********************
     
