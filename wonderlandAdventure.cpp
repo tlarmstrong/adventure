@@ -122,7 +122,7 @@ multimap<string, Thing*>& Place::getThingsHere()
 std::ostream& Place::narrate(std::ostream& out) const
 {
     out << description << endl;
-    //render(out);
+    render(out);
     return out;
 }
 
@@ -138,7 +138,7 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Person*>::const_iterator i;
 		i=peopleHere.begin();
 		out << i->second->getName();
-		for(;++i!=peopleHere.end();i++)
+		for(;i!=peopleHere.end();i++)
 		{
 			out << ", " <<i->second->getName();
 		}
