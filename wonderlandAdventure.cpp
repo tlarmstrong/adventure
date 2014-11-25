@@ -944,6 +944,16 @@ void Door::openThing()
 
 void Door::closeThing()
 {
+	map<string, Place*>::const_iterator i;
+	i=places.begin()
+	for(; i!=places.end();i++)
+	{
+		if(i->second->whoHere().find("Alice")!=i->second->whoHere().end())
+		{
+			i->second->whoHere().find("Alice")->second
+			Alice* ali=
+		}
+	}
 	if(status==1)
 	{
         //Invalid operands to binary expression ('iterator' (aka '__map_iterator<typename __base::iterator>') and 'int')
@@ -1101,13 +1111,36 @@ void Game::makePlaces()
     Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.", pStuff, pPeople, pThing, ptrav);
     places.insert(pair<string, Place*>(teaParty->getPlaceName(), teaParty));
     
-    //Castle
+    //CastleP1
     map<string, Person*> cPeople;
     multimap<string, Stuff*> cStuff;
     multimap<string,Thing*> cThing;
     map<string, Place*> ctrav;
     
-    Place* castle = new Place("Castle", "Alice is taken to the Red Queen's Castle.", cStuff, cPeople, cThing, ctrav);
+    Place* castle = new Place("CastleP1", "Alice is taken to the Red Queen's Castle.", cStuff, cPeople, cThing, ctrav);
+    places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
+    
+    //CastleP2
+    map<string, Person*> c2People;
+    multimap<string, Stuff*> c2Stuff;
+    multimap<string,Thing*> c2Thing;
+    map<string, Place*> c2trav;
+    
+    Place* castle2 = new Place("CastleP2", "Escape the Castle.", c2Stuff, c2People, c2Thing, c2trav);
+    
+    map<string, Place*> doorway;
+    doorway.insert(pair<string, Place*>(castle2->getName(),castle2));
+    doorway.insert(pair<string, Place*>(castle->getName(),castle));
+    Thing* cd=new Door(0, "DoorInCastle", doorway);
+    castle->genThing(cd);
+    castle2->genThing(cd);
+    
+    multimap<std::string, Stuff*> sinchst;
+    Stuff* aswrd=new HealthStuff("SwordToKillJabberwocky", "You can use this to kill the Jabberwocky", 5, 1);
+    sinchst.insert(pair<string, Stuff*>(aswrd->getName(),aswrd));
+    Thing* dchst=new Chest(0, "ChestInCastle", sinchst);
+    castle->genThing(dchst);
+    
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
     // Battlefield
@@ -1147,8 +1180,8 @@ void Game::makePlaces()
     places.find("TeaParty")->second->newPlaceToGo(places.find("Castle")->second);
     
     // places to go from Castle
-    places.find("Castle")->second->newPlaceToGo(places.find("TeaParty")->second);
-    places.find("Castle")->second->newPlaceToGo(places.find("Battlefield")->second);
+    places.find("CastleP1")->second->newPlaceToGo(places.find("TeaParty")->second);
+    places.find("CastleP1")->second->newPlaceToGo(places.find("Battlefield")->second);
     
     // places to go from Battlefield
     places.find("Battlefield")->second->newPlaceToGo(places.find("Castle")->second);
