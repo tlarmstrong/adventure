@@ -138,6 +138,7 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Person*>::const_iterator i;
 		i=peopleHere.begin();
 		out << i->second->getName();
+		i++;
 		for(;i!=peopleHere.end();i++)
 		{
 			out << ", " <<i->second->getName();
@@ -155,7 +156,8 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Thing*>::const_iterator i;
 		i=thingHere.begin();
 		out << i->second->getName();
-		for(;++i!=thingHere.end();i++)
+		i++;
+		for(;i!=thingHere.end();i++)
 		{
 			out << ", and a" <<i->second->getName();
 		}
@@ -172,7 +174,8 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Stuff*>::const_iterator i;
 		i=stuffHere.begin();
 		out << i->second->getName();
-		for(;++i!=stuffHere.end();i++)
+		i++;
+		for(;i!=stuffHere.end();i++)
 		{
 			out << ", and a" <<i->second->getName();
 		}
@@ -189,7 +192,7 @@ std::ostream& Place::render(std::ostream& out) const
 		std::map<string, Place*>::const_iterator i;
 		i=placeTo.begin();
 		out << i->second->getPlaceName();
-        i++;
+		i++;
 		for(;i!=placeTo.end();i++)
 		{
 			out << ", " <<i->second->getPlaceName();
@@ -1220,7 +1223,7 @@ void Game::delegate(const std::string& input)
 	
 	if(input=="go")
 	{
-        here->narrate(cout);
+        	//here->narrate(cout);
         
 		cout << "Where would you like to go? " << endl;
         
