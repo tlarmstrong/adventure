@@ -9,12 +9,12 @@ class HealthStuff;
 class GrowStuff;
 class MoveStuff;
 class OpenStuff;
-class Place;
+//class Place;
 class Person;
 class PersonFactory;
 class NPC;
-class Thing;
-class Chest;
+//class Thing;
+//class Chest;
 class Game;
 
 /*
@@ -27,6 +27,7 @@ class Game;
  
  */
 
+/* COMMENT OUT TO TEST
 class Place {
     
 protected:
@@ -75,6 +76,7 @@ public:
     // what Alice can do in particular place
     //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
 };
+*/
 
 /*
  ------------------------------------------------------------
@@ -83,7 +85,9 @@ public:
  */
 
 class Person {
-    friend class PersonFactory; 
+    
+    friend class PersonFactory;
+    
 private:
     // prevent value semantics
     Person(const Person& other);            //copy constructor
@@ -91,41 +95,59 @@ private:
     
 protected:
     
-    int health;                     //health level of the person
-    std::multimap<std::string, Stuff*> stuffList;          // list of stuff each person has  
+    int health;    //health level of the person 
     std::string name;
     bool isAttack;
     Person();
     bool dead;
     
-    // stuff lists for NPCs and Alice
-    std::map<std::string, HealthStuff*> hStuff;
-    std::map<std::string, GrowStuff*> gStuff;
-    std::map<std::string, FriendStuff*> fStuff;
-    std::map<std::string, OpenStuff*> oStuff;
-    std::map<std::string, MoveStuff*> mStuff;
-    
 public:
     
+    // stuff lists for NPCs and Alice
+    std::multimap<std::string, HealthStuff*> hStuff;
+    std::multimap<std::string, GrowStuff*> gStuff;
+    std::multimap<std::string, FriendStuff*> fStuff;
+    std::multimap<std::string, OpenStuff*> oStuff;
+    std::multimap<std::string, MoveStuff*> mStuff;
+    
     // constructor -- all derived use (initialization list)
-
     Person(const int& hLevel, const std::string& nm, bool attk);
     virtual ~Person();                       // destructor
     
     // Person can move from place to place
-    virtual void move(Place* to) /*const*/;
+    //virtual void move(Place* to) /*const*/;
     
     // get (and display) name of place
-    Place* whereAreYou() const;
+    //Place* whereAreYou() const;
     
     // gives an item to someone else
     // CHANGE: NPC* (used to be Person*)
-    void give(Stuff* item, NPC* other);
+    
+    //void give(Stuff* item, NPC* other);
+    template<class T>
+    void give(GrowStuff* item, T* other);
+    
+    template<class T>
+    void give(FriendStuff* item, T* other);
+    
+    template<class T>
+    void give(OpenStuff* item, T* other);
+    
+    template<class T>
+    void give(MoveStuff* item, T* other);
+    
+    template<class T>
+    void give(HealthStuff* item, T* other);
+    
     
     // recieves an item
     // Does this still work with a Stuff* or do we need to have a recieve function for each type of Stuff?
-    void recieve(Stuff* item);
-    void give(Stuff* item, Person* other);
+    //void recieve(Stuff* item);
+    void recieve(HealthStuff* item);
+    void recieve(GrowStuff* item);
+    void recieve(FriendStuff* item);
+    void recieve(OpenStuff* item);
+    void recieve(MoveStuff* item);
     
     // person takes damage
     void hurt(const int& damage);
@@ -135,13 +157,15 @@ public:
     int getHealth() const;
     
     // gets Stuff list
-    std::multimap<std::string, Stuff*>& getStuffList();
+    //std::multimap<std::string, Stuff*>& getStuffList();
+    // what if we make the lists public?
     
     // gets person's name
     std::string getName() const;
     
-    void dies();
-    bool isDead();
+    // COMMENT OUT TO TEST
+    //void dies();
+    //bool isDead();
     
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
@@ -177,7 +201,9 @@ public:
     virtual ~Alice();        // destructor
     
     // Singleton
-    static Alice* makeAlice(const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
+    //static Alice* makeAlice(const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
+    
+    static Alice* makeAlice();
     
     //adds a person to the list of Helpers
     void taggingAlong(NPC* tagger);
@@ -186,33 +212,44 @@ public:
     void ditched(NPC* ditcher);
     
     // Alice can move from place to place with her friends
-    void move(Place* to) const;
+    //void move(Place* to) const;
 
     //Alice chooses an item from a chest
-    void choose(Chest* chst, Stuff* item);
+    //void choose(Chest* chst, Stuff* item);
     
     //Alice adds item to the list of stuff
-    void pickup(Stuff* item);
+    //void pickup(Stuff* item);
+    
+    template<class T>
+    void pickUp(T* item);
     
     //Alice drops an item
-    void drop(Stuff* item);
+    //void drop(Stuff* item);
+    
+    template<class T>
+    void drop(T* item);
     
     //Alice uses an item on herself
-    void use(Stuff* item);
+    //void use(Stuff* item);
+    template<class T>
+    void use(T* item);
     
     //Alice uses an item in a place
-    void use(Stuff* item, Place* where);
+    //void use(Stuff* item, Place* where);
     
     //Alice uses an item on a thing
-    void use(Stuff* item, Thing* what);
+    //void use(Stuff* item, Thing* what);
     
     //Alice uses an item on a person
-    void use(Stuff* item, Person* who);
+    //void use(Stuff* item, Person* who);
+    
+    template<class T>
+    void use(T* item, NPC* who);
     
     // Get size of Alice//her size is an int
     int getBodySize() const;
     
-    void setBodySize(const int& s);
+    void setBodySize(const int& sz);
     
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;
@@ -276,6 +313,7 @@ public:
     std::ostream& render(std::ostream& out) const;
     
     // still needed for NPCs?
+    /*
     void choose(Chest* chst, Stuff* item);
     void pickup(Stuff* item);
     void drop(Stuff* item);
@@ -283,6 +321,7 @@ public:
     void use(Stuff* item, Place* where);
     void use(Stuff* item, Thing* what);
     void use(Stuff* item, Person* who);
+     */
 };
 
 /*
@@ -305,7 +344,7 @@ public:
     ~PersonFactory();
     
     //make a test tube baby
-    static Person* makePerson (const std::string who);
+    static NPC* makePerson (const std::string who);
     
     //from here for npc's we will call their constructor but for alice we will call makeAlice
 };
@@ -343,12 +382,14 @@ public:
     virtual ~Stuff();
     
     // need to make derived classes work?
+    /*
     virtual void useItem(Alice*)=0;
     virtual void useItem(Place*)=0;
     virtual void useItem(Person*)=0;
     virtual void useItem(NPC*)=0;
     virtual void useItem(Thing*)=0;
-    virtual void useItem(/*const*/ Person* who, Place* where)=0;
+    virtual void useItem(Person* who, Place* where)=0;
+     */
     
     //**************************************************
     
@@ -379,12 +420,11 @@ class GrowStuff : public Stuff
         ~GrowStuff();
 
         void useItem(Alice* who);
-    
-        void useItem(Place* where);
-        void useItem(Person* who);
         void useItem(NPC* who);
-        void useItem(Thing* what);
-        void useItem(/*const*/ Person* who, Place* where);
+    
+        //void useItem(Place* where);
+        //void useItem(Thing* what);
+        //void useItem(/*const*/ Person* who, Place* where);
 };
 
 class HealthStuff : public Stuff
@@ -393,13 +433,11 @@ class HealthStuff : public Stuff
         HealthStuff(const std::string name, const std::string description, const int result,const bool status);
         ~HealthStuff();
     
-        void useItem(Person* who);
-    
         void useItem(Alice* who);
-        void useItem(Place* where);
         void useItem(NPC* who);
-        void useItem(Thing* what);
-        void useItem(/*const*/ Person* who, Place* where);
+        //void useItem(Place* where);
+        //void useItem(Thing* what);
+        //void useItem(/*const*/ Person* who, Place* where);
 };
 
 class FriendStuff : public Stuff
@@ -409,12 +447,11 @@ class FriendStuff : public Stuff
         ~FriendStuff();
     
         void useItem(NPC* who);
-    
         void useItem(Alice* who);
-        void useItem(Person* who);
-        void useItem(Place* where);
-        void useItem(Thing* what);
-        void useItem(/*const*/ Person* who, Place* where);
+    
+        //void useItem(Place* where);
+        //void useItem(Thing* what);
+        //void useItem(/*const*/ Person* who, Place* where);
 };
 
 class OpenStuff : public Stuff
@@ -423,13 +460,15 @@ class OpenStuff : public Stuff
         OpenStuff(const std::string name, const std::string description, const int result,const bool status);
         ~OpenStuff();
     
-        void useItem(Thing* what);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
-        
+        //void useItem(Thing* what);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
+    
+        /* COMMENT OUT TO TEST
         void useItem(Alice* who);
         void useItem(Place* where);
         void useItem(Person* who);
         void useItem(NPC* who);
-        void useItem(/*const*/ Person* who, Place* where);
+        void useItem(Person* who, Place* where);
+         */
 };
 
 class MoveStuff : public Stuff
@@ -438,13 +477,15 @@ class MoveStuff : public Stuff
         MoveStuff(const std::string name, const std::string description, const int result,const bool status);
         ~MoveStuff();
     
-        void useItem(/*const*/ Person* who, Place* where);
+        /* COMMENT OUT TO TEST
+        void useItem(Person* who, Place* where);
     
         void useItem(Alice* who);
         void useItem(Place* where);
         void useItem(Person* who);
         void useItem(NPC* who);
         void useItem(Thing* what);
+         */
 };
 
 /*
@@ -453,7 +494,8 @@ class MoveStuff : public Stuff
  ----------------------------------
  */
     
-class Thing {
+/* COMMENT OUT TO TEST
+ class Thing {
     
 protected:
         
@@ -529,7 +571,7 @@ public:
     // effects of openThing()
     //std::ostream& render(const std::ostream&);
 };
-    
+ */
     
 /*
  ----------------------------------
@@ -542,21 +584,24 @@ public:
      private:
      
      
-         void makePlaces();             // instantiates Places and adds to static list
+         //void makePlaces();             // instantiates Places and adds to static list
          void makePeople();             // instantiates People and adds to static list
          void makeStuff();              // instantiates Stuff and adds to Place's stuff list
          
      public:
      
-        static std::map<std::string, Place*> places;    // Game class keeps static list of Places in Wonderland
-        //static std::map<std::string, Person*> people;   // Game class keeps static list of People in Wonderland
+        //static std::map<std::string, Place*> places;    // Game class keeps static list of Places in Wonderland
+        static std::map<std::string, NPC*> people;   // Game class keeps static list of People in Wonderland
          
         Game();                        // constructor
         ~Game();                       // destructor
-        std::map<std::string, Place*>& getPlaceList();
-        //std::map<std::string, Person*> getPeopleList() const;
+        //std::map<std::string, Place*>& getPlaceList();
      
-        Place* findHere() const;
+     
+     Alice* alicePtr;
+        std::map<std::string, NPC*>& getPeopleList() const;
+     
+        //Place* findHere() const;
         void delegate(const std::string& input);
  };
 
