@@ -340,7 +340,7 @@ Place* Person::whereAreYou() const
 
 // ***********************
 
-// still use stuffList and Person*, should we make these polymorphic for different types of stuff and NPCs?
+// still use stuffList and Person*, should we make these polymorphic for different types of stuff and an NPC/Alice or would templates work here?
 
 // ***********************
 
@@ -372,7 +372,7 @@ void Person::recieve(Stuff* item)
 //person takes damage
 void Person::hurt(const int& damage)
 {
-    health += damage;
+    health -= damage;
 }
 
 void Person::attack()
@@ -388,7 +388,7 @@ int Person::getHealth() const
 // ************************
 
 // hmmmm....how to do getStuffList() with all the different lists?
-// polymorphic, too? or get each list from one function and return a string (or simple string array) of names?
+// polymorphic functions or make them templates?
 
 // ************************
 
@@ -456,6 +456,8 @@ void Alice::move(Place* to) const
 // **********************
 
 // make these polymorphic to accommodate different types of stuff?
+
+// moved these to just be in Alice, but did we decide to have some of these available to NPCs too (ex: drop())? Move these back to Person and make virtual so NPCs can use, too?
 
 // **********************
 
@@ -534,6 +536,12 @@ std::ostream& Alice::render(std::ostream& out) const
     out << "Her health level is " << getHealth() << endl;
     
     out << "She has these items: ";
+    
+// **********************************
+    
+// could we just print out the different list one at a time and forget the commas to simplify?
+
+// **********************************
 
     if(!hStuff.empty())
     {
@@ -712,6 +720,12 @@ ostream& NPC::render(ostream& out) const
     
     out << getName() << " has these items: ";
     
+    // **********************************
+    
+    // could we just print out the different list one at a time and forget the commas to simplify?
+    
+    // **********************************
+    
     if(!hStuff.empty())
     {
         multimap<string, HealthStuff*>::const_iterator i;
@@ -823,7 +837,7 @@ Person* PersonFactory::makePerson(std::string who)
         
         // *******************
         
-        // inserting stuff here instead of inserting into dummy list and passing to constructor to copy (constructors for person, alice, and npc no longer take lists
+        // inserting stuff here instead of inserting into dummy list and passing to constructor to copy (constructors for person, alice, and npc no longer take lists)
         
         // *******************
         
@@ -1000,7 +1014,7 @@ void GrowStuff::useItem(Alice* who)
 
 // *************************
 
-// Since we are now using specific stuff-type lists, can we get rid of the extra functions?
+// Since we are now using specific stuff-type lists, can we get rid of the virtual functions (although they do seem helpful)?
 
 // *************************
 
@@ -1128,10 +1142,6 @@ void Door::openThing()
 {
 	if(status==0)
 	{
-        //Invalid operands to binary expression ('iterator' (aka '__map_iterator<typename __base::iterator>') and 'int')
-        
-        // added ->second and parenthesis
-        
         between.begin()->second->blockPlaceToGo(((between.begin())++)->second);
         ((between.begin())++)->second->blockPlaceToGo(between.begin()->second);
 		status=1;
@@ -1146,7 +1156,7 @@ void Door::closeThing()
 	{
 		if(i->second->whoHere().find("Alice")!=i->second->whoHere().end())
 		{
-			i->second->whoHere().find("Alice")->second
+            i->second->whoHere().find("Alice")->second
 			Alice* ali=
 		}
 	}
@@ -1157,12 +1167,6 @@ void Door::closeThing()
 		status=0;
 	}
 }
-
-multimap<string, Stuff*>& Door::whatsinside()
-{
-    return nothing;
-}
-
 
 /*
  ----------------------------------
@@ -1250,6 +1254,12 @@ map<string, Place*>& Game::getPlaceList()
 void Game::makePlaces()
 {
     // Tree
+    // *******************************
+    
+    // could we take out the dummy lists and use insert instead (see Person Factory)
+    
+    // *******************************
+    
     map<string, Person*> tPeople;
     multimap<string, Stuff*> tStuff;
     multimap<string,Thing*> tThing;
@@ -1349,14 +1359,14 @@ void Game::makePlaces()
     
     // places to go from TeaParty
     places.find("TeaParty")->second->newPlaceToGo(places.find("Woods")->second);
-    places.find("TeaParty")->second->newPlaceToGo(places.find("Castle")->second);
+    places.find("TeaParty")->second->newPlaceToGo(places.find("CastleP1")->second);
     
     // places to go from Castle
     places.find("CastleP1")->second->newPlaceToGo(places.find("TeaParty")->second);
     places.find("CastleP1")->second->newPlaceToGo(places.find("Battlefield")->second);
     
     // places to go from Battlefield
-    places.find("Battlefield")->second->newPlaceToGo(places.find("Castle")->second);
+    places.find("Battlefield")->second->newPlaceToGo(places.find("CastleP1")->second);
     places.find("Battlefield")->second->newPlaceToGo(places.find("Home")->second);
 }
 
@@ -1725,7 +1735,7 @@ void Game::delegate(const std::string& input)
 		}
 	}
 }
-}
+
 
 // needed to make static lists work
 map<string, Place*> Game::places;

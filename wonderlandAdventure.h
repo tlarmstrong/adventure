@@ -473,8 +473,7 @@ public:
     virtual void openThing()=0;
     virtual void closeThing()=0;
     bool getStatus() const;
-    
-    virtual std::multimap<std::string, Stuff*>& whatsinside()=0;
+
     // output of what Alice has opened (will pass to derived)
     virtual std::ostream& render(const std::ostream&)=0;
 };
@@ -500,8 +499,7 @@ public:
     // Not sure, since we talked about Things having a different outcome, I'm not sure if these should be in the base class or in the derived...
     void openThing();
     void closeThing();      // automatic close, or should this also take a Person?... good question. I like it taking an Alice
-    
-    std::multimap<std::string, Stuff*>& whatsinside();
+
     // effects of openThing()
     //std::ostream& render(const std::ostream&);
 };
