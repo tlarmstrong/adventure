@@ -16,34 +16,50 @@ using namespace std;
 
 
 // constructor
-
-/* TEST COMMENT OUT
- 
-Place::Place(const std::string& nm, const std::string& dscpt, const multimap<string, Stuff*>& what, const map<string, Person*>& who, const multimap<string, Thing*>& obj, const map<string, Place*>& trav): name(nm), description(dscpt), stuffHere(what), peopleHere(who), thingHere(obj), placeTo(trav) {}
+Place::Place(const std::string& nm, const std::string& dscpt): name(nm), description(dscpt) {}
  
 Place::~Place()
 {
-	for (map<string, Person*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
+	for (map<string, NPC*>::iterator i=peopleHere.begin(); i!=peopleHere.end(); i++)		//deletes all people in a place
 	{
 		delete i->second;
 	}
 	
-	for (map<string, Stuff*>::iterator i=stuffHere.begin(); i!=stuffHere.end(); i++)	//deletes all the stuff in a place
+	for (map<string, HealthStuff*>::iterator h=hHere.begin(); h!=hHere.end(); h++)	//deletes all the stuff in a place
 	{
-		delete i->second;
+		delete h->second;
 	}
+    
+    for (map<string, GrowStuff*>::iterator g=gHere.begin(); g!=gHere.end(); g++)	//deletes all the stuff in a place
+    {
+        delete g->second;
+    }
+    
+    for (map<string, FriendStuff*>::iterator f=fHere.begin(); f!=fHere.end(); f++)	//deletes all the stuff in a place
+    {
+        delete f->second;
+    }
+    
+    for (map<string, OpenStuff*>::iterator o=oHere.begin(); o!=oHere.end(); o++)	//deletes all the stuff in a place
+    {
+        delete o->second;
+    }
+    
+    for (map<string, MoveStuff*>::iterator m=mHere.begin(); m!=mHere.end(); m++)	//deletes all the stuff in a place
+    {
+        delete m->second;
+    }
 	
-	for (map<string, Thing*>::iterator i=thingHere.begin(); i!=thingHere.end(); i++) //deletes all the things in a place
+	for (map<string, Door*>::iterator d=dHere.begin(); d!=dHere.end(); d++) //deletes all the things in a place
 	{
-		delete i->second;
+		delete d->second;
 	}
+    
+    for (map<string, Chest*>::iterator c=cHere.begin(); c!=cHere.end(); c++) //deletes all the things in a place
+    {
+        delete c->second;
+    }
 	
-}
-
-// pass all return maps/multimaps by value
-map<string, Person*>& Place::whoHere()     //returns a list of everybody here
-{
-    return peopleHere;
 }
 
 string Place::getPlaceName() const  // returns name of Place
@@ -51,43 +67,128 @@ string Place::getPlaceName() const  // returns name of Place
     return name;
 }
 
-void Place::personEnters(Person* enterer)  // somebody comes into the place
+void Place::personEnters(NPC* enterer)  // somebody comes into the place
 {
-    peopleHere.insert(pair<string, Person*>(enterer->getName(), enterer));
+    peopleHere.insert(pair<string, NPC*>(enterer->getName(), enterer));
 }
 
-void Place::personLeaves(Person* leaver)   // removes somebody from a place
+void Place::personLeaves(NPC* leaver)   // removes somebody from a place
 {
     peopleHere.erase(peopleHere.find(leaver->getName()));
 }
 
-multimap<string, Stuff*>& Place::whatsHere()              // returns the list of stuff here
-{
-    return stuffHere;
-}
-
-std::multimap<std::string, Thing*>& Place::openHere()
-{
-    return thingHere;
-}
-
 // someone dropped an item, so now it is laying around
+/*
 void Place::dropped(Stuff* drop, Person* who)
 {
     who->getStuffList().erase(who->getStuffList().find(drop->getName()));
     stuffHere.insert(pair<string, Stuff*>(drop->getName(), drop));
-} // getting an error "no matching constructor for initialization of 'pair<string,Stuff*>'...removed const from Stuff* and it worked
+}*/
+
+template<class T>
+void Place::dropped(HealthStuff* drop, T* who)
+{
+    who->hStuff.erase(who->hStuff.find(drop->getName()));
+    hHere.insert(pair<string, HealthStuff*>(drop->getName(), drop));
+}
+
+template<class T>
+void Place::dropped(GrowStuff* drop, T* who)
+{
+    who->gStuff.erase(who->gStuff.find(drop->getName()));
+    gHere.insert(pair<string, GrowStuff*>(drop->getName(), drop));
+}
+
+template<class T>
+void Place::dropped(FriendStuff* drop, T* who)
+{
+    who->fStuff.erase(who->fStuff.find(drop->getName()));
+    fHere.insert(pair<string, FriendStuff*>(drop->getName(), drop));
+}
+
+template<class T>
+void Place::dropped(OpenStuff* drop, T* who)
+{
+    who->oStuff.erase(who->oStuff.find(drop->getName()));
+    oHere.insert(pair<string, OpenStuff*>(drop->getName(), drop));
+}
+
+template<class T>
+void Place::dropped(MoveStuff* drop, T* who)
+{
+    who->mStuff.erase(who->mStuff.find(drop->getName()));
+    mHere.insert(pair<string, MoveStuff*>(drop->getName(), drop));
+}
 
 //somebody picked up an item here
-void Place::pickedUp(Stuff* pick, Person* who)
+template<class T>
+void Place::pickedUp(HealthStuff* pick, T* who)
 {
-    stuffHere.erase(stuffHere.find(pick->getName()));
+    hHere.erase(hHere.find(pick->getName()));
     who->recieve(pick);
-} // error could not convert from const Stuff* to Stuff*; removed const to make work
+}
 
-void Place::genStuff(Stuff* gen)
+template<class T>
+void Place::pickedUp(GrowStuff* pick, T* who)
 {
-	stuffHere.insert(pair<string, Stuff*>(gen->getName(), gen));
+    gHere.erase(gHere.find(pick->getName()));
+    who->recieve(pick);
+}
+
+template<class T>
+void Place::pickedUp(FriendStuff* pick, T* who)
+{
+    fHere.erase(fHere.find(pick->getName()));
+    who->recieve(pick);
+}
+
+template<class T>
+void Place::pickedUp(OpenStuff* pick, T* who)
+{
+    oHere.erase(oHere.find(pick->getName()));
+    who->recieve(pick);
+}
+
+template<class T>
+void Place::pickedUp(MoveStuff* pick, T* who)
+{
+    mHere.erase(mHere.find(pick->getName()));
+    who->recieve(pick);
+}
+
+void Place::genStuff(GrowStuff* gen)
+{
+	gHere.insert(pair<string, GrowStuff*>(gen->getName(), gen));
+}
+
+void Place::genStuff(HealthStuff* gen)
+{
+    hHere.insert(pair<string, HealthStuff*>(gen->getName(), gen));
+}
+
+void Place::genStuff(FriendStuff* gen)
+{
+    fHere.insert(pair<string, FriendStuff*>(gen->getName(), gen));
+}
+
+void Place::genStuff(OpenStuff* gen)
+{
+    oHere.insert(pair<string, OpenStuff*>(gen->getName(), gen));
+}
+
+void Place::genStuff(MoveStuff* gen)
+{
+    mHere.insert(pair<string, MoveStuff*>(gen->getName(), gen));
+}
+
+void Place::genThing(Chest* gen)
+{
+    cHere.insert(pair<string, Chest*>(gen->getName(), gen));
+}
+
+void Place::genThing(Door* gen)
+{
+    dHere.insert(pair<string, Door*>(gen->getName(), gen));
 }
 
 void Place::newPlaceToGo(Place* goTo)
@@ -98,16 +199,6 @@ void Place::newPlaceToGo(Place* goTo)
 void Place::blockPlaceToGo(Place* block)
 {
     placeTo.erase(placeTo.find(block->getPlaceName()));
-}
-
-map<string, Place*>& Place::getNewPlaceToGo()
-{
-    return placeTo;
-}
-
-multimap<string, Thing*>& Place::getThingsHere()
-{
-	return thingHere;
 }
 
 // output description of Place
@@ -124,10 +215,7 @@ std::ostream& Place::render(std::ostream& out) const
 	{
         out << "You see there are other people here: ";
         
-        // Error: No viable overloaded '='
-        // Fix: Change iterator to const_iterator
-        
-		std::map<string, Person*>::const_iterator i;
+		std::map<string, NPC*>::const_iterator i;
 		i=peopleHere.begin();
 		out << i->second->getName();
 		i++;
@@ -138,41 +226,99 @@ std::ostream& Place::render(std::ostream& out) const
         out << endl;
 	}
 	
-	if (!(thingHere.empty()))
+	if (dHere.empty() && cHere.empty())
 	{
-		out << "You see a ";
+		out << "";
+    }
+    
+    else
+    {
+        if(!dHere.empty())
+        {
+            for(map<string, Door*>::const_iterator i = dHere.begin(); i!=dHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
         
-        // Error: No viable overloaded '='
-        // Fix: Change iterator to const_iterator
+        else
+            out << "";
         
-		std::map<string, Thing*>::const_iterator i;
-		i=thingHere.begin();
-		out << i->second->getName();
-		i++;
-		for(;i!=thingHere.end();i++)
-		{
-			out << ", and a" <<i->second->getName();
-		}
-		out << "."<< endl;
+        if(!dHere.empty())
+        {
+            for(map<string, Door*>::const_iterator i = dHere.begin(); i!=dHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
+        else
+            out << "";
 	}
     
-	if (!(stuffHere.empty()))
-	{
-		out << "On the ground you see a ";
+    if(hHere.empty() && gHere.empty() && fHere.empty() && oHere.empty() && mHere.empty())
+    {
+        out << "nothing" << endl;
+    }
+    
+    else
+    {
+        if(!hHere.empty())
+        {
+            for(map<string, HealthStuff*>::const_iterator i = hHere.begin(); i!=hHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
         
-        // Error: No viable overloaded '='
-        // Fix: Change iterator to const_iterator
+        else
+            out << "";
         
-		std::map<string, Stuff*>::const_iterator i;
-		i=stuffHere.begin();
-		out << i->second->getName();
-		i++;
-		for(;i!=stuffHere.end();i++)
-		{
-			out << ", and a" <<i->second->getName();
-		}
-		out << "."<< endl;
-	}
+        if(!gHere.empty())
+        {
+            for(map<string, GrowStuff*>::const_iterator i = gHere.begin(); i!=gHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
+        
+        else
+            out << "";
+        
+        if(!fHere.empty())
+        {
+            for(map<string, FriendStuff*>::const_iterator i = fHere.begin(); i!=fHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
+        
+        else
+            out << "";
+        
+        if(!oHere.empty())
+        {
+            for(map<string, OpenStuff*>::const_iterator i = oHere.begin(); i!=oHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
+        
+        else
+            out << "";
+        
+        if(!mHere.empty())
+        {
+            for(map<string, MoveStuff*>::const_iterator i = mHere.begin(); i!=mHere.end(); i++)
+            {
+                out << (i->second)->getName() << endl;
+            }
+        }
+        
+        else
+            out << "";
+    }
+    
+    out << endl;
     
 	if (!(placeTo.empty()))
 	{
@@ -194,8 +340,6 @@ std::ostream& Place::render(std::ostream& out) const
     out << endl;
     return out;
 }
-
-*/
 
 /*
  -----------------------------------------------------------
@@ -258,7 +402,6 @@ Person::~Person()
 
 // *********************
 
-/* COMMENT OUT TO TEST
 void Person::dies()
 {
 	multimap<string, HealthStuff*>::iterator h;
@@ -299,9 +442,7 @@ void Person::dies()
     this->whereAreYou()->personLeaves(this);
     delete this;
 }
-*/
 
-/* COMMENT OUT TO TEST
 bool Person::isDead()
 {
 	if (health<=0)
@@ -312,11 +453,8 @@ bool Person::isDead()
 	else
 		return false;
 }
- */
-
-/* TEST COMMENT OUT
  
-void Person::move(Place* to) const
+void Person::move(Place* to) /*const*/
 {
     Place* from = whereAreYou();
 
@@ -335,15 +473,13 @@ Place* Person::whereAreYou() const
     
     for(map<string, Place*>::const_iterator i = Game::places.begin(); i!= Game::places.end(); i++)
     {
-        if((((i->second)->whoHere()).find(getName())) != ((i->second)->whoHere()).end())
+        if((((i->second)->peopleHere).find(getName())) != ((i->second)->peopleHere).end())
         {
             here = (i->second);
         }
     }
     return here;
 }
- 
- */
 
 // ***********************
 
@@ -441,12 +577,6 @@ void Person::recieve(MoveStuff* item)
     mStuff.insert(pair<string, MoveStuff*>(item->getName(), item));
 }
 
-// **************************
-
-// end of possible polymorphic functions
-
-// **************************
-
 //person takes damage
 void Person::hurt(const int& damage)
 {
@@ -526,22 +656,19 @@ void Alice::ditched(NPC* ditcher)
 
 }
 
-/* COMMENT OUT TO TEST
 //now alice's friends can come with her
-void Alice::move(Place* to) const
+void Alice::move(Place* to)
 {
 	Place* from = whereAreYou();
     
-	from->personLeaves(this);        // remove person from current location
-    to->personEnters(this);          // move a person to another place
+	from->alicePtr = NULL;        // remove person from current location
+    to->alicePtr = this;          // move a person to another place
 
     	for(map<string, NPC*>::const_iterator i=helperList.begin(); i!=helperList.end(); i++)
     	{
     		(i->second)->move(to);
     	}
 }
-
- */
 
 // **********************
 
@@ -551,13 +678,13 @@ void Alice::move(Place* to) const
 
 // **********************
 
-/* COMMENT OUT TO TEST
-void Alice::choose(Chest* chst, Stuff* item)
+
+template<class T>
+void choose(Chest* chst, T* item)
 {
 	chst->takeStuff(item);
 	recieve(item);
 }
-*/
 
 template<class T>
 void Alice::pickUp(T* item)
@@ -610,21 +737,25 @@ void Alice::use(T* item)
     item->useItem(this);
 }
 
-/* COMMENT OUT TO TEST
 //Alice uses an item in a place
-void Alice::use(Stuff* item, Place* where)
+template<class T>
+void Alice::use(T* item, Place* where)
 {
     item->useItem(where);
 }
 
-
 //Alice uses an item on a thing
-void Alice::use(Stuff* item, Thing* what)
+template<class T>
+void Alice::use(Stuff* item, Door* what)
 {
     item->useItem(what);
 }
 
- */
+template<class T>
+void Alice::use(Stuff* item, Chest* what)
+{
+    item->useItem(what);
+}
 
 //Alice uses an item on a person
 template<class T>
@@ -656,7 +787,7 @@ std::ostream& Alice::render(std::ostream& out) const
     else
         sz = "normal size";
     
-    //out << "Alice is at the " << whereAreYou()->getPlaceName() << endl;
+    out << "Alice is at the " << whereAreYou()->getPlaceName() << endl;
     out << "She is " << sz << endl;
     out << "Her health level is " << getHealth() << endl;
     
@@ -1043,7 +1174,7 @@ NPC* PersonFactory::makePerson(std::string who)
         return cheshireCat;
     }
     
-    /* PF needs to return NPC* not Person* -- using makeAlice to instantiate her instead (see makePeople() in Game)
+    /* PF needs to return NPC* not Person* -- using Alice::makeAlice() to instantiate her instead (see makePeople() in Game)
      
      else if (who == "Alice")
     {
@@ -1077,15 +1208,6 @@ NPC* PersonFactory::makePerson(std::string who)
 Stuff::Stuff(const std::string nm, const std::string dscrptn, const int rslt, const bool stts) : name(nm), description(dscrptn), result(rslt), status(stts) {}
 
 Stuff::~Stuff() {}                // destructor
-
-// ************************************************************
-// Added earlier
-
-int Stuff::getResult()
-{
-    return result;
-}
-// ************************************************************
 
 string Stuff::getName() const
 {
@@ -1151,9 +1273,7 @@ void HealthStuff::useItem(Alice* who)
 	status = 0;
 }
 
-/* COMMENT OUT TO TEST
 void HealthStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
-*/
 
 void HealthStuff::useItem(NPC* who)
 {
@@ -1192,13 +1312,14 @@ OpenStuff::OpenStuff(const string name, const string description, const int resu
 
 OpenStuff::~OpenStuff() {}
 
-/* COMMENT OUT TO TEST
-void OpenStuff::useItem(Thing* what)
+template<class T>
+void OpenStuff::useItem(T* what)
 {
     what->openThing();
     status = 0;
 }
 
+/*
 void OpenStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
 void OpenStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
 void OpenStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
@@ -1212,7 +1333,6 @@ MoveStuff::MoveStuff(const string name, const string description, const int resu
 
 MoveStuff::~MoveStuff() {}
 
-/* COMMENT OUT TO TEST
 // move Alice home
 void MoveStuff::useItem(Alice* who, Place* where)
 {
@@ -1223,6 +1343,7 @@ void MoveStuff::useItem(Alice* who, Place* where)
     status=0;
 }
 
+/*
 void MoveStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
 void MoveStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
 void MoveStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
@@ -1374,21 +1495,13 @@ std::ostream& Chest::narrate(std::ostream& out)
 
 Game::Game()
 {
-    //makePlaces(); COMMENT OUT TO TEST
+    makePlaces();
     makePeople();
-    //makeStuff(); COMMENT OUT TO TEST
+    makeStuff();
 }
 
 Game::~Game() {}
 
-/* COMMENT OUT TO TEST
-map<string, Place*>& Game::getPlaceList()
-{
-    return places;
-}
-*/
-
-/* COMMENT OUT TO TEST
 void Game::makePlaces()
 {
     // Tree
@@ -1398,90 +1511,55 @@ void Game::makePlaces()
     
     // *******************************
     
-    map<string, Person*> tPeople;
-    multimap<string, Stuff*> tStuff;
-    multimap<string,Thing*> tThing;
-    map<string, Place*> ttrav;
-    
-    Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a whiterabbit run by.", tStuff, tPeople, tThing, ttrav);
+    Place* tree = new Place("Tree", "Alice woke up under a big oak tree. She saw a whiterabbit run by.");
     places.insert(pair<string, Place*>(tree->getPlaceName(), tree));
     
     // Garden
-    map<string, Person*> gPeople;
-    multimap<string, Stuff*> gStuff;
-    multimap<string,Thing*> gThing;
-    map<string, Place*> gtrav;
-    
-    Place* garden = new Place("Garden", "Alice follows the WhiteRabbit to a beautiful garden full of white roses. Should she pick one?", gStuff, gPeople, gThing, gtrav);
+    Place* garden = new Place("Garden", "Alice follows the WhiteRabbit to a beautiful garden full of white roses. Should she pick one?");
     places.insert(pair<string, Place*>(garden->getPlaceName(), garden));
     
     // Woods
-    map<string, Person*> wPeople;
-    multimap<string, Stuff*> wStuff;
-    multimap<string,Thing*> wThing;
-    map<string, Place*> wtrav;
-    
-    Place* woods = new Place("Woods", "Alice is in the Woods. She sees a cat in a tree.", wStuff, wPeople, wThing, wtrav);
+    Place* woods = new Place("Woods", "Alice is in the Woods. She sees a cat in a tree.");
     places.insert(pair<string, Place*>(woods->getPlaceName(), woods));
     
     // TeaParty
-    map<string, Person*> pPeople;
-    multimap<string, Stuff*> pStuff;
-    multimap<string,Thing*> pThing;
-    map<string, Place*> ptrav;
-    
-    Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.", pStuff, pPeople, pThing, ptrav);
+    Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.");
     places.insert(pair<string, Place*>(teaParty->getPlaceName(), teaParty));
     
     //CastleP1
-    map<string, Person*> cPeople;
-    multimap<string, Stuff*> cStuff;
-    multimap<string,Thing*> cThing;
-    map<string, Place*> ctrav;
-    
-    Place* castle = new Place("CastleP1", "Alice is taken to the Red Queen's Castle.", cStuff, cPeople, cThing, ctrav);
+    Place* castle = new Place("CastleP1", "Alice is taken to the Red Queen's Castle.");
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
     //CastleP2
-    map<string, Person*> c2People;
-    multimap<string, Stuff*> c2Stuff;
-    multimap<string,Thing*> c2Thing;
-    map<string, Place*> c2trav;
-    
-    Place* castle2 = new Place("CastleP2", "Escape the Castle.", c2Stuff, c2People, c2Thing, c2trav);
+    Place* castle2 = new Place("CastleP2", "Escape the Castle.");
     
     map<string, Place*> doorway;
     doorway.insert(pair<string, Place*>(castle2->getPlaceName(),castle2));
+    
     doorway.insert(pair<string, Place*>(castle->getPlaceName(),castle));
-    Thing* cd=new Door(0, "DoorInCastle", doorway);
+    
+    Door* cd=new Door(0, "DoorInCastle", doorway);
     castle->genThing(cd);
     castle2->genThing(cd);
     
     multimap<std::string, Stuff*> sinchst;
-    Stuff* aswrd=new HealthStuff("SwordToKillJabberwocky", "You can use this to kill the Jabberwocky", 5, 1);
+    HealthStuff* aswrd=new HealthStuff("SwordToKillJabberwocky", "You can use this to kill the Jabberwocky", 5, 1);
+    
     sinchst.insert(pair<string, Stuff*>(aswrd->getName(),aswrd));
-    Thing* dchst=new Chest(0, "ChestInCastle", sinchst);
+    
+    Chest* dchst=new Chest(0, "ChestInCastle", sinchst);
     castle->genThing(dchst);
     
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
     // Battlefield
-    map<string, Person*> bPeople;
-    multimap<string, Stuff*> bStuff;
-    multimap<string,Thing*> bThing;
-    map<string, Place*> trav;
-    
-    Place* battlefield = new Place("Battlefield", "Alice is all suited up and ready to fight.", bStuff, bPeople, bThing, trav);
+    Place* battlefield = new Place("Battlefield", "Alice is all suited up and ready to fight.");
     
     places.insert(pair<string, Place*>(battlefield->getPlaceName(), battlefield));
     
     // Home
-    map<string, Person*> hPeople;
-    multimap<string, Stuff*> hStuff;
-    multimap<string,Thing*> hThing;
-    map<string, Place*> htrav;
+    Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...");
     
-    Place* home = new Place("Home", "Alice wakes up and remembers a wonderful dream...", hStuff, hPeople, hThing, trav);
     places.insert(pair<string, Place*>(home->getPlaceName(), home));
     
     // places to go from Tree
@@ -1507,7 +1585,6 @@ void Game::makePlaces()
     places.find("Battlefield")->second->newPlaceToGo(places.find("CastleP1")->second);
     places.find("Battlefield")->second->newPlaceToGo(places.find("Home")->second);
 }
-*/
 
 void Game::makePeople()
 {
@@ -1516,44 +1593,42 @@ void Game::makePeople()
     
     //(1)
     NPC* bandersnatch = PersonFactory::makePerson("Bandersnatch");
-    //places.find("Garden")->second->personEnters(bandersnatch);
-    people.insert(pair<string, NPC*>(bandersnatch->getName(), bandersnatch));
+    places.find("Garden")->second->personEnters(bandersnatch);
+    //people.insert(pair<string, NPC*>(bandersnatch->getName(), bandersnatch));
     
     // (2)
     NPC* jabberwocky = PersonFactory::makePerson("Jabberwocky");
-    //places.find("Castle")->second->personEnters(jabberwocky);
-    people.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
+    places.find("Castle")->second->personEnters(jabberwocky);
+    //people.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
     
     // (3)
     NPC* redQueen = PersonFactory::makePerson("RedQueen");
-    //places.find("Castle")->second->personEnters(redQueen);
-    people.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
+    places.find("Castle")->second->personEnters(redQueen);
+    //people.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
     
     // (4)
     NPC* whiteRabbit = PersonFactory::makePerson("WhiteRabbit");
-    //places.find("Tree")->second->personEnters(whiteRabbit);
-    people.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
+    places.find("Tree")->second->personEnters(whiteRabbit);
+    //people.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
     
     // (5)
     NPC* madHatter = PersonFactory::makePerson("MadHatter");
-    //places.find("TeaParty")->second->personEnters(madHatter);
-    people.insert(pair<string, NPC*>(madHatter->getName(), madHatter));
+    places.find("TeaParty")->second->personEnters(madHatter);
+    //people.insert(pair<string, NPC*>(madHatter->getName(), madHatter));
     
     // (6)
     NPC* cheshireCat = PersonFactory::makePerson("CheshireCat");
-    //places.find("Woods")->second->personEnters(cheshireCat);
-    people.insert(pair<string, NPC*>(cheshireCat->getName(), cheshireCat));
+    places.find("Woods")->second->personEnters(cheshireCat);
+    //people.insert(pair<string, NPC*>(cheshireCat->getName(), cheshireCat));
     
     // (7)
     //Person* alice = PersonFactory::makePerson("Alice");
     //places.find("Tree")->second->personEnters(alice);
     
-    alicePtr = Alice::makeAlice();
+    places.find("Tree")->second->alicePtr = Alice::makeAlice();
 }
 
 // make stuff for people and places
-
-/* COMMENT OUT TO TEST
 void Game::makeStuff()
 {
     // **********************
@@ -1591,7 +1666,8 @@ void Game::makeStuff()
     
     // (6) Battlefield
     
-    MOVED TO PERSON FACTORY TO INSERT jabberBlood INTO HIS mStuff BEFORE RETURNING HIM
+    /*
+     MOVED TO PERSON FACTORY TO INSERT jabberBlood INTO HIS mStuff BEFORE RETURNING HIM
     
     MoveStuff* jabberBlood = new MoveStuff("JabberBlood", "Drinking the Jabberwocky's purple blood will take Alice home", 1, 1);
     
@@ -1600,42 +1676,38 @@ void Game::makeStuff()
         if(((((i->second)->Place::whoHere()).find("Jabberwocky")))!=((i->second)->Place::whoHere()).end())
             ((((i->second)->Place::whoHere()).find("Jabberwocky"))->second)->recieve(jabberBlood);
     }
- 
+     */
     
     // (7) Home
     // Home has nothing in list
 }
-*/
 
 // added to give us ability to find place in main
 
-/* COMMENT OUT TO TEST
 Place* Game::findHere() const
 {
     Place* here=NULL;
     
     for(map<string, Place*>::const_iterator i = places.begin(); i!=places.end(); i++)
     {
-        if((((i->second)->whoHere()).find("Alice")) != ((i->second)->whoHere()).end())
+        if(i->second->alicePtr != NULL)
         {
             here = (i->second);
         }
     }
     return here;
 }
- */
 
 void Game::delegate(const std::string& input)
 {
 	//"Keywords: aboutme, go, pickup, drop, use, approach"
 	string subput="start";
     
-    //Place* here = findHere(); COMMENT OUT TO TEST
+    Place* here = findHere();
 	
 	if(input=="aboutme")
 	{
-		//here->whoHere().find("Alice")->second->render(cout);
-        alicePtr->narrate(cout);
+        here->alicePtr->narrate(cout);
 	}
     
     // *****************************************
@@ -1665,11 +1737,11 @@ void Game::delegate(const std::string& input)
             {
                 if(h->second->getName() == subput)
                 {
-                    alicePtr->recieve(h->second);
+                    here->alicePtr->recieve(h->second);
                 }
             }
         }
-        alicePtr->render(cout);
+        here->alicePtr->render(cout);
     }
     
     if(input == "use")
@@ -1946,7 +2018,7 @@ void Game::delegate(const std::string& input)
 
 
 // needed to make static lists work
-//map<string, Place*> Game::places; COMMENT OUT TO TEST
-map<string, NPC*> Game::people;
+map<string, Place*> Game::places;
+//map<string, NPC*> Game::people;
 
 

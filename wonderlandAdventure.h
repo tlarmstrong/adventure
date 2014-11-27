@@ -3,18 +3,20 @@
 #include <iostream>
 
 // declare Stuff, NPC, Place, Thing, Person
-class Stuff;
+//class Stuff;
 class FriendStuff;
 class HealthStuff;
 class GrowStuff;
 class MoveStuff;
 class OpenStuff;
-//class Place;
+class Place;
 class Person;
 class PersonFactory;
 class NPC;
+class Alice;
 //class Thing;
-//class Chest;
+class Chest;
+class Door;
 class Game;
 
 /*
@@ -27,56 +29,97 @@ class Game;
  
  */
 
-/* COMMENT OUT TO TEST
 class Place {
     
 protected:
     
-    std::string description;         // unique description of Place
-    //std::string action;              // what Alice can do here //I am not sure this should be a thing... Her possible actions are determined by what is around her.
-    std::string name;                // name of Place
-    std::map<std::string, Person*> peopleHere;         // everybody in Place
-    std::multimap<std::string, Stuff*> stuffHere;           // list of things in a Place
-    std::multimap<std::string, Thing*> thingHere;			 // list of things here
-    std::map<std::string, Place*> placeTo;			 // list of Place Alice can go from here
+    // unique description of Place
+    std::string description;
+    
+    // name of Place
+    std::string name;
     
 public:
     
-    Place(const std::string& nm, const std::string& dscpt, const std::multimap<std::string, Stuff*>& what, const std::map<std::string, Person*>& who, const std::multimap<std::string,Thing*>& obj, const std::map<std::string, Place*>& trav);
+    // Place lists are now public
+    std::multimap<std::string, HealthStuff*> hHere;
+    std::multimap<std::string, GrowStuff*> gHere;
+    std::multimap<std::string, FriendStuff*> fHere;
+    std::multimap<std::string, OpenStuff*> oHere;
+    std::multimap<std::string, MoveStuff*> mHere;
+    
+    std::multimap<std::string, Chest*> cHere;
+    std::multimap<std::string, Door*> dHere;
+    
+    std::map<std::string, Place*>& placeTo;
+    std::map<std::string, NPC*>& peopleHere;
+    
+    Alice* alicePtr;
+    
+    Place(const std::string& nm, const std::string& dscpt);
     //Place();                                    // constructor
     ~Place();                                   // destructor
     
-    std::map<std::string, Person*>& whoHere();               //constructed list
     std::string getPlaceName() const;           // returns name of Place
     
-    void personEnters(Person* enterer);   //somebody comes into the place
-    void personLeaves(Person* leaver);    //removes somebody from a place
+    void personEnters(NPC* enterer);   //somebody comes into the place
+    void personLeaves(NPC* leaver);    //removes somebody from a place
     
-    std::multimap<std::string, Stuff*>& whatsHere();              //returns the list of stuff here
-    std::multimap<std::string, Thing*>& openHere();
-    void dropped(Stuff* drop, Person* who);             //someone dropped an item here, so it is now laying around
-    void pickedUp(Stuff* pick, Person* who);              //somebody picked up an item here
-    void genStuff(Stuff* gen);				//to generate an item in the game
-    void genThing(Thing* gen);				//generate a thing
+    //someone dropped an item here, so it is now laying around
+    template<class T>
+    void dropped(HealthStuff* drop, T* who);
+    
+    template<class T>
+    void dropped(GrowStuff* drop, T* who);
+    
+    template<class T>
+    void dropped(FriendStuff* drop, T* who);
+    
+    template<class T>
+    void dropped(OpenStuff* drop, T* who);
+    
+    template<class T>
+    void dropped(MoveStuff* drop, T* who);
+    
+    //somebody picked up an item here
+    template<class T>
+    void pickedUp(HealthStuff* drop, T* who);
+    
+    template<class T>
+    void pickedUp(GrowStuff* drop, T* who);
+    
+    template<class T>
+    void pickedUp(FriendStuff* drop, T* who);
+    
+    template<class T>
+    void pickedUp(OpenStuff* drop, T* who);
+    
+    template<class T>
+    void pickedUp(MoveStuff* drop, T* who);
+    
+    //to generate an item in the game
+    void genStuff(HealthStuff* gen);
+    void genStuff(GrowStuff* gen);
+    void genStuff(FriendStuff* gen);
+    void genStuff(OpenStuff* gen);
+    void genStuff(MoveStuff* gen);
+    
+    //generate a thing
+    void genThing(Chest* gen);
+    void genThing(Door* gen);
     
     void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
     
-    std::multimap<std::string, Thing*>& getThingsHere();	//gets things here
-    
-    std::map<std::string, Place*>& getNewPlaceToGo();
+    //std::map<std::string, Place*>& getNewPlaceToGo();
     
     // output description of Place
     std::ostream& narrate(std::ostream& out) const;
     
     //output current information
     std::ostream& render(std::ostream& out) const;
-    
-    
-    // what Alice can do in particular place
-    //std::string canDo(const std::string& doin);		//dont forget to name your variables. Not sure if we need it nor what we want it to do exactly.
 };
-*/
+
 
 /*
  ------------------------------------------------------------
@@ -115,15 +158,12 @@ public:
     virtual ~Person();                       // destructor
     
     // Person can move from place to place
-    //virtual void move(Place* to) /*const*/;
+    virtual void move(Place* to) /*const*/;
     
     // get (and display) name of place
-    //Place* whereAreYou() const;
+    Place* whereAreYou() const;
     
     // gives an item to someone else
-    // CHANGE: NPC* (used to be Person*)
-    
-    //void give(Stuff* item, NPC* other);
     template<class T>
     void give(GrowStuff* item, T* other);
     
@@ -139,15 +179,17 @@ public:
     template<class T>
     void give(HealthStuff* item, T* other);
     
-    
     // recieves an item
-    // Does this still work with a Stuff* or do we need to have a recieve function for each type of Stuff?
     //void recieve(Stuff* item);
     void recieve(HealthStuff* item);
     void recieve(GrowStuff* item);
     void recieve(FriendStuff* item);
     void recieve(OpenStuff* item);
     void recieve(MoveStuff* item);
+    
+    // Someone drops an item
+    template<class T>
+    void drop(T* item);
     
     // person takes damage
     void hurt(const int& damage);
@@ -156,16 +198,14 @@ public:
     
     int getHealth() const;
     
-    // gets Stuff list
+    // gets Stuff list -- LISTS ARE PUBLIC
     //std::multimap<std::string, Stuff*>& getStuffList();
-    // what if we make the lists public?
     
     // gets person's name
     std::string getName() const;
     
-    // COMMENT OUT TO TEST
-    //void dies();
-    //bool isDead();
+    void dies();
+    bool isDead();
     
     virtual std::ostream& narrate(std::ostream& out) const=0;
     virtual std::ostream& render(std::ostream& out) const=0;
@@ -212,37 +252,32 @@ public:
     void ditched(NPC* ditcher);
     
     // Alice can move from place to place with her friends
-    //void move(Place* to) const;
+    void move(Place* to);
 
     //Alice chooses an item from a chest
-    //void choose(Chest* chst, Stuff* item);
+    template<class T>
+    void choose(Chest* chst, T* item);
     
     //Alice adds item to the list of stuff
-    //void pickup(Stuff* item);
-    
     template<class T>
     void pickUp(T* item);
     
-    //Alice drops an item
-    //void drop(Stuff* item);
-    
-    template<class T>
-    void drop(T* item);
-    
     //Alice uses an item on herself
-    //void use(Stuff* item);
     template<class T>
     void use(T* item);
     
     //Alice uses an item in a place
-    //void use(Stuff* item, Place* where);
+    template<class T>
+    void use(T* item, Place* where);
     
     //Alice uses an item on a thing
-    //void use(Stuff* item, Thing* what);
+    template<class T>
+    void use(T* item, Chest* what);
+    
+    template<class T>
+    void use(T* item, Door* what);
     
     //Alice uses an item on a person
-    //void use(Stuff* item, Person* who);
-    
     template<class T>
     void use(T* item, NPC* who);
     
@@ -285,7 +320,6 @@ private:
     // constructor
     NPC(const std::string& nm, const std::string& dscrpt, const std::string& threat, const int& hlth, const bool& frndly, bool attk);
 
-    
 public:
     
     // destructor
@@ -312,16 +346,12 @@ public:
     
     std::ostream& render(std::ostream& out) const;
     
-    // still needed for NPCs?
-    /*
-    void choose(Chest* chst, Stuff* item);
-    void pickup(Stuff* item);
-    void drop(Stuff* item);
-    void use(Stuff* item);
-    void use(Stuff* item, Place* where);
-    void use(Stuff* item, Thing* what);
-    void use(Stuff* item, Person* who);
-     */
+    // NPC uses item on another NPC or Alice
+    template<class T>
+    void use(T* item, NPC* who);
+    
+    template<class T>
+    void use(T* item, Alice* who);
 };
 
 /*
@@ -380,23 +410,7 @@ public:
     
     // destructor
     virtual ~Stuff();
-    
-    // need to make derived classes work?
-    /*
-    virtual void useItem(Alice*)=0;
-    virtual void useItem(Place*)=0;
-    virtual void useItem(Person*)=0;
-    virtual void useItem(NPC*)=0;
-    virtual void useItem(Thing*)=0;
-    virtual void useItem(Person* who, Place* where)=0;
-     */
-    
-    //**************************************************
-    
-    int getResult();
-    
-    //*************************************************
-    
+
     std::string getName() const;
     
     // output description of Stuff
@@ -420,7 +434,7 @@ class GrowStuff : public Stuff
         ~GrowStuff();
 
         void useItem(Alice* who);
-        void useItem(NPC* who);
+        //void useItem(NPC* who);
     
         //void useItem(Place* where);
         //void useItem(Thing* what);
@@ -435,6 +449,7 @@ class HealthStuff : public Stuff
     
         void useItem(Alice* who);
         void useItem(NPC* who);
+    
         //void useItem(Place* where);
         //void useItem(Thing* what);
         //void useItem(/*const*/ Person* who, Place* where);
@@ -447,8 +462,8 @@ class FriendStuff : public Stuff
         ~FriendStuff();
     
         void useItem(NPC* who);
-        void useItem(Alice* who);
     
+        //void useItem(Alice* who);
         //void useItem(Place* where);
         //void useItem(Thing* what);
         //void useItem(/*const*/ Person* who, Place* where);
@@ -460,15 +475,14 @@ class OpenStuff : public Stuff
         OpenStuff(const std::string name, const std::string description, const int result,const bool status);
         ~OpenStuff();
     
-        //void useItem(Thing* what);		//clearly this is separated for this to be the actual function to be called... what is the who being acted on? Is this a trap?
+        template<class T>
+        void useItem(T* what);
     
-        /* COMMENT OUT TO TEST
-        void useItem(Alice* who);
-        void useItem(Place* where);
-        void useItem(Person* who);
-        void useItem(NPC* who);
-        void useItem(Person* who, Place* where);
-         */
+        //void useItem(Alice* who);
+        //void useItem(Place* where);
+        //void useItem(Person* who);
+        //void useItem(NPC* who);
+        //void useItem(Person* who, Place* where);
 };
 
 class MoveStuff : public Stuff
@@ -477,15 +491,13 @@ class MoveStuff : public Stuff
         MoveStuff(const std::string name, const std::string description, const int result,const bool status);
         ~MoveStuff();
     
-        /* COMMENT OUT TO TEST
-        void useItem(Person* who, Place* where);
+        void useItem(Alice* who, Place* where);
     
-        void useItem(Alice* who);
-        void useItem(Place* where);
-        void useItem(Person* who);
-        void useItem(NPC* who);
-        void useItem(Thing* what);
-         */
+        //void useItem(Alice* who);
+        //void useItem(Place* where);
+        //void useItem(Person* who);
+        //void useItem(NPC* who);
+        //void useItem(Thing* what);
 };
 
 /*
@@ -584,24 +596,24 @@ public:
      private:
      
      
-         //void makePlaces();             // instantiates Places and adds to static list
+         void makePlaces();             // instantiates Places and adds to static list
          void makePeople();             // instantiates People and adds to static list
          void makeStuff();              // instantiates Stuff and adds to Place's stuff list
          
      public:
      
-        //static std::map<std::string, Place*> places;    // Game class keeps static list of Places in Wonderland
-        static std::map<std::string, NPC*> people;   // Game class keeps static list of People in Wonderland
+        static std::map<std::string, Place*> places;    // Game class keeps static list of Places in Wonderland
+        //static std::map<std::string, NPC*> people;   // Game class keeps static list of People in Wonderland
          
         Game();                        // constructor
         ~Game();                       // destructor
         //std::map<std::string, Place*>& getPlaceList();
      
      
-     Alice* alicePtr;
-        std::map<std::string, NPC*>& getPeopleList() const;
+        //Alice* alicePtr;
+        //std::map<std::string, NPC*>& getPeopleList() const;
      
-        //Place* findHere() const;
+        Place* findHere() const;
         void delegate(const std::string& input);
  };
 
