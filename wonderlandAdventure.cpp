@@ -50,6 +50,7 @@ Place::~Place()
         delete m->second;
     }
 	
+    /* COMMENT OUT TO TEST
 	for (map<string, Door*>::iterator d=dHere.begin(); d!=dHere.end(); d++) //deletes all the things in a place
 	{
 		delete d->second;
@@ -59,7 +60,7 @@ Place::~Place()
     {
         delete c->second;
     }
-	
+	END COMMENT */
 }
 
 string Place::getPlaceName() const  // returns name of Place
@@ -156,6 +157,7 @@ void Place::pickedUp(MoveStuff* pick, T* who)
     who->recieve(pick);
 }
 
+/*
 void Place::genStuff(GrowStuff* gen)
 {
 	gHere.insert(pair<string, GrowStuff*>(gen->getName(), gen));
@@ -164,6 +166,7 @@ void Place::genStuff(GrowStuff* gen)
 void Place::genStuff(HealthStuff* gen)
 {
     hHere.insert(pair<string, HealthStuff*>(gen->getName(), gen));
+    cout << gen->getName() << " inserted" << endl;
 }
 
 void Place::genStuff(FriendStuff* gen)
@@ -180,7 +183,9 @@ void Place::genStuff(MoveStuff* gen)
 {
     mHere.insert(pair<string, MoveStuff*>(gen->getName(), gen));
 }
+ */
 
+/* COMMENT OUT TO TEST
 void Place::genThing(Chest* gen)
 {
     cHere.insert(pair<string, Chest*>(gen->getName(), gen));
@@ -190,11 +195,14 @@ void Place::genThing(Door* gen)
 {
     dHere.insert(pair<string, Door*>(gen->getName(), gen));
 }
+END COMMENT */
 
+/*
 void Place::newPlaceToGo(Place* goTo)
 {
     placeTo.insert(pair<string, Place*>(goTo->getPlaceName(),goTo));
 }
+*/
 
 void Place::blockPlaceToGo(Place* block)
 {
@@ -226,6 +234,7 @@ std::ostream& Place::render(std::ostream& out) const
         out << endl;
 	}
 	
+    /* COMMENT OUT TO TEST
 	if (dHere.empty() && cHere.empty())
 	{
 		out << "";
@@ -244,6 +253,7 @@ std::ostream& Place::render(std::ostream& out) const
         else
             out << "";
         
+        
         if(!dHere.empty())
         {
             for(map<string, Door*>::const_iterator i = dHere.begin(); i!=dHere.end(); i++)
@@ -253,15 +263,19 @@ std::ostream& Place::render(std::ostream& out) const
         }
         else
             out << "";
+         
 	}
+    END COMMENT */
     
     if(hHere.empty() && gHere.empty() && fHere.empty() && oHere.empty() && mHere.empty())
     {
-        out << "nothing" << endl;
+        out << "There is nothing here to get" << endl;
     }
     
     else
     {
+        out << "Things here to get: " << endl;
+        
         if(!hHere.empty())
         {
             for(map<string, HealthStuff*>::const_iterator i = hHere.begin(); i!=hHere.end(); i++)
@@ -402,6 +416,7 @@ Person::~Person()
 
 // *********************
 
+/*
 void Person::dies()
 {
 	multimap<string, HealthStuff*>::iterator h;
@@ -442,6 +457,7 @@ void Person::dies()
     this->whereAreYou()->personLeaves(this);
     delete this;
 }
+ */
 
 bool Person::isDead()
 {
@@ -453,18 +469,6 @@ bool Person::isDead()
 	else
 		return false;
 }
- 
-void Person::move(Place* to) /*const*/
-{
-    Place* from = whereAreYou();
-
-    // remove person from current location
-    from->personLeaves(this);
-    
-    // move a person to another place
-    to->personEnters(this);
-}
-
 
 // get Place where Person is
 Place* Person::whereAreYou() const
@@ -577,6 +581,35 @@ void Person::recieve(MoveStuff* item)
     mStuff.insert(pair<string, MoveStuff*>(item->getName(), item));
 }
 
+template<class T>
+void Person::drop(T* item)
+{
+    if(hStuff.find(item))
+    {
+        hStuff.erase(hStuff.find(item->getName()));
+    }
+    
+    if(gStuff.find(item))
+    {
+        gStuff.erase(gStuff.find(item->getName()));
+    }
+    
+    if(fStuff.find(item))
+    {
+        fStuff.erase(fStuff.find(item->getName()));
+    }
+    
+    if(oStuff.find(item))
+    {
+        oStuff.erase(oStuff.find(item->getName()));
+    }
+    
+    if(mStuff.find(item))
+    {
+        mStuff.erase(mStuff.find(item->getName()));
+    }
+}
+
 //person takes damage
 void Person::hurt(const int& damage)
 {
@@ -640,6 +673,20 @@ Alice* Alice::makeAlice()
     return &alice;
 }
 
+Place* Alice::whereAreYou() const
+{
+    Place* here=NULL;
+    
+    for(map<string, Place*>::const_iterator i = Game::places.begin(); i!= Game::places.end(); i++)
+    {
+        if(i->second->alicePtr != NULL)
+        {
+            here = (i->second);
+        }
+    }
+    return here;
+}
+
 //adds a person to the list of Helpers
 void Alice::taggingAlong(NPC* tagger)
 {
@@ -678,13 +725,14 @@ void Alice::move(Place* to)
 
 // **********************
 
-
+/* COMMENT OUT TO TEST
 template<class T>
 void choose(Chest* chst, T* item)
 {
 	chst->takeStuff(item);
 	recieve(item);
 }
+ END COMMENT */
 
 template<class T>
 void Alice::pickUp(T* item)
@@ -692,7 +740,7 @@ void Alice::pickUp(T* item)
     recieve(item);
 }
 
-/*
+/* OLD
 //Alice drops an item
 void Alice::drop(Stuff* item)
 {
@@ -700,6 +748,7 @@ void Alice::drop(Stuff* item)
 }
 */
 
+/* MOVED TO PERSON
 template<class T>
 void Alice::drop(T* item)
 {
@@ -728,6 +777,7 @@ void Alice::drop(T* item)
         mStuff.erase(mStuff.find(item->getName()));
     }
 }
+ */
 
 // delete stuff after used?
 //Alice uses an item on herself
@@ -746,13 +796,13 @@ void Alice::use(T* item, Place* where)
 
 //Alice uses an item on a thing
 template<class T>
-void Alice::use(Stuff* item, Door* what)
+void Alice::use(T* item, Door* what)
 {
     item->useItem(what);
 }
 
 template<class T>
-void Alice::use(Stuff* item, Chest* what)
+void Alice::use(T* item, Chest* what)
 {
     item->useItem(what);
 }
@@ -767,6 +817,47 @@ void Alice::use(T* item, NPC* who)
 int Alice::getBodySize() const
 {
     return bodySize;
+}
+
+void Alice::dies()
+{
+    multimap<string, HealthStuff*>::iterator h;
+    h=hStuff.begin();
+    for(;!hStuff.empty();h++)
+    {
+        this->whereAreYou()->dropped(h->second, this);
+    }
+    
+    multimap<string, GrowStuff*>::iterator g;
+    g=gStuff.begin();
+    for(;!gStuff.empty();g++)
+    {
+        this->whereAreYou()->dropped(g->second, this);
+    }
+    
+    multimap<string, FriendStuff*>::iterator f;
+    f=fStuff.begin();
+    for(;!fStuff.empty();f++)
+    {
+        this->whereAreYou()->dropped(f->second, this);
+    }
+    
+    multimap<string, OpenStuff*>::iterator o;
+    o=oStuff.begin();
+    for(;!oStuff.empty();o++)
+    {
+        this->whereAreYou()->dropped(o->second, this);
+    }
+    
+    multimap<string, MoveStuff*>::iterator m;
+    m=mStuff.begin();
+    for(;!mStuff.empty();m++)
+    {
+        this->whereAreYou()->dropped(m->second, this);
+    }
+    
+    this->whereAreYou()->alicePtr = NULL;
+    delete this;
 }
 
 void Alice::setBodySize(const int& sz)
@@ -910,6 +1001,17 @@ NPC::NPC(const std::string& nm, const std::string& dscrpt, const std::string& sa
 // destructor
 NPC::~NPC() {}
 
+void NPC::move(Place* to) /*const*/
+{
+    Place* from = whereAreYou();
+    
+    // remove person from current location
+    from->personLeaves(this);
+    
+    // move a person to another place
+    to->personEnters(this);
+}
+
 // public function to set friendly status of NPC
 void NPC::setFriendly(const bool& x)
 {
@@ -946,6 +1048,47 @@ std::ostream& NPC::talk(std::ostream& out) const
 bool NPC::isfriendly() const
 {
     return friendly;
+}
+
+void NPC::dies()
+{
+    multimap<string, HealthStuff*>::iterator h;
+    h=hStuff.begin();
+    for(;!hStuff.empty();h++)
+    {
+        this->whereAreYou()->dropped(h->second, this);
+    }
+    
+    multimap<string, GrowStuff*>::iterator g;
+    g=gStuff.begin();
+    for(;!gStuff.empty();g++)
+    {
+        this->whereAreYou()->dropped(g->second, this);
+    }
+    
+    multimap<string, FriendStuff*>::iterator f;
+    f=fStuff.begin();
+    for(;!fStuff.empty();f++)
+    {
+        this->whereAreYou()->dropped(f->second, this);
+    }
+    
+    multimap<string, OpenStuff*>::iterator o;
+    o=oStuff.begin();
+    for(;!oStuff.empty();o++)
+    {
+        this->whereAreYou()->dropped(o->second, this);
+    }
+    
+    multimap<string, MoveStuff*>::iterator m;
+    m=mStuff.begin();
+    for(;!mStuff.empty();m++)
+    {
+        this->whereAreYou()->dropped(m->second, this);
+    }
+    
+    this->whereAreYou()->personLeaves(this);
+    delete this;
 }
 
 ostream& NPC::render(ostream& out) const
@@ -1249,7 +1392,7 @@ void GrowStuff::useItem(Alice* who)
 //void GrowStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
 //void GrowStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 
-void GrowStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
+//void GrowStuff::useItem(NPC* who) {cout << getName() << "cannot be used on" << who->getName();}
 
 //void GrowStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
 //void GrowStuff::useItem(/*const*/ Person* who, Place* where) {cout << getName() << "cannot be used on this way";}
@@ -1273,7 +1416,7 @@ void HealthStuff::useItem(Alice* who)
 	status = 0;
 }
 
-void HealthStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
+//void HealthStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
 
 void HealthStuff::useItem(NPC* who)
 {
@@ -1298,7 +1441,7 @@ void FriendStuff::useItem(NPC* who)
     status = 0;
 }
 
-void FriendStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
+//void FriendStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
 
 //void FriendStuff::useItem(Person* who) {cout << getName() << "cannot be used on" << who->getName();}
 //void FriendStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
@@ -1312,12 +1455,14 @@ OpenStuff::OpenStuff(const string name, const string description, const int resu
 
 OpenStuff::~OpenStuff() {}
 
+/* COMMENT OUT TO TEST
 template<class T>
 void OpenStuff::useItem(T* what)
 {
     what->openThing();
     status = 0;
 }
+ END OF COMMENT */
 
 /*
 void OpenStuff::useItem(Alice* who) {cout << getName() << "cannot be used on" << who->getName();}
@@ -1420,7 +1565,7 @@ void Door::closeThing()
 		status=0;
 	}
 }
- */
+ END COMMENT */
 
 /*
  ----------------------------------
@@ -1485,7 +1630,7 @@ std::ostream& Chest::narrate(std::ostream& out)
 	}
 	return out;
 }
-*/
+END COMMENT */
 
 /*
  ----------------------------------
@@ -1507,7 +1652,7 @@ void Game::makePlaces()
     // Tree
     // *******************************
     
-    // could we take out the dummy lists and use insert instead (see Person Factory)
+    // took out the dummy lists and use insert instead (see Person Factory)
     
     // *******************************
     
@@ -1530,9 +1675,9 @@ void Game::makePlaces()
     Place* castle = new Place("CastleP1", "Alice is taken to the Red Queen's Castle.");
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
+    /* COMMENT OUT TO TEST
     //CastleP2
     Place* castle2 = new Place("CastleP2", "Escape the Castle.");
-    
     map<string, Place*> doorway;
     doorway.insert(pair<string, Place*>(castle2->getPlaceName(),castle2));
     
@@ -1542,13 +1687,14 @@ void Game::makePlaces()
     castle->genThing(cd);
     castle2->genThing(cd);
     
-    multimap<std::string, Stuff*> sinchst;
+    multimap<std::string, HealthStuff*> sinchst;
     HealthStuff* aswrd=new HealthStuff("SwordToKillJabberwocky", "You can use this to kill the Jabberwocky", 5, 1);
     
-    sinchst.insert(pair<string, Stuff*>(aswrd->getName(),aswrd));
+    sinchst.insert(pair<string, HealthStuff*>(aswrd->getName(),aswrd));
     
     Chest* dchst=new Chest(0, "ChestInCastle", sinchst);
     castle->genThing(dchst);
+    */
     
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
@@ -1563,27 +1709,27 @@ void Game::makePlaces()
     places.insert(pair<string, Place*>(home->getPlaceName(), home));
     
     // places to go from Tree
-    places.find("Tree")->second->newPlaceToGo(places.find("Garden")->second);
+    places.find("Tree")->second->placeTo.insert(pair<string, Place*>(places.find("Garden")->second->getPlaceName(), places.find("Garden")->second));
     
     // places to go from Garden
-    places.find("Garden")->second->newPlaceToGo(places.find("Woods")->second);
-    places.find("Garden")->second->newPlaceToGo(places.find("Tree")->second);
+    places.find("Garden")->second->placeTo.insert(pair<string, Place*>(places.find("Tree")->second->getPlaceName(), places.find("Tree")->second));
+    places.find("Garden")->second->placeTo.insert(pair<string, Place*>(places.find("Woods")->second->getPlaceName(), places.find("Woods")->second));
     
     // places to go from Woods
-    places.find("Woods")->second->newPlaceToGo(places.find("Garden")->second);
-    places.find("Woods")->second->newPlaceToGo(places.find("TeaParty")->second);
+    places.find("Woods")->second->placeTo.insert(pair<string, Place*>(places.find("Garden")->second->getPlaceName(), places.find("Garden")->second));
+    places.find("Woods")->second->placeTo.insert(pair<string, Place*>(places.find("TeaParty")->second->getPlaceName(), places.find("TeaParty")->second));
     
     // places to go from TeaParty
-    places.find("TeaParty")->second->newPlaceToGo(places.find("Woods")->second);
-    places.find("TeaParty")->second->newPlaceToGo(places.find("CastleP1")->second);
+    places.find("TeaParty")->second->placeTo.insert(pair<string, Place*>(places.find("Woods")->second->getPlaceName(), places.find("Woods")->second));
+    places.find("TeaParty")->second->placeTo.insert(pair<string, Place*>(places.find("CastleP1")->second->getPlaceName(), places.find("CastleP1")->second));
     
     // places to go from Castle
-    places.find("CastleP1")->second->newPlaceToGo(places.find("TeaParty")->second);
-    places.find("CastleP1")->second->newPlaceToGo(places.find("Battlefield")->second);
+    places.find("CastleP1")->second->placeTo.insert(pair<string, Place*>(places.find("TeaParty")->second->getPlaceName(), places.find("TeaParty")->second));
+    places.find("CastleP1")->second->placeTo.insert(pair<string, Place*>(places.find("Battlefield")->second->getPlaceName(), places.find("Battlefield")->second));
     
     // places to go from Battlefield
-    places.find("Battlefield")->second->newPlaceToGo(places.find("CastleP1")->second);
-    places.find("Battlefield")->second->newPlaceToGo(places.find("Home")->second);
+    places.find("Battlefield")->second->placeTo.insert(pair<string, Place*>(places.find("CastleP1")->second->getPlaceName(), places.find("CastleP1")->second));
+    places.find("Battlefield")->second->placeTo.insert(pair<string, Place*>(places.find("Home")->second->getPlaceName(), places.find("Home")->second));
 }
 
 void Game::makePeople()
@@ -1593,32 +1739,32 @@ void Game::makePeople()
     
     //(1)
     NPC* bandersnatch = PersonFactory::makePerson("Bandersnatch");
-    places.find("Garden")->second->personEnters(bandersnatch);
+    places.find("Garden")->second->peopleHere.insert(pair<string, NPC*>(bandersnatch->getName(), bandersnatch));
     //people.insert(pair<string, NPC*>(bandersnatch->getName(), bandersnatch));
     
     // (2)
     NPC* jabberwocky = PersonFactory::makePerson("Jabberwocky");
-    places.find("Castle")->second->personEnters(jabberwocky);
+    places.find("CastleP1")->second->peopleHere.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
     //people.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
     
     // (3)
     NPC* redQueen = PersonFactory::makePerson("RedQueen");
-    places.find("Castle")->second->personEnters(redQueen);
+    places.find("CastleP1")->second->peopleHere.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
     //people.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
     
     // (4)
     NPC* whiteRabbit = PersonFactory::makePerson("WhiteRabbit");
-    places.find("Tree")->second->personEnters(whiteRabbit);
+    places.find("Tree")->second->peopleHere.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
     //people.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
     
     // (5)
     NPC* madHatter = PersonFactory::makePerson("MadHatter");
-    places.find("TeaParty")->second->personEnters(madHatter);
+    places.find("TeaParty")->second->peopleHere.insert(pair<string, NPC*>(madHatter->getName(), madHatter));
     //people.insert(pair<string, NPC*>(madHatter->getName(), madHatter));
     
     // (6)
     NPC* cheshireCat = PersonFactory::makePerson("CheshireCat");
-    places.find("Woods")->second->personEnters(cheshireCat);
+    places.find("Woods")->second->peopleHere.insert(pair<string, NPC*>(cheshireCat->getName(), cheshireCat));
     //people.insert(pair<string, NPC*>(cheshireCat->getName(), cheshireCat));
     
     // (7)
@@ -1643,11 +1789,11 @@ void Game::makeStuff()
     
     // (2) Garden
     HealthStuff* whiteRose = new HealthStuff("WhiteRose", "The Red Queen hates white roses", 3, 1);
-    places.find("Garden")->second->genStuff(whiteRose);
+    places.find("Garden")->second->hHere.insert(pair<string, HealthStuff*>(whiteRose->getName(), whiteRose));
     
     // (3) Woods
     OpenStuff* key = new OpenStuff("Key", "Key can be used to open the door, but Alice needs to be small to get through!", 1, 1);
-    places.find("Woods")->second->genStuff(key);
+    places.find("Woods")->second->oHere.insert(pair<string, OpenStuff*>(key->getName(), key));
     
     // (4) TeaParty
     
@@ -1657,12 +1803,12 @@ void Game::makeStuff()
     
     GrowStuff* cake = new GrowStuff("Cake", "The cake will make Alice big!", 3, 1);
     GrowStuff* tea = new GrowStuff("Tea", "Drinking the tea will make Alice small.", 1, 1);
-    places.find("TeaParty")->second->genStuff(cake);
-    places.find("TeaParty")->second->genStuff(tea);
+    places.find("TeaParty")->second->gHere.insert(pair<string, GrowStuff*>(cake->getName(), cake));
+    places.find("TeaParty")->second->gHere.insert(pair<string, GrowStuff*>(tea->getName(), cake));
     
     // (5) Castle
     HealthStuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 1);
-    places.find("Castle")->second->genStuff(sword);
+    places.find("CastleP1")->second->hHere.insert(pair<string, HealthStuff*>(sword->getName(), sword));
     
     // (6) Battlefield
     
@@ -1719,7 +1865,7 @@ void Game::delegate(const std::string& input)
     
     if(input == "others")
     {
-        for(map<string, NPC*>::const_iterator i = people.begin(); i!=people.end(); i++)
+        for(map<string, NPC*>::const_iterator i = here->peopleHere.begin(); i!=here->peopleHere.end(); i++)
         {
             i->second->getName();
             i->second->narrate(cout);
@@ -1731,7 +1877,7 @@ void Game::delegate(const std::string& input)
     {
         cout << "What would you like to get?" << endl;
         cin >> subput;
-        for(map<string, NPC*>::const_iterator i = people.begin(); i!=people.end(); i++)
+        for(map<string, NPC*>::const_iterator i = here->peopleHere.begin(); i!=here->peopleHere.end(); i++)
         {
             for(map<string, HealthStuff*>::const_iterator h = (i->second)->hStuff.begin(); h!=(i->second)->hStuff.end(); h++)
             {
@@ -1754,44 +1900,42 @@ void Game::delegate(const std::string& input)
         cout << "Who would you like to use it on?" << endl;
         cin >> sub3;
         
-        for(map<string, HealthStuff*>::const_iterator i = alicePtr->hStuff.begin(); i!=alicePtr->hStuff.end(); i++)
+        for(map<string, HealthStuff*>::const_iterator i = here->alicePtr->hStuff.begin(); i!=here->alicePtr->hStuff.end(); i++)
         {
             if(i->second->getName() == subput)
             {
-                alicePtr->use(i->second, people.find(sub3)->second);
+                here->alicePtr->use(i->second, here->peopleHere.find(sub3)->second);
             }
-            people.find(sub3)->second->render(cout);
+            here->peopleHere.find(sub3)->second->render(cout);
         }
         
     }
     // end of code for testing ********************************
 	
     
-    /* COMMENT OUT TO TEST
 	if(input=="go")
 	{
 		cout << "Where would you like to go? " << endl;
      
-        map<string, Place*>::const_iterator i=here->getNewPlaceToGo().begin();
+        map<string, Place*>::const_iterator i=here->placeTo.begin();
         cout << "[choices: " << (i->second)->getPlaceName();
         i++;
         
-        for(; i!=here->getNewPlaceToGo().end(); i++)
+        for(; i!=here->placeTo.end(); i++)
             cout << ", " << (i->second)->getPlaceName();
         
         cout << "]" << endl;
         
 		cin >> subput;
-		if(here->getNewPlaceToGo().find(subput)!= here->getNewPlaceToGo().end())
+		if(here->placeTo.find(subput)!= here->placeTo.end())
 		{
-			(here->whoHere().find("Alice")->second)->move(here->getNewPlaceToGo().find(subput)->second);
+			(here->alicePtr->move(here->placeTo.find(subput)->second));
 		}
 		else
 		{
 			cout << "You cannot go there from here.";
 		}
 	}
-	*/
     
     /* COMMENT OUT TO TEST
 	if(input=="pickup")

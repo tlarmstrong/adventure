@@ -36,7 +36,7 @@ protected:
     // unique description of Place
     std::string description;
     
-    // name of Place
+    // name of Place>
     std::string name;
     
 public:
@@ -51,8 +51,8 @@ public:
     std::multimap<std::string, Chest*> cHere;
     std::multimap<std::string, Door*> dHere;
     
-    std::map<std::string, Place*>& placeTo;
-    std::map<std::string, NPC*>& peopleHere;
+    std::map<std::string, Place*> placeTo;
+    std::map<std::string, NPC*> peopleHere;
     
     Alice* alicePtr;
     
@@ -98,17 +98,19 @@ public:
     void pickedUp(MoveStuff* drop, T* who);
     
     //to generate an item in the game
+    /*
     void genStuff(HealthStuff* gen);
     void genStuff(GrowStuff* gen);
     void genStuff(FriendStuff* gen);
     void genStuff(OpenStuff* gen);
     void genStuff(MoveStuff* gen);
+    */
     
     //generate a thing
     void genThing(Chest* gen);
     void genThing(Door* gen);
     
-    void newPlaceToGo(Place* goTo);
+    //void newPlaceToGo(Place* goTo);
     void blockPlaceToGo(Place* block);
     
     //std::map<std::string, Place*>& getNewPlaceToGo();
@@ -158,10 +160,10 @@ public:
     virtual ~Person();                       // destructor
     
     // Person can move from place to place
-    virtual void move(Place* to) /*const*/;
+    virtual void move(Place* to)=0; /*const*/;
     
     // get (and display) name of place
-    Place* whereAreYou() const;
+    virtual Place* whereAreYou() const;
     
     // gives an item to someone else
     template<class T>
@@ -204,7 +206,7 @@ public:
     // gets person's name
     std::string getName() const;
     
-    void dies();
+    virtual void dies()=0;
     bool isDead();
     
     virtual std::ostream& narrate(std::ostream& out) const=0;
@@ -244,6 +246,8 @@ public:
     //static Alice* makeAlice(const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool a);
     
     static Alice* makeAlice();
+    
+    Place* whereAreYou() const;
     
     //adds a person to the list of Helpers
     void taggingAlong(NPC* tagger);
@@ -286,6 +290,8 @@ public:
     
     void setBodySize(const int& sz);
     
+    void dies();
+    
     // output what she has, who she's met, body getSize, and health
     std::ostream& render(std::ostream& out) const;
     std::ostream& narrate(std::ostream& out) const;
@@ -325,6 +331,8 @@ public:
     // destructor
     ~NPC();
     
+    void move(Place* to);
+    
     // set friendly status
     void setFriendly(const bool& x);
     
@@ -352,6 +360,8 @@ public:
     
     template<class T>
     void use(T* item, Alice* who);
+    
+    void dies();
 };
 
 /*
