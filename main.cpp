@@ -18,30 +18,29 @@ int main()
     static bool finished=false;
     while(!finished && input!="quit")
     {
-        one.findHere()->narrate(cout);
-        cout << "What do you want to do?" << endl << "Keywords: aboutme, go, pickup, drop, use, approach, attack" << endl;
+        //one.findHere()->narrate(cout);
+        //cout << one.findHere()->getPlaceName() << endl;
         
-        //we need to write approach for alice so she can approach a person, or a thing
-        
-        for(map<string, NPC*>::iterator i = one.findHere()->peopleHere.begin(); i!=one.findHere()->peopleHere.end(); i++)
+        if(one.findHere()->getPlaceName() == "Home")
         {
-            if((i->second)->getName() == "Bandersnatch" && (i->second)->isfriendly() == false)
+            finished = true;
+            break;
+        }
+        
+        for(map<string, NPC*>::iterator j = one.findHere()->peopleHere.begin(); j!=one.findHere()->peopleHere.end(); j++)
+        {
+            if((j->second->isDead()))
             {
-                cout << "Bandersnatch attack!" << endl;
-            }
-            
-            if((i->second)->getName() == "Jabberwocky")
-            {
-                cout << "Jabberwocky attack!" << endl;
-            }
-            
-            if((i->second)->getName() == "Red Queen")
-            {
-                cout << "Off with her head!" << endl;
+                cout << "dead." << endl;
             }
         }
         
+        cout << "What do you want to do?" << endl << "Keywords: aboutme, go, pickup, drop, use, approach, attack" << endl;
+                
         cin >> input;
         one.delegate(input);
     }
+    
+    if(finished == true)
+        cout << "yay! You win!" << endl;
 }

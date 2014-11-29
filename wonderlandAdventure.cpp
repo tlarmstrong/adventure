@@ -267,7 +267,12 @@ std::ostream& Place::render(std::ostream& out) const
 	}
     END COMMENT */
     
-    if(hHere.empty() && gHere.empty() && fHere.empty() && oHere.empty() && mHere.empty())
+    if(getPlaceName() == "Home")
+    {
+        out << "";
+    }
+    
+    else if(hHere.empty() && gHere.empty() && fHere.empty() && oHere.empty() && mHere.empty())
     {
         out << "There is nothing here to get" << endl;
     }
@@ -410,64 +415,14 @@ Person::~Person()
     }
 }
 
-// *********************
-
-// changed dies() to accommodate different lists, hope it works
-
-// *********************
-
-/*
-void Person::dies()
-{
-	multimap<string, HealthStuff*>::iterator h;
-	h=hStuff.begin();
-	for(;!hStuff.empty();h++)
-	{
-		this->whereAreYou()->dropped(h->second, this);
-	}
-    
-    multimap<string, GrowStuff*>::iterator g;
-    g=gStuff.begin();
-    for(;!gStuff.empty();g++)
-    {
-        this->whereAreYou()->dropped(g->second, this);
-    }
-    
-    multimap<string, FriendStuff*>::iterator f;
-    f=fStuff.begin();
-    for(;!fStuff.empty();f++)
-    {
-        this->whereAreYou()->dropped(f->second, this);
-    }
-    
-    multimap<string, OpenStuff*>::iterator o;
-    o=oStuff.begin();
-    for(;!oStuff.empty();o++)
-    {
-        this->whereAreYou()->dropped(o->second, this);
-    }
-    
-    multimap<string, MoveStuff*>::iterator m;
-    m=mStuff.begin();
-    for(;!mStuff.empty();m++)
-    {
-        this->whereAreYou()->dropped(m->second, this);
-    }
-    
-    this->whereAreYou()->personLeaves(this);
-    delete this;
-}
- */
-
 bool Person::isDead()
 {
-	if (health<=0)
+	if (health > 0)
 	{
-        this->dies();
-		return true;
+        return false;
 	}
-	else
-		return false;
+    this->dies();
+    return true;
 }
 
 // get Place where Person is
@@ -582,38 +537,18 @@ void Person::recieve(MoveStuff* item)
 }
 
 template<class T>
-void Person::drop(T* item)
+void Person::drop(T* item, Place* where)
 {
-    if(hStuff.find(item))
-    {
-        hStuff.erase(hStuff.find(item->getName()));
-    }
-    
-    if(gStuff.find(item))
-    {
-        gStuff.erase(gStuff.find(item->getName()));
-    }
-    
-    if(fStuff.find(item))
-    {
-        fStuff.erase(fStuff.find(item->getName()));
-    }
-    
-    if(oStuff.find(item))
-    {
-        oStuff.erase(oStuff.find(item->getName()));
-    }
-    
-    if(mStuff.find(item))
-    {
-        mStuff.erase(mStuff.find(item->getName()));
-    }
+    //fStuff.erase(fStuff.find(item->getName()));
+    where->dropped(item, this);
 }
 
 //person takes damage
 void Person::hurt(const int& damage)
 {
     health -= damage;
+    cout << "Oooooh, health level down " << damage << endl;
+    cout << "Total health: " << health << endl;
 }
 
 void Person::attack()
@@ -791,10 +726,11 @@ void Alice::use(T* item)
 template<class T>
 void Alice::use(T* item, Place* where)
 {
-    item->useItem(where);
+    item->useItem(this, where);
 }
 
 //Alice uses an item on a thing
+/*
 template<class T>
 void Alice::use(T* item, Door* what)
 {
@@ -806,6 +742,7 @@ void Alice::use(T* item, Chest* what)
 {
     item->useItem(what);
 }
+*/
 
 //Alice uses an item on a person
 template<class T>
@@ -892,9 +829,10 @@ std::ostream& Alice::render(std::ostream& out) const
 
     if(!hStuff.empty())
     {
+        out << "Weapons: " << endl;
         for(map<string, HealthStuff*>::const_iterator i = hStuff.begin(); i!=hStuff.end(); i++)
         {
-            out << (i->second)->getName() << endl;
+            out << "+ " << (i->second)->getName() << endl;
         }
     }
     
@@ -903,9 +841,10 @@ std::ostream& Alice::render(std::ostream& out) const
     
     if(!gStuff.empty())
     {
+        out << "Stuff to change her size: " << endl;
         for(map<string, GrowStuff*>::const_iterator i = gStuff.begin(); i!=gStuff.end(); i++)
         {
-            out << (i->second)->getName() << endl;
+            out << "+ " << (i->second)->getName() << endl;
         }
     }
     
@@ -914,9 +853,10 @@ std::ostream& Alice::render(std::ostream& out) const
     
     if(!fStuff.empty())
     {
+        out << "Things to make friends: " << endl;
         for(map<string, FriendStuff*>::const_iterator i = fStuff.begin(); i!=fStuff.end(); i++)
         {
-            out << (i->second)->getName() << endl;
+            out << "+ " << (i->second)->getName() << endl;
         }
     }
     
@@ -925,9 +865,10 @@ std::ostream& Alice::render(std::ostream& out) const
     
     if(!oStuff.empty())
     {
+        out << "Open stuff with " << endl;
         for(map<string, OpenStuff*>::const_iterator i = oStuff.begin(); i!=oStuff.end(); i++)
         {
-            out << (i->second)->getName() << endl;
+            out << "+ " << (i->second)->getName() << endl;
         }
     }
     
@@ -936,10 +877,12 @@ std::ostream& Alice::render(std::ostream& out) const
     
     if(!mStuff.empty())
     {
+        out << "Use ";
         for(map<string, MoveStuff*>::const_iterator i = mStuff.begin(); i!=mStuff.end(); i++)
         {
-            out << (i->second)->getName() << endl;
+            out << "+ " << (i->second)->getName();
         }
+        out << " to go home" << endl;
     }
     
     else
@@ -947,7 +890,7 @@ std::ostream& Alice::render(std::ostream& out) const
     
     if(!helperList.empty())
     {
-        out << "/nHer friends are: ";
+        out << "Her friends are: ";
         
         map<string, NPC*>::const_iterator i=helperList.begin();
         out << (i->second)->getName();
@@ -955,6 +898,7 @@ std::ostream& Alice::render(std::ostream& out) const
         
         for(; i!=helperList.end(); i++)
             out << ", " << (i->second)->getName();
+        out << endl;
     }
     
     else
@@ -962,7 +906,7 @@ std::ostream& Alice::render(std::ostream& out) const
     
     if(!badguyList.empty())
     {
-        out << "/nHer enemies are: ";
+        out << "Her enemies are: ";
 
         map<string, NPC*>::const_iterator i=badguyList.begin();
         out << (i->second)->getName();
@@ -970,6 +914,7 @@ std::ostream& Alice::render(std::ostream& out) const
         
         for(; i!=badguyList.end(); i++)
             out << ", " << (i->second)->getName();
+        out << endl;
     }
     
     else
@@ -1050,41 +995,54 @@ bool NPC::isfriendly() const
     return friendly;
 }
 
+// NPC uses item on another NPC or Alice
+template<class T, class U>
+void NPC::use(T* item, U* who)
+{
+    item->useItem(who);
+}
+
+/*template<class T>
+void NPC::use(T* item, Alice* who)
+{
+    item->useItem(who);
+}*/
+
 void NPC::dies()
 {
     multimap<string, HealthStuff*>::iterator h;
     h=hStuff.begin();
     for(;!hStuff.empty();h++)
     {
-        this->whereAreYou()->dropped(h->second, this);
+        this->drop(h->second, this->whereAreYou());
     }
     
     multimap<string, GrowStuff*>::iterator g;
     g=gStuff.begin();
     for(;!gStuff.empty();g++)
     {
-        this->whereAreYou()->dropped(g->second, this);
+        this->drop(g->second, this->whereAreYou());
     }
     
     multimap<string, FriendStuff*>::iterator f;
     f=fStuff.begin();
     for(;!fStuff.empty();f++)
     {
-        this->whereAreYou()->dropped(f->second, this);
+        this->drop(f->second, this->whereAreYou());
     }
     
     multimap<string, OpenStuff*>::iterator o;
     o=oStuff.begin();
     for(;!oStuff.empty();o++)
     {
-        this->whereAreYou()->dropped(o->second, this);
+        this->drop(o->second, this->whereAreYou());
     }
     
     multimap<string, MoveStuff*>::iterator m;
     m=mStuff.begin();
     for(;!mStuff.empty();m++)
     {
-        this->whereAreYou()->dropped(m->second, this);
+        this->drop(m->second, this->whereAreYou());
     }
     
     this->whereAreYou()->personLeaves(this);
@@ -1303,7 +1261,7 @@ NPC* PersonFactory::makePerson(std::string who)
     
     else if (who == "CheshireCat")
     {
-        string nm = "Cheshire Cat";
+        string nm = "CheshireCat";
         string dscrpt = "I like to smile";
         string sayThings = "I'm a mysterious friend";
         int hLevel = 10;
@@ -1410,19 +1368,20 @@ void HealthStuff::useItem(Person* who)
 }
 */
 
-void HealthStuff::useItem(Alice* who)
+template<class T>
+void HealthStuff::useItem(T* who)
 {
 	who->hurt(result);
 	status = 0;
 }
 
 //void HealthStuff::useItem(Place* where) {cout << getName() << "cannot be used on" << where->getPlaceName();}
-
+/*
 void HealthStuff::useItem(NPC* who)
 {
 	who->hurt(result);
 	status = 0;
-}
+}*/
 
 /* NEEDED?
 void HealthStuff::useItem(Thing* what) {cout << getName() << "cannot be used on" << what->getName();}
@@ -1660,7 +1619,7 @@ void Game::makePlaces()
     places.insert(pair<string, Place*>(tree->getPlaceName(), tree));
     
     // Garden
-    Place* garden = new Place("Garden", "Alice follows the WhiteRabbit to a beautiful garden full of white roses. Should she pick one?");
+    Place* garden = new Place("Garden", "Alice follows the WhiteRabbit to a beautiful garden full of white roses.");
     places.insert(pair<string, Place*>(garden->getPlaceName(), garden));
     
     // Woods
@@ -1671,8 +1630,8 @@ void Game::makePlaces()
     Place* teaParty = new Place("TeaParty", "Alice goes to a Tea Party.");
     places.insert(pair<string, Place*>(teaParty->getPlaceName(), teaParty));
     
-    //CastleP1
-    Place* castle = new Place("CastleP1", "Alice is taken to the Red Queen's Castle.");
+    //Castle
+    Place* castle = new Place("Castle", "Alice is taken to the Red Queen's Castle.");
     places.insert(pair<string, Place*>(castle->getPlaceName(), castle));
     
     /* COMMENT OUT TO TEST
@@ -1721,14 +1680,14 @@ void Game::makePlaces()
     
     // places to go from TeaParty
     places.find("TeaParty")->second->placeTo.insert(pair<string, Place*>(places.find("Woods")->second->getPlaceName(), places.find("Woods")->second));
-    places.find("TeaParty")->second->placeTo.insert(pair<string, Place*>(places.find("CastleP1")->second->getPlaceName(), places.find("CastleP1")->second));
+    places.find("TeaParty")->second->placeTo.insert(pair<string, Place*>(places.find("Castle")->second->getPlaceName(), places.find("Castle")->second));
     
     // places to go from Castle
-    places.find("CastleP1")->second->placeTo.insert(pair<string, Place*>(places.find("TeaParty")->second->getPlaceName(), places.find("TeaParty")->second));
-    places.find("CastleP1")->second->placeTo.insert(pair<string, Place*>(places.find("Battlefield")->second->getPlaceName(), places.find("Battlefield")->second));
+    places.find("Castle")->second->placeTo.insert(pair<string, Place*>(places.find("TeaParty")->second->getPlaceName(), places.find("TeaParty")->second));
+    places.find("Castle")->second->placeTo.insert(pair<string, Place*>(places.find("Battlefield")->second->getPlaceName(), places.find("Battlefield")->second));
     
     // places to go from Battlefield
-    places.find("Battlefield")->second->placeTo.insert(pair<string, Place*>(places.find("CastleP1")->second->getPlaceName(), places.find("CastleP1")->second));
+    places.find("Battlefield")->second->placeTo.insert(pair<string, Place*>(places.find("Castle")->second->getPlaceName(), places.find("Castle")->second));
     places.find("Battlefield")->second->placeTo.insert(pair<string, Place*>(places.find("Home")->second->getPlaceName(), places.find("Home")->second));
 }
 
@@ -1744,17 +1703,17 @@ void Game::makePeople()
     
     // (2)
     NPC* jabberwocky = PersonFactory::makePerson("Jabberwocky");
-    places.find("CastleP1")->second->peopleHere.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
+    places.find("TeaParty")->second->peopleHere.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
     //people.insert(pair<string, NPC*>(jabberwocky->getName(), jabberwocky));
     
     // (3)
     NPC* redQueen = PersonFactory::makePerson("RedQueen");
-    places.find("CastleP1")->second->peopleHere.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
+    places.find("Castle")->second->peopleHere.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
     //people.insert(pair<string, NPC*>(redQueen->getName(), redQueen));
     
     // (4)
     NPC* whiteRabbit = PersonFactory::makePerson("WhiteRabbit");
-    places.find("Tree")->second->peopleHere.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
+    places.find("Garden")->second->peopleHere.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
     //people.insert(pair<string, NPC*>(whiteRabbit->getName(), whiteRabbit));
     
     // (5)
@@ -1804,11 +1763,11 @@ void Game::makeStuff()
     GrowStuff* cake = new GrowStuff("Cake", "The cake will make Alice big!", 3, 1);
     GrowStuff* tea = new GrowStuff("Tea", "Drinking the tea will make Alice small.", 1, 1);
     places.find("TeaParty")->second->gHere.insert(pair<string, GrowStuff*>(cake->getName(), cake));
-    places.find("TeaParty")->second->gHere.insert(pair<string, GrowStuff*>(tea->getName(), cake));
+    places.find("TeaParty")->second->gHere.insert(pair<string, GrowStuff*>(tea->getName(), tea));
     
     // (5) Castle
     HealthStuff* sword = new HealthStuff("Sword", "Sword can be used to fight the Jabberwocky", 4, 1);
-    places.find("CastleP1")->second->hHere.insert(pair<string, HealthStuff*>(sword->getName(), sword));
+    places.find("Castle")->second->hHere.insert(pair<string, HealthStuff*>(sword->getName(), sword));
     
     // (6) Battlefield
     
@@ -1853,7 +1812,7 @@ void Game::delegate(const std::string& input)
 	
 	if(input=="aboutme")
 	{
-        here->alicePtr->narrate(cout);
+        here->alicePtr->render(cout);
 	}
     
     // *****************************************
@@ -1873,24 +1832,9 @@ void Game::delegate(const std::string& input)
         }
     }
     
-    if(input == "get")
-    {
-        cout << "What would you like to get?" << endl;
-        cin >> subput;
-        for(map<string, NPC*>::const_iterator i = here->peopleHere.begin(); i!=here->peopleHere.end(); i++)
-        {
-            for(map<string, HealthStuff*>::const_iterator h = (i->second)->hStuff.begin(); h!=(i->second)->hStuff.end(); h++)
-            {
-                if(h->second->getName() == subput)
-                {
-                    here->alicePtr->recieve(h->second);
-                }
-            }
-        }
-        here->alicePtr->render(cout);
-    }
+    /*
     
-    if(input == "use")
+    if(input == "attack")
     {
         cout << "What would you like to use?" << endl;
         cin >> subput;
@@ -1908,10 +1852,7 @@ void Game::delegate(const std::string& input)
             }
             here->peopleHere.find(sub3)->second->render(cout);
         }
-        
-    }
-    // end of code for testing ********************************
-	
+    }*/
     
 	if(input=="go")
 	{
@@ -1930,6 +1871,56 @@ void Game::delegate(const std::string& input)
 		if(here->placeTo.find(subput)!= here->placeTo.end())
 		{
 			(here->alicePtr->move(here->placeTo.find(subput)->second));
+            
+            findHere()->narrate(cout);
+            
+            for(map<string, NPC*>::iterator j = findHere()->peopleHere.begin(); j!=findHere()->peopleHere.end(); j++)
+            {
+                if((j->second)->getName() == "Bandersnatch" && (j->second)->isfriendly() == false)
+                {
+                    cout << "Bandersnatch attack!" << endl;
+                    
+                    (j->second)->use((j->second->hStuff.find("Knife")->second), findHere()->alicePtr);
+                    
+                    j->second->render(cout);
+                    
+                    if((j->second)->getName() == "Bandersnatch" && !(j->second)->fStuff.empty())
+                    {
+                        for(map<string, FriendStuff*>::iterator k = j->second->fStuff.begin(); k!=j->second->fStuff.end(); k++)
+                        {
+                            if(k->second->getName() == "BandersnatchEye")
+                            {
+                                (j->second)->drop(k->second, findHere());
+                                cout << "Oops! He poked his own eye out...it's now laying on the ground. Get it!" << endl << endl;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if((j->second)->getName() == "Jabberwocky")
+                {
+                    cout << "Jabberwocky attack!" << endl;
+                    
+                    (j->second)->use((j->second->hStuff.find("Sword")->second), findHere()->alicePtr);
+                    
+                    j->second->render(cout);
+                    findHere()->alicePtr->badguyList.insert(pair<string, NPC*>(j->second->getName(), j->second));
+                    break;
+                }
+                
+                if((j->second)->getName() == "RedQueen")
+                {
+                    cout << "Red Queen attack!" << endl;
+                    cout << "Off with your head!" << endl;
+                    
+                    (j->second)->use((j->second->hStuff.find("Potion")->second), findHere()->alicePtr);
+                    
+                    j->second->render(cout);
+                    findHere()->alicePtr->badguyList.insert(pair<string, NPC*>(j->second->getName(), j->second));
+                    break;
+                }
+            }
 		}
 		else
 		{
@@ -1937,35 +1928,75 @@ void Game::delegate(const std::string& input)
 		}
 	}
     
-    /* COMMENT OUT TO TEST
 	if(input=="pickup")
 	{
 		cout << "What would you like to pick up? ";
 		cin >> subput;
-		if(here->whatsHere().find(subput)!=here->whatsHere().end())
+		if(here->hHere.find(subput)!=here->hHere.end())
 		{
-            here->pickedUp(here->whatsHere().find(subput)->second, here->whoHere().find("Alice")->second);
+            here->pickedUp(here->hHere.find(subput)->second, here->alicePtr);
+            cout << subput << " added to list." << endl;
 		}
-		else
-		{
-			cout << "That item is not here.";
-		}
+
+        else if(here->gHere.find(subput)!=here->gHere.end())
+        {
+            here->pickedUp(here->gHere.find(subput)->second, here->alicePtr);
+            cout << subput << " added to list." << endl;
+        }
+
+        else if(here->fHere.find(subput)!=here->fHere.end())
+        {
+            here->pickedUp(here->fHere.find(subput)->second, here->alicePtr);
+            cout << subput << " added to list." << endl;
+        }
+
+        else if(here->oHere.find(subput)!=here->oHere.end())
+        {
+            here->pickedUp(here->oHere.find(subput)->second, here->alicePtr);
+            cout << subput << " added to list." << endl;
+        }
+
+        else if(here->mHere.find(subput)!=here->mHere.end())
+        {
+            here->pickedUp(here->mHere.find(subput)->second, here->alicePtr);
+            cout << subput << " added to list." << endl;
+        }
+        else
+            cout << subput << " is not here." << endl;
 	}
-     */
-	
-    /* COMMENT OUT TO TEST
+
 	if (input=="drop")
 	{
 		cout << "What would you like to drop? ";
 		cin >> subput;
-		if(here->whoHere().find("Alice")->second->getStuffList().find(subput) != here->whoHere().find("Alice")->second->getStuffList().end())
+		if(here->alicePtr->hStuff.find(subput) != here->alicePtr->hStuff.end())
 		{
-            here->dropped(here->whoHere().find("Alice")->second->getStuffList().find(subput)->second, here->whoHere().find("Alice")->second);
+            here->dropped(here->alicePtr->hStuff.find(subput)->second, here->alicePtr);
 		}
-		else
-		{
-			cout << "You do not have that item to drop.";
-		}
+
+        else if(here->alicePtr->gStuff.find(subput) != here->alicePtr->gStuff.end())
+        {
+            here->dropped(here->alicePtr->gStuff.find(subput)->second, here->alicePtr);
+        }
+
+        else if(here->alicePtr->fStuff.find(subput) != here->alicePtr->fStuff.end())
+        {
+            here->dropped(here->alicePtr->fStuff.find(subput)->second, here->alicePtr);
+        }
+
+        else if(here->alicePtr->oStuff.find(subput) != here->alicePtr->oStuff.end())
+        {
+            here->dropped(here->alicePtr->oStuff.find(subput)->second, here->alicePtr);
+        }
+
+        else if(here->alicePtr->mStuff.find(subput) != here->alicePtr->mStuff.end())
+        {
+            here->dropped(here->alicePtr->mStuff.find(subput)->second, here->alicePtr);
+        }
+        else
+        {
+            cout << "You do not have that item to drop.";
+        }
 	}
      
 	
@@ -1973,45 +2004,110 @@ void Game::delegate(const std::string& input)
 	{
 		cout << "What would you like to use? ";
 		cin >> subput;
-		if(here->whoHere().find("Alice")->second->getStuffList().find(subput)!= here->whoHere().find("Alice")->second->getStuffList().end())
+		if(here->alicePtr->hStuff.find(subput)!= here->alicePtr->hStuff.end())
 		{
-			cout << "What/Who/Where would you like to use that (to use on alice: Alice)? ";
+			cout << "Who would you like to use that on? ";
             
 			string subput2;
 			cin >> subput2;
 			bool used=false;
             
-			Stuff* item = here->whoHere().find("Alice")->second->getStuffList().find(subput)->second;
-            
-			if(subput2=="Alice")
-			{
-                here->whoHere().find("Alice")->second->use(item);
-				used=true;
-			}
-			for(multimap<string, Thing*>::iterator i=here->getThingsHere().begin();i!=here->getThingsHere().end();i++)
+			HealthStuff* hItem = here->alicePtr->hStuff.find(subput)->second;
+
+			for(multimap<string, NPC*>::iterator i=here->peopleHere.begin();i!=here->peopleHere.end();i++)
 			{
 				if(i->second->getName()==subput2)
 				{
-					here->whoHere().find("Alice")->second->use(item, i->second);
-					used=true;
-					break;
-				}
-			}
-			for(multimap<string, Person*>::iterator i=here->whoHere().begin();i!=here->whoHere().end();i++)
-			{
-				if(i->second->getName()==subput2)
-				{
-                    			here->whoHere().find("Alice")->second->use(item, i->second);
+                    here->alicePtr->use(hItem, i->second);
 					used=true;
 					break;
 				}
 			}
 			if(!used)
 				cout <<"Couldn't use item.";
-
-			
 		}
-		
+        
+        else if(here->alicePtr->gStuff.find(subput)!= here->alicePtr->gStuff.end())
+        {
+            bool used=false;
+            
+            GrowStuff* gItem = here->alicePtr->gStuff.find(subput)->second;
+            
+            here->alicePtr->use(gItem);
+            used=true;
+
+            if(!used)
+                cout <<"Couldn't use item.";
+        }
+        
+        else if(here->alicePtr->fStuff.find(subput)!= here->alicePtr->fStuff.end())
+        {
+            cout << "Who would you like to use that on? ";
+            
+            string subput2;
+            cin >> subput2;
+            bool used=false;
+            
+            FriendStuff* fItem = here->alicePtr->fStuff.find(subput)->second;
+            
+            for(multimap<string, NPC*>::iterator i=here->peopleHere.begin();i!=here->peopleHere.end();i++)
+            {
+                if(i->second->getName()==subput2 && i->second->getName()=="Bandersnatch")
+                {
+                    here->alicePtr->use(fItem, i->second);
+                    i->second->render(cout);
+                    used=true;
+                    break;
+                }
+            }
+            if(!used)
+                cout <<"Couldn't use item.";
+        }
+        /*
+        else if(here->alicePtr->oStuff.find(subput)!= here->alicePtr->oStuff.end())
+        {
+            cout << "What would you like to use that on? ";
+            
+            string subput2;
+            cin >> subput2;
+            bool used=false;
+            
+            OpenStuff* oItem = here->alicePtr->oStuff.find(subput)->second;
+            
+             for(multimap<string, Door*>::iterator i=here->dHere.begin();i!=here->dHere.end();i++)
+             {
+                 if(i->second->getName()==subput2)
+                 {
+                     here->alicePtr->use(oItem, i->second);
+                     used=true;
+                     break;
+                 }
+             }
+            if(!used)
+                cout <<"Couldn't use item.";
+        }
+        */
+        
+        else if(here->alicePtr->mStuff.find(subput)!= here->alicePtr->mStuff.end())
+        {
+            cout << "Where would you like to go";
+            
+            string subput2;
+            cin >> subput2;
+            bool used=false;
+            
+            MoveStuff* mItem = here->alicePtr->mStuff.find(subput)->second;
+            
+            if(subput2=="Home")
+            {
+                here->alicePtr->use(mItem, places.find("Home")->second);
+                used=true;
+            }
+            if(!used)
+                cout <<"Couldn't use item.";
+        }
+        else
+            cout <<"Couldn't use " << subput << endl;
 	}
     
 	if(input=="approach")
@@ -2020,6 +2116,7 @@ void Game::delegate(const std::string& input)
 		string subput;
 		cin>>subput;
 		
+        /* COMMENT OUT TO TEST
         for(map<string, Thing*>::iterator i=here->openHere().begin();i!=here->openHere().end(); i++)
 		{
 
@@ -2102,28 +2199,26 @@ void Game::delegate(const std::string& input)
 				}
 			}
 		}
-        
-     
-        
-		for(map<string, NPC*>::iterator i=here->whoHere().begin();i!=here->whoHere().end(); i++)
+        END COMMENT OUT*/
+    
+		for(map<string, NPC*>::iterator i=here->peopleHere.begin();i!=here->peopleHere.end(); i++)
 		{
 			if(i->first==subput)
 			{
 				NPC* pers=i->second;
 				pers->narrate(cout);
-				cout << "What would you like to do:\n Keywords:talk, askfollow, askleave, attack";
+				cout << "What would you like to do:\n Keywords: talk, askfollow, askleave, attack";
 				cin >>subput;
 				if (subput=="talk")
 				{
-                    pers->talk(cout
-                               );
+                    pers->talk(cout);
 				}
 				if (subput=="askfollow")
 				{
 					if(pers->isfriendly())
 					{
 						cout << "Sure\n";
-						here->whoHere().find("Alice")->second->taggingAlong(pers);
+						here->alicePtr->taggingAlong(pers);
 					}
 					else
 					{
@@ -2135,8 +2230,7 @@ void Game::delegate(const std::string& input)
 					if(pers->isfriendly())
 					{
 						cout << "Sure\n";
-						here->whoHere().find("Alice")->second->ditched
-                        (pers);
+						here->alicePtr->ditched(pers);
 					}
 					else
 					{
@@ -2145,9 +2239,9 @@ void Game::delegate(const std::string& input)
 				}
 				if (subput=="attack")
 				{
-					if(here->whoHere().find("Alice")->second->getStuffList().find("sword")!=here->whoHere().find("Alice")->second->getStuffList().end())
+					if(here->alicePtr->hStuff.find("Sword")!=here->alicePtr->hStuff.end())
 					{
-						here->whoHere().find("Alice")->second->use(here->whoHere().find("Alice")->second->getStuffList().find("sword"),pers);
+						here->alicePtr->use(here->alicePtr->hStuff.find("Sword")->second, pers);
 					}
 					else
 					{
@@ -2157,7 +2251,6 @@ void Game::delegate(const std::string& input)
 			}
 		}
 	}
-     */
 }
 
 

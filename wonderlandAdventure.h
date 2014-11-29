@@ -191,8 +191,8 @@ public:
     
     // Someone drops an item
     template<class T>
-    void drop(T* item);
-    
+    void drop(T* item, Place* where);
+
     // person takes damage
     void hurt(const int& damage);
     
@@ -227,9 +227,6 @@ private:
     // list of helpers with Alice
     std::map<std::string, NPC*> helperList;
     
-    // list of badguys with Alice
-    std::map<std::string, NPC*> badguyList;
-    
     // getSize of Alice (small(1), normal(2), big(3))
     int bodySize;
     
@@ -239,6 +236,9 @@ private:
     Alice(const int& bSize, const int& hLevel, const std::string& nm, const std::string& dscpt, bool attk);
     
 public:
+    
+    // list of badguys with Alice
+    std::map<std::string, NPC*> badguyList;
     
     virtual ~Alice();        // destructor
     
@@ -275,11 +275,13 @@ public:
     void use(T* item, Place* where);
     
     //Alice uses an item on a thing
-    template<class T>
+    /*
+     template<class T>
     void use(T* item, Chest* what);
     
     template<class T>
     void use(T* item, Door* what);
+     */
     
     //Alice uses an item on a person
     template<class T>
@@ -355,11 +357,11 @@ public:
     std::ostream& render(std::ostream& out) const;
     
     // NPC uses item on another NPC or Alice
-    template<class T>
-    void use(T* item, NPC* who);
+    template<class T, class U>
+    void use(T* item, U* who);
     
-    template<class T>
-    void use(T* item, Alice* who);
+    //template<class T>
+    //void use(T* item, Alice* who);
     
     void dies();
 };
@@ -457,8 +459,9 @@ class HealthStuff : public Stuff
         HealthStuff(const std::string name, const std::string description, const int result,const bool status);
         ~HealthStuff();
     
-        void useItem(Alice* who);
-        void useItem(NPC* who);
+        template<class T>
+        void useItem(T* who);
+        //void useItem(NPC* who);
     
         //void useItem(Place* where);
         //void useItem(Thing* what);
